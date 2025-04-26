@@ -44,3 +44,10 @@ a {
     color-scheme: dark;
   }
 }
+
+@font-face {
+  font-family: "MachineStd";
+  src: url("../fonts/MachineStd.otf");
+  font-weight: 700;
+  font-style: normal;
+}

@@ -1,7 +1,64 @@
-export default function RootLayout({
+"use client";
+
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useEffect, useState } from "react";
+
+export default function AuthLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  return <main>{children}</main>;
+}) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const [windowWidth, setWindowWidth] = useState(1920); // fallback default width
+  const [windowHeight, setWindowHeight] = useState(1080); // fallback default height
+
+  const springConfig = { damping: 30, stiffness: 150 };
+
+  const moveX = useSpring(
+    useTransform(mouseX, [0, windowWidth], ["1%", "-1%"]),
+    springConfig
+  );
+  const moveY = useSpring(
+    useTransform(mouseY, [0, windowHeight], ["1%", "-1%"]),
+    springConfig
+  );
+
+  useEffect(() => {
+    // Only runs on client-side
+    setWindowWidth(window.innerWidth);
+    setWindowHeight(window.innerHeight);
+
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  return (
+    <main className="relative min-h-dvh overflow-hidden">
+      <motion.div
+        className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-primaryBackground bg-cover bg-center bg-no-repeat"
+        style={{
+          translateX: moveX,
+          translateY: moveY,
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col min-h-dvh">{children}</div>
+    </main>
+  );
 }
