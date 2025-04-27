@@ -29,7 +29,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen">
+    <div className="flex items-center justify-center flex-1 pt-16">
       <KPDialougue
         title="Join the battle"
         subtitle="You need an account to play BATTLE.FUN."

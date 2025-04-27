@@ -12,6 +12,7 @@ module.exports = {
         dialougue: "url('/images/dialougue.png')",
         kripson: "url('/images/kripson.png')",
         iconButton: "url('/images/iconButton.png')",
+        material: "url(/images/material.png)",
       },
       colors: {
         primary: {

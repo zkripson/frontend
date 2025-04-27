@@ -58,6 +58,15 @@ export default function AuthLayout({
         }}
       />
 
+      <header className="w-full flex flex-col gap-2 fixed top-0 z-20 bg-material backdrop-blur-sm px-10 py-4">
+        <h1 className="text-[32px] leading-[32px] text-primary-300 font-MachineStd">
+          BATTLE.FUN GAME
+        </h1>
+        <h4 className="text-[12px] leading-[12px] text-primary-550">
+          powered by MEGAETH
+        </h4>
+      </header>
+
       <div className="relative z-10 flex flex-col min-h-dvh">{children}</div>
     </main>
   );
