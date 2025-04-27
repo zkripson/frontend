@@ -1,7 +1,6 @@
 "use client";
-
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 export default function AuthLayout({
   children,
@@ -11,8 +10,8 @@ export default function AuthLayout({
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const [windowWidth, setWindowWidth] = useState(1920); // fallback default width
-  const [windowHeight, setWindowHeight] = useState(1080); // fallback default height
+  const [windowWidth, setWindowWidth] = useState(1920);
+  const [windowHeight, setWindowHeight] = useState(1080);
 
   const springConfig = { damping: 30, stiffness: 150 };
 
@@ -26,7 +25,6 @@ export default function AuthLayout({
   );
 
   useEffect(() => {
-    // Only runs on client-side
     setWindowWidth(window.innerWidth);
     setWindowHeight(window.innerHeight);
 
@@ -57,15 +55,16 @@ export default function AuthLayout({
           translateY: moveY,
         }}
       />
-
-      <header className="w-full flex flex-col gap-2 fixed top-0 z-20 bg-material backdrop-blur-sm px-10 py-4">
-        <h1 className="text-[32px] leading-[32px] text-primary-300 font-MachineStd">
-          BATTLE.FUN GAME
-        </h1>
-        <h4 className="text-[12px] leading-[12px] text-primary-550">
-          powered by MEGAETH
-        </h4>
-      </header>
+      <div className="layout-header-container">
+        <header className="w-full flex flex-col gap-2 fixed top-0 z-20 bg-material backdrop-blur-sm px-10 py-4">
+          <h1 className="text-[32px] leading-[32px] text-primary-300 font-MachineStd">
+            BATTLE.FUN GAME
+          </h1>
+          <h4 className="text-[12px] leading-[12px] text-primary-550">
+            powered by MEGAETH
+          </h4>
+        </header>
+      </div>
 
       <div className="relative z-10 flex flex-col min-h-dvh">{children}</div>
     </main>

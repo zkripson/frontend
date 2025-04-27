@@ -5,6 +5,7 @@ import KPButton from "./button";
 import KPLoader from "./loader";
 import KPInput from "./input";
 import KPCheckbox from "./checkbox";
+import KPFullscreenLoader from "./fullscreen-loader";
 
 export {
   KPDialougue,
@@ -14,4 +15,5 @@ export {
   KPLoader,
   KPInput,
   KPCheckbox,
+  KPFullscreenLoader,
 };

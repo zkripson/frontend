@@ -2,7 +2,7 @@
 import Image from "next/image";
 import classNames from "classnames";
 
-import { BackIcon } from "@/public/icons";
+import { BackIcon, CheckIcon } from "@/public/icons";
 import KPIconButton from "../icon-button";
 import KPClickAnimation from "../click-animation";
 import KPButton from "../button";
@@ -18,6 +18,7 @@ const KPDialougue = ({
   showCloseButton = false,
   showKripsonImage = false,
   subtitle,
+  ctaText,
 }: KPDialougueProps) => {
   return (
     <div
@@ -25,7 +26,7 @@ const KPDialougue = ({
         "relative w-[588px] h-[824.41px] bg-dialougue bg-cover bg-no-repeat bg-center flex flex-col items-center text-center px-6",
         {
           "pt-16": showKripsonImage,
-          "pt-28": !showKripsonImage,
+          "pt-32": !showKripsonImage,
         }
       )}
     >
@@ -69,7 +70,6 @@ const KPDialougue = ({
             )}
           </div>
 
-          {/* Children */}
           {children}
         </div>
       </div>
@@ -80,21 +80,20 @@ const KPDialougue = ({
             "gap-2": primaryCta && secondaryCta,
           })}
         >
-          {primaryCta && (
-            <KPButton
-              title={primaryCta.label}
-              onClick={primaryCta.onClick}
-              isMachine
-              fullWidth
-            />
-          )}
+          {primaryCta && <KPButton isMachine fullWidth {...primaryCta} />}
           {secondaryCta && (
             <button
               onClick={secondaryCta.onClick}
               className="bg-transparent border border-white text-white py-3 rounded-md font-semibold"
             >
-              {secondaryCta.label}
+              {secondaryCta.title}
             </button>
+          )}
+          {ctaText && (
+            <div className="w-full flex items-center justify-center gap-2 h-[52px]">
+              <CheckIcon />
+              <p className="text-base text-primary-50">{ctaText}</p>
+            </div>
           )}
         </div>
       </div>

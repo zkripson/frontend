@@ -51,3 +51,15 @@ a {
   font-weight: 700;
   font-style: normal;
 }
+
+.layout-header-container {
+  max-height: 90px;
+  transition: max-height 0.6s ease, opacity 0.6s ease;
+  overflow: hidden;
+}
+
+body:has(#fullscreen-loader) .layout-header-container {
+  max-height: 0;
+  opacity: 0;
+  visibility: hidden;
+}

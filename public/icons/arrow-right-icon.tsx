@@ -9,18 +9,18 @@ const ArrowRightIcon = () => (
     <path
       d="M14.4297 6.13617L20.4997 12.2062L14.4297 18.2762"
       stroke="white"
-      stroke-width="1.5"
+      strokeWidth="1.5"
       stroke-miterlimit="10"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M3.5 12.2062H20.33"
       stroke="white"
-      stroke-width="1.5"
+      strokeWidth="1.5"
       stroke-miterlimit="10"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

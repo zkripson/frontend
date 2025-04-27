@@ -1,6 +1,26 @@
+"use client";
+
 import classNames from "classnames";
 import { motion } from "framer-motion";
+import Image from "next/image";
+
+import { ArrowRightIcon, CopyIcon } from "@/public/icons";
 import KPLoader from "../loader";
+
+const icons = {
+  farcaster: (
+    <Image
+      src="/images/farcaster.png"
+      alt="farcaster"
+      width={32}
+      height={32}
+      quality={100}
+      className="w-8 h-8 object-cover rounded-md"
+    />
+  ),
+  copy: <CopyIcon />,
+  arrow: <ArrowRightIcon />,
+};
 
 const KPButton = ({
   title,
@@ -9,9 +29,11 @@ const KPButton = ({
   fullWidth = false,
   loading,
   onClick,
-  type,
+  type = "button",
   variant = "primary",
   isMachine = false,
+  icon,
+  iconPosition = "left",
 }: IKPButton) => {
   const shadowColor = {
     primary: "#632918",
@@ -46,19 +68,30 @@ const KPButton = ({
       {loading && <KPLoader variant="small" />}
 
       {!loading && (
-        <span
-          className={classNames(
-            "uppercase text-[26px] leading-[100%] tracking-[2%] mt-3",
-            {
-              "text-white": variant === "primary" || variant === "secondary",
-              "text-primary-100": variant === "tertiary",
-              "font-MachineStd": isMachine,
-              "font-Inter": !isMachine,
-            }
-          )}
+        <div
+          className={classNames("flex justify-center gap-2.5", {
+            "flex-row": iconPosition === "left",
+            "flex-row-reverse": iconPosition === "right",
+            "items-end mt-1.5": icon === "farcaster",
+            "items-center mt-3": icon !== "farcaster",
+          })}
         >
-          {title}
-        </span>
+          {icon && <span className="flex-shrink-0">{icons[icon]}</span>}
+
+          <span
+            className={classNames(
+              "uppercase text-[26px] leading-[100%] tracking-[2%]",
+              {
+                "text-white": variant === "primary" || variant === "secondary",
+                "text-primary-100": variant === "tertiary",
+                "font-MachineStd": isMachine,
+                "font-Inter": !isMachine,
+              }
+            )}
+          >
+            {title}
+          </span>
+        </div>
       )}
     </motion.button>
   );

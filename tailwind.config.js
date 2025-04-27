@@ -13,6 +13,7 @@ module.exports = {
         kripson: "url('/images/kripson.png')",
         iconButton: "url('/images/iconButton.png')",
         material: "url(/images/material.png)",
+        loadingBackground: "url('/images/loadingBackground.png')",
       },
       colors: {
         primary: {
