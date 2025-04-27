@@ -1,0 +1,3 @@
+interface IKPTimer {
+  initialSeconds?: number;
+}

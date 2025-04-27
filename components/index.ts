@@ -9,6 +9,8 @@ import KPFullscreenLoader from "./fullscreen-loader";
 import KPHeader from "./header";
 import KPProfileBadge from "./profile-badge";
 import KPGameTypeCard from "./game-type-card";
+import KPGameBadge from "./game-badge";
+import KPTimer from "./timer";
 
 export {
   KPDialougue,
@@ -22,4 +24,6 @@ export {
   KPHeader,
   KPProfileBadge,
   KPGameTypeCard,
+  KPGameBadge,
+  KPTimer,
 };

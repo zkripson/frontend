@@ -14,6 +14,7 @@ module.exports = {
         iconButton: "url('/images/iconButton.png')",
         material: "url(/images/material.png)",
         loadingBackground: "url('/images/loadingBackground.png')",
+        gameBackground: "url('/images/gameBackground.png')",
       },
       colors: {
         primary: {
@@ -29,6 +30,7 @@ module.exports = {
           500: "#8C5A0B40",
           550: "#565656",
           600: "#6C5940",
+          650: "#87CF50",
         },
       },
       fontFamily: {
