@@ -15,8 +15,8 @@ const KPLoader = ({ variant = "small", color }: IKPLoader) => {
       height = 30;
       break;
     case "large":
-      width = 40;
-      height = 40;
+      width = 64;
+      height = 64;
       break;
   }
 

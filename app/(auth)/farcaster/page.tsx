@@ -167,7 +167,7 @@ const Farcaster = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <KPLoader variant="large" color="white" />
+            <KPLoader variant="large" color="#44190c" />
           </motion.div>
         )}
       </AnimatePresence>
