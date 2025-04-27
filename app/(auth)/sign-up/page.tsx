@@ -37,7 +37,7 @@ const SignUp = () => {
         onClose={() => {}}
         showKripsonImage
         primaryCta={{
-          label: "Continue",
+          title: "Continue",
           onClick: () => handleSubmit(onSubmit)(),
         }}
       >

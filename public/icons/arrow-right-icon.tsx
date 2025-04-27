@@ -10,7 +10,7 @@ const ArrowRightIcon = () => (
       d="M14.4297 6.13617L20.4997 12.2062L14.4297 18.2762"
       stroke="white"
       strokeWidth="1.5"
-      stroke-miterlimit="10"
+      strokeMiterlimit="10"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
@@ -18,7 +18,7 @@ const ArrowRightIcon = () => (
       d="M3.5 12.2062H20.33"
       stroke="white"
       strokeWidth="1.5"
-      stroke-miterlimit="10"
+      strokeMiterlimit="10"
       strokeLinecap="round"
       strokeLinejoin="round"
     />

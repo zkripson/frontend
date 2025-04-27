@@ -76,7 +76,15 @@ const KPButton = ({
             "items-center mt-3": icon !== "farcaster",
           })}
         >
-          {icon && <span className="flex-shrink-0">{icons[icon]}</span>}
+          {icon && (
+            <span
+              className={classNames("flex-shrink-0", {
+                "mb-1.5": icon === "arrow",
+              })}
+            >
+              {icons[icon]}
+            </span>
+          )}
 
           <span
             className={classNames(

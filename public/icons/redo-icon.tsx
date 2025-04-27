@@ -10,7 +10,7 @@ const RedoIcon = () => (
       d="M17.1201 18.8101H9.12012C6.36012 18.8101 4.12012 16.5701 4.12012 13.8101C4.12012 11.0501 6.36012 8.81006 9.12012 8.81006H20.1201"
       stroke="white"
       strokeWidth="1.5"
-      stroke-miterlimit="10"
+      strokeMiterlimit="10"
       strokeLinecap="round"
       strokeLinejoin="round"
     />

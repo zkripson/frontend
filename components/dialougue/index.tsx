@@ -19,11 +19,12 @@ const KPDialougue = ({
   showKripsonImage = false,
   subtitle,
   ctaText,
+  className,
 }: KPDialougueProps) => {
   return (
     <div
       className={classNames(
-        "relative w-[588px] h-[824.41px] bg-dialougue bg-cover bg-no-repeat bg-center flex flex-col items-center text-center px-6",
+        `relative w-[588px] h-[824.41px] bg-dialougue bg-cover bg-no-repeat bg-center flex flex-col items-center text-center px-6 ${className}`,
         {
           "pt-16": showKripsonImage,
           "pt-32": !showKripsonImage,
@@ -38,7 +39,7 @@ const KPDialougue = ({
         />
       )}
 
-      {showBackButton && !onBack && (
+      {showBackButton && onBack && (
         <KPClickAnimation
           onClick={onBack}
           className="absolute top-[8.2%] left-[13.5%]"

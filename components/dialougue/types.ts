@@ -1,5 +1,5 @@
 interface KPDialougueProps {
-  title: string;
+  title?: string;
   children: React.ReactNode;
   subtitle?: string;
   primaryCta?: IKPButton;
@@ -12,4 +12,5 @@ interface KPDialougueProps {
   icon?: "farcaster" | "copy" | "arrow";
   iconPosition?: "left" | "right";
   ctaText?: string;
+  className?: string;
 }

@@ -6,6 +6,9 @@ import KPLoader from "./loader";
 import KPInput from "./input";
 import KPCheckbox from "./checkbox";
 import KPFullscreenLoader from "./fullscreen-loader";
+import KPHeader from "./header";
+import KPProfileBadge from "./profile-badge";
+import KPGameTypeCard from "./game-type-card";
 
 export {
   KPDialougue,
@@ -16,4 +19,7 @@ export {
   KPInput,
   KPCheckbox,
   KPFullscreenLoader,
+  KPHeader,
+  KPProfileBadge,
+  KPGameTypeCard,
 };
