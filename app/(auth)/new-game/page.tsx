@@ -88,7 +88,7 @@ const NewGame = () => {
         }}
         className="pt-[88px]"
       >
-        <div className="flex flex-col items-center gap-16 self-stretch w-full max-w-[426px] -mt-8">
+        <div className="flex flex-col items-center gap-16 self-stretch w-full -mt-8">
           <KPProfileBadge username="Dazeign" />
 
           <div className="flex flex-col gap-2 w-full">
@@ -140,7 +140,7 @@ const NewGame = () => {
         }}
         className="pt-28"
       >
-        <div className="flex flex-col items-center gap-20 self-stretch w-full max-w-[426px] -mt-8">
+        <div className="flex flex-col items-center gap-20 self-stretch w-full -mt-8">
           <SelectGrid
             title="Grid size:"
             options={gridSizes}
@@ -162,7 +162,7 @@ const NewGame = () => {
   };
 
   return (
-    <div className="flex items-center justify-center flex-1 pt-16 relative">
+    <div className="w-full h-full flex items-center justify-center relative">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={step}

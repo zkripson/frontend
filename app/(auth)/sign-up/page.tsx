@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
 import { KPCheckbox, KPDialougue, KPInput } from "@/components";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 const schema = z.object({
   email: z.string().min(1, "Email is required").email(),
@@ -15,6 +16,7 @@ type SignUp = z.infer<typeof schema>;
 
 const SignUp = () => {
   const [agreed, setAgreed] = useState(false);
+  const { navigate } = useSystemFunctions();
   const {
     register,
     handleSubmit,
@@ -26,10 +28,11 @@ const SignUp = () => {
 
   const onSubmit = (data: SignUp) => {
     console.log(data);
+    if (agreed) navigate.push("/verify");
   };
 
   return (
-    <div className="flex items-center justify-center flex-1 pt-16">
+    <div className="w-full h-full flex items-center justify-center">
       <KPDialougue
         title="Join the battle"
         subtitle="You need an account to play BATTLE.FUN."
@@ -41,7 +44,7 @@ const SignUp = () => {
           onClick: () => handleSubmit(onSubmit)(),
         }}
       >
-        <div className="flex flex-col gap-4 self-stretch w-full max-w-[426px]">
+        <div className="flex flex-col gap-4 self-stretch w-full">
           <KPInput
             name="email"
             label="Email address"

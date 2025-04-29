@@ -1,6 +1,6 @@
 import React from "react";
 
-const HamIcon = () => (
+const HamIcon = ({ width = 28, height = 26 }: IconProps) => (
   <svg
     width="26"
     height="23"

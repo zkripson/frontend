@@ -1,11 +1,23 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactDOM from "react-dom";
 
 const KPFullscreenLoader = ({
   title,
   loadingMessages,
 }: IKPFullscreenLoader) => {
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Avoid SSR mismatch and ensure document is defined
+    setMounted(true);
+  }, []);
+
+  if (!mounted || typeof window === "undefined") return null;
+
+  return ReactDOM.createPortal(
     <div
       id="fullscreen-loader"
       className="fixed inset-0 z-[9999] bg-loadingBackground bg-cover bg-center p-6"
@@ -59,12 +71,13 @@ const KPFullscreenLoader = ({
               })}
             </AnimatePresence>
 
-            {/* Optional: nice fading mask at bottom */}
+            {/* Fade Mask */}
             <div className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-loadingBackground to-transparent pointer-events-none" />
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

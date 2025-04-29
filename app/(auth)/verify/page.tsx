@@ -3,12 +3,16 @@ import { useState, useEffect } from "react";
 
 import { KPDialougue } from "@/components";
 import KPPinInput from "@/components/pin-input";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 const Verify = () => {
   const [pin, setPin] = useState("");
+  const { navigate } = useSystemFunctions();
 
   const onSubmit = () => {
     console.log(pin);
+
+    navigate.push("/farcaster");
   };
 
   const resend = () => {
@@ -23,7 +27,7 @@ const Verify = () => {
   }, [pin]);
 
   return (
-    <div className="flex items-center justify-center flex-1 pt-16">
+    <div className="w-full h-full flex items-center justify-center">
       <KPDialougue
         title="check your email"
         subtitle="Please check registered email emailname@email.com and enter the code to verify"

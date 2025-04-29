@@ -1,4 +1,4 @@
-const PauseIcon = () => (
+const PauseIcon = ({ width = 28, height = 26 }: IconProps) => (
   <svg
     width="25"
     height="27"

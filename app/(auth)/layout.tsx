@@ -49,9 +49,9 @@ export default function AuthLayout({
   }, [mouseX, mouseY]);
 
   return (
-    <main className="relative min-h-dvh overflow-hidden">
+    <main className="relative w-screen h-screen overflow-hidden">
       <motion.div
-        className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-primaryBackground bg-cover bg-center bg-no-repeat"
+        className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-primaryBackground bg-cover bg-center bg-no-repeat max"
         style={{
           translateX: moveX,
           translateY: moveY,
@@ -59,7 +59,11 @@ export default function AuthLayout({
       />
       <KPHeader />
 
-      <div className="relative z-10 flex flex-col min-h-dvh">{children}</div>
+      <div className="relative z-10 w-full h-full flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center scale-[0.80] sm:scale-[0.80] md:scale-[0.85] lg:scale-[0.90] min-[1281px]:scale-100  min-[1281px]:pt-14 transition-transform duration-300 ease-in-out">
+          {children}
+        </div>
+      </div>
     </main>
   );
 }

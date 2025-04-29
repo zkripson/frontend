@@ -158,7 +158,7 @@ const Farcaster = () => {
   };
 
   return (
-    <div className="flex items-center justify-center flex-1 pt-16 relative">
+    <div className="w-full h-full flex items-center justify-center relative">
       <AnimatePresence>
         {showSpinner && (
           <motion.div
@@ -194,6 +194,7 @@ const Farcaster = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6 }}
+            className=""
           >
             <KPFullscreenLoader title="SETTING UP GAME PROFILE..." />
           </motion.div>
