@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@farcaster/frame-sdk": "^0.0.37",
     "@hookform/resolvers": "^5.0.1",
     "@privy-io/react-auth": "^2.11.1",
     "@reduxjs/toolkit": "^2.7.0",
+    "axios": "^1.9.0",
     "classnames": "^2.5.1",
     "framer-motion": "^12.9.2",
     "next": "15.3.1",

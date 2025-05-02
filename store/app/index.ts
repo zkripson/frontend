@@ -4,6 +4,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 const initialState: AppState = {
   isInGame: false,
   appIsReady: false,
+  farcasterContext: undefined,
 };
 
 export const appReducer = createSlice({
@@ -17,9 +18,14 @@ export const appReducer = createSlice({
     setAppIsReady(state, action: PayloadAction<boolean>) {
       state.appIsReady = action.payload;
     },
+
+    setFarcasterContext(state, action: PayloadAction<FarcasterContext>) {
+      state.farcasterContext = { ...action.payload };
+    },
   },
 });
 
-export const { setIsInGame, setAppIsReady } = appReducer.actions;
+export const { setIsInGame, setAppIsReady, setFarcasterContext } =
+  appReducer.actions;
 
 export default appReducer.reducer;
