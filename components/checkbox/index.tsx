@@ -14,11 +14,11 @@ const KPCheckbox = ({
   return (
     <div
       className={classNames(`${className}`, {
-        "flex items-center gap-2": label,
+        "flex items-center gap-2 cursor-pointer": label,
       })}
+      onClick={() => !disabled && onChange(!checked)}
     >
       <div
-        onClick={() => !disabled && onChange(!checked)}
         className="relative size-6 bg-primary-450 border border-primary-600 rounded-sm cursor-pointer"
         style={{
           boxShadow: "inset 0px 2.5px 0px 0px #8C5A0B40",

@@ -1,29 +1,41 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
-import ReactDOM from "react-dom";
+
+import useSystemFunctions from "@/hooks/useSystemFunctions";
+
+const authGroup = [
+  "/sign-up",
+  "/sign-in",
+  "/verify",
+  "/farcaster",
+  "/",
+  "/new-game",
+];
 
 const KPFullscreenLoader = ({
   title,
   loadingMessages,
 }: IKPFullscreenLoader) => {
-  const [mounted, setMounted] = useState(false);
+  const { pathname } = useSystemFunctions();
 
-  useEffect(() => {
-    // Avoid SSR mismatch and ensure document is defined
-    setMounted(true);
-  }, []);
+  const isAuthLayout = authGroup.some((path) => {
+    if (path === "/") return pathname === "/";
+    return pathname.startsWith(path);
+  });
 
-  if (!mounted || typeof window === "undefined") return null;
-
-  return ReactDOM.createPortal(
+  return (
     <div
       id="fullscreen-loader"
-      className="fixed inset-0 z-[9999] bg-loadingBackground bg-cover bg-center p-6"
+      className={classNames(
+        "fixed inset-0 z-[9999] bg-loadingBackground bg-cover bg-center p-6",
+        {
+          "scale-[1.3333] sm:scale-[1.3333] md:scale-[1.25] lg:scale-[1.176] min-[1281px]:scale-100 [transform-origin:center] [will-change:transform]":
+            isAuthLayout,
+        }
+      )}
     >
       <div className="size-full relative flex flex-col items-center justify-center gap-8">
-        {/* Progress Bar */}
         <div className="relative w-full max-w-[357px] h-[60px] bg-primary-450 border border-primary-300 px-3.5 py-2.5 overflow-hidden">
           <motion.div
             className="h-full bg-primary-200 border border-primary-300"
@@ -36,7 +48,6 @@ const KPFullscreenLoader = ({
           />
         </div>
 
-        {/* Title */}
         <h1 className="text-[26px] leading-none text-center text-primary-50 font-MachineStd">
           {title}
         </h1>
@@ -71,13 +82,11 @@ const KPFullscreenLoader = ({
               })}
             </AnimatePresence>
 
-            {/* Fade Mask */}
             <div className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-loadingBackground to-transparent pointer-events-none" />
           </div>
         )}
       </div>
-    </div>,
-    document.body
+    </div>
   );
 };
 
