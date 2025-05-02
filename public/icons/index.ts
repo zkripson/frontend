@@ -15,6 +15,7 @@ import CruiserOutline from "./cruiser-outline";
 import DestroyerOutline from "./destroyer-outline";
 import SubmarineOutline from "./submarine-outline";
 import ShuffleIcon from "./shuffle-icon";
+import QuestionIcon from "./question-icon";
 
 export {
   CloseIcon,
@@ -34,4 +35,5 @@ export {
   DestroyerOutline,
   SubmarineOutline,
   ShuffleIcon,
+  QuestionIcon,
 };

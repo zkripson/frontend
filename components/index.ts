@@ -12,6 +12,7 @@ import KPGameTypeCard from "./game-type-card";
 import KPGameBadge from "./game-badge";
 import KPTimer from "./timer";
 import KPShip from "./ship";
+import KPBackdrop from "./backdrop";
 
 export {
   KPDialougue,
@@ -28,4 +29,5 @@ export {
   KPGameBadge,
   KPTimer,
   KPShip,
+  KPBackdrop,
 };
