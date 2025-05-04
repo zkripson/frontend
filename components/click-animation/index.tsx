@@ -23,7 +23,7 @@ const KPClickAnimation = ({
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
       className={classNames(`${className}`, {
-        "pointer-events-none opacity-70": disabled,
+        "pointer-events-none opacity-30": disabled,
       })}
       disabled={disabled}
       type={type}

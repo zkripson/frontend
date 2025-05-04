@@ -1,4 +1,3 @@
-// KPShip.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -67,6 +66,12 @@ export default function KPShip({
     y.set(position.y * cellSize);
   }, [position.x, position.y, x, y, cellSize]);
 
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // drag end snapping
   const handleDragEnd = (
     _: any,
@@ -90,7 +95,6 @@ export default function KPShip({
     setTimeout(() => setIsDragging(false), 0);
   };
 
-  // sizes
   const containerWidth =
     orientation === "horizontal" ? shipLength * cellSize : cellSize;
   const containerHeight =
@@ -110,7 +114,7 @@ export default function KPShip({
         height: containerHeight,
         opacity: disintegrated ? 0.3 : 1,
       }}
-      drag={!dragDisabled}
+      drag={mounted && !dragDisabled}
       dragConstraints={parentRef}
       dragMomentum={false}
       onDragStart={() => setIsDragging(true)}

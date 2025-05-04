@@ -12,6 +12,9 @@ type InventoryProps = {
   onShuffle: () => void;
   onReady: () => void;
   disableReady: boolean;
+  visible: boolean;
+  onToggle: () => void;
+  show?: boolean;
 };
 
 interface PlacedShip {
@@ -35,4 +38,12 @@ interface BoardProps {
   onShipFlip: (id: string) => void;
   onOverlap: (overlaps: { x: number; y: number }[]) => void;
   onCellClick?: (x: number, y: number) => void;
+}
+
+interface Info {
+  message: string;
+  type: "warning" | "info";
+  onStopShowing: () => void;
+  show?: boolean;
+  warningTitle?: string;
 }
