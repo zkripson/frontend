@@ -45,8 +45,23 @@ const Board: React.FC<BoardProps> = ({
   onCellClick,
   mode = "setup",
 }) => {
-  const { isXSmall, isSmall } = useScreenDetect();
-  const cellSize = isXSmall ? 41 : isSmall ? 60 : 78;
+  const { isXSmall, isSmall, isMedium, isLarge, isXLarge, is2XLarge } =
+    useScreenDetect();
+
+  let cellSize: number;
+  if (is2XLarge) {
+    cellSize = 78;
+  } else if (isXLarge) {
+    cellSize = 70;
+  } else if (isLarge) {
+    cellSize = 60;
+  } else if (isMedium) {
+    cellSize = 50;
+  } else if (isSmall) {
+    cellSize = 41;
+  } else {
+    cellSize = 41;
+  }
 
   const isLabelSmall = isXSmall || isSmall;
   const labelCellWidth = isLabelSmall ? 32 : 40;
@@ -175,13 +190,13 @@ const Board: React.FC<BoardProps> = ({
         }}
       >
         {/* corner */}
-        <div className="border border-white/25" />
+        <div className="border-[0.5px] lg:border border-white/50 lg:border-white/25" />
 
         {/* column labels */}
         {COL_LABELS.map((label) => (
           <div
             key={label}
-            className="flex items-center justify-center border border-white/25"
+            className="flex items-center justify-center border-[0.5px] lg:border border-white/50 lg:border-white/25"
             style={{
               width: cellSize,
               height: labelCellHeight,
@@ -197,7 +212,7 @@ const Board: React.FC<BoardProps> = ({
           <Fragment key={rowLabel}>
             {/* row label */}
             <div
-              className="flex items-center justify-center border border-white/25"
+              className="flex items-center justify-center border-[0.5px] lg:border border-white/50 lg:border-white/25"
               style={{
                 width: labelCellWidth,
                 height: cellSize,
@@ -224,14 +239,17 @@ const Board: React.FC<BoardProps> = ({
                   }
                   onMouseLeave={() => setHoveredCell(null)}
                   onClick={() => handleCellClick(colIndex, rowIndex)}
-                  className={classNames("relative border border-white/25", {
-                    ...(mode === "setup"
-                      ? {
-                          "bg-white/10": isHovered && !isOverlap,
-                          "bg-red-500/30": isOverlap,
-                        }
-                      : { "bg-white/10": isHovered }),
-                  })}
+                  className={classNames(
+                    "relative border-[0.5px] lg:border border-white/50 lg:border-white/25",
+                    {
+                      ...(mode === "setup"
+                        ? {
+                            "bg-white/10": isHovered && !isOverlap,
+                            "bg-red-500/30": isOverlap,
+                          }
+                        : { "bg-white/10": isHovered }),
+                    }
+                  )}
                   style={{ width: cellSize, height: cellSize }}
                 >
                   {/* shot overlays in game mode */}
