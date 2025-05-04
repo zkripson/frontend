@@ -270,7 +270,7 @@ const GameSession = () => {
               <HowToPlay />
             </div>
 
-            <div className="flex flex-col-reverse lg:flex-row items-center gap-4 lg:gap-6">
+            <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-4 lg:gap-6">
               {mode === "game" && <Turn yourTurn={mode === "game"} />}
               <KPTimer initialSeconds={60} />
               <KPIconButton icon="pause" onClick={() => {}} />
