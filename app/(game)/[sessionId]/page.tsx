@@ -289,7 +289,7 @@ const GameSession = () => {
             show={mode === "setup"}
           />
 
-          <div>
+          <div className="relative">
             <Board
               ships={placedShips}
               onShipPositionChange={updateShipPosition}
@@ -299,20 +299,19 @@ const GameSession = () => {
               mode={mode}
             />
 
-            <div className="lg:hidden mt-4 w-full">
-              <KPClickAnimation
-                disabled={disableReadyButton}
-                className={classNames(
-                  "flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]",
-                  { "opacity-15 pointer-events-none": disableReadyButton }
-                )}
-                onClick={() => setMode("game")}
-              >
-                <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
-                  ready
-                </span>
-              </KPClickAnimation>
-            </div>
+            {mode === "setup" && (
+              <div className="lg:hidden w-full absolute top-[103%] left-0">
+                <KPClickAnimation
+                  disabled={disableReadyButton || inventoryVisible}
+                  className="flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]"
+                  onClick={() => setMode("game")}
+                >
+                  <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
+                    ready
+                  </span>
+                </KPClickAnimation>
+              </div>
+            )}
           </div>
 
           <div className="fixed bottom-[2%] right-0 w-full px-5 lg:px-12">

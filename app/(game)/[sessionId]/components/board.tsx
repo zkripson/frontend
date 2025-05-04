@@ -60,7 +60,7 @@ const Board: React.FC<BoardProps> = ({
   } else if (isSmall) {
     cellSize = 41;
   } else {
-    cellSize = 32;
+    cellSize = 41;
   }
 
   const isLabelSmall = isXSmall || isSmall;
