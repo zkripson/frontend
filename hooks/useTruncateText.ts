@@ -1,3 +1,4 @@
+"use client";
 import { useMemo } from "react";
 
 const useTruncateText = (text?: string, startChars = 5, endChars = 5) => {

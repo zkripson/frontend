@@ -1,3 +1,5 @@
+"use client";
+
 import { useAppDispatch, useAppSelector } from "./useRedux";
 
 /**
@@ -16,6 +18,8 @@ const useSystemFunctions = () => {
   const pathname = usePathname();
 
   // states
+  const appState = useAppSelector((state) => state.app);
+  const gameState = useAppSelector((state) => state.game);
 
   return {
     // functions
@@ -26,6 +30,8 @@ const useSystemFunctions = () => {
     pathname,
 
     // states
+    appState,
+    gameState,
   };
 };
 
