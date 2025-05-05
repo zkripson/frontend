@@ -6,9 +6,10 @@ import KPPinInputBackground from "./background";
 interface KPPinInputProps {
   length?: number;
   onComplete: (pin: string) => void;
+  loading?: boolean;
 }
 
-const KPPinInput = ({ length = 4, onComplete }: KPPinInputProps) => {
+const KPPinInput = ({ length = 6, onComplete, loading }: KPPinInputProps) => {
   const [values, setValues] = useState<string[]>(Array(length).fill(""));
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -67,9 +68,9 @@ const KPPinInput = ({ length = 4, onComplete }: KPPinInputProps) => {
         .map((_, i) => (
           <div
             key={i}
-            className="relative w-[80px] h-[82px] max-sm:w-[53.47px] max-sm:h-[54.81px]"
+            className="relative w-[50px] h-[52px] max-sm:w-[33.47px] max-sm:h-[34.81px]"
           >
-            <KPPinInputBackground className="w-[80px] h-[82px] max-sm:w-[53.47px] max-sm:h-[54.81px" />
+            <KPPinInputBackground className="w-[50px] h-[52px] max-sm:w-[33.47px] max-sm:h-[34.81px" />
 
             <input
               ref={(el) => {
@@ -79,7 +80,7 @@ const KPPinInput = ({ length = 4, onComplete }: KPPinInputProps) => {
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
               onPaste={handlePaste}
-              className="absolute inset-0 w-full h-full flex justify-center items-center bg-transparent outline-none text-center text-[44px] max-sm:text-[32px] font-bold text-primary-250 placeholder-primary-550 font-MachineStd pt-3 max-sm:pt-0 max-sm:top-4"
+              className="absolute inset-0 w-full h-full flex justify-center items-center bg-transparent outline-none text-center text-[24px] max-sm:text-[18px] font-bold text-primary-250 placeholder-primary-550 font-MachineStd pt-3 max-sm:pt-0 max-sm:top-4"
               maxLength={1}
               inputMode="numeric"
               pattern="[0-9]*"

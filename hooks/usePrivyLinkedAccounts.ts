@@ -1,20 +1,29 @@
-import { usePrivy } from "@privy-io/react-auth";
+import {
+  LinkedAccountWithMetadata,
+  usePrivy,
+  WalletWithMetadata,
+} from "@privy-io/react-auth";
+
+function isPrivyWallet<T extends "ethereum" | "solana">(
+  account: LinkedAccountWithMetadata,
+  chainType: T
+): account is WalletWithMetadata & { chainType: T; walletClientType: "privy" } {
+  return (
+    account.type === "wallet" &&
+    account.chainType === chainType &&
+    account.walletClientType === "privy"
+  );
+}
 
 const usePrivyLinkedAccounts = () => {
   const { user } = usePrivy();
 
-  const evmWallet: any = user?.linkedAccounts.find(
-    (account) =>
-      account.type === "wallet" &&
-      account.chainType === "ethereum" &&
-      account.walletClientType === "privy"
+  const evmWallet = user?.linkedAccounts.find((account) =>
+    isPrivyWallet(account, "ethereum")
   );
 
-  const solanaWallet: any = user?.linkedAccounts.find(
-    (account) =>
-      account.type === "wallet" &&
-      account.chainType === "solana" &&
-      account.walletClientType === "privy"
+  const solanaWallet = user?.linkedAccounts.find((account) =>
+    isPrivyWallet(account, "solana")
   );
 
   const linkedTwitter = user?.linkedAccounts?.find(
