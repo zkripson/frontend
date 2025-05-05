@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import classNames from "classnames";
+import { useContainerBounds } from "@/hooks/useContainerBounds";
 
 const GRID_SIZE = 8;
 
@@ -58,19 +59,12 @@ export default function KPShip({
 
   const [isDragging, setIsDragging] = useState(false);
 
-  // motion values
   const x = useMotionValue(position.x * cellSize);
   const y = useMotionValue(position.y * cellSize);
   useEffect(() => {
     x.set(position.x * cellSize);
     y.set(position.y * cellSize);
   }, [position.x, position.y, x, y, cellSize]);
-
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   // drag end snapping
   const handleDragEnd = (
@@ -91,7 +85,14 @@ export default function KPShip({
     gridX = Math.max(0, Math.min(gridX, maxX));
     gridY = Math.max(0, Math.min(gridY, maxY));
 
+    // tell the parent
     onPositionChange({ x: gridX, y: gridY });
+
+    // *** snap the visuals back immediately ***
+    x.set(gridX * cellSize);
+    y.set(gridY * cellSize);
+
+    // clear dragging flag
     setTimeout(() => setIsDragging(false), 0);
   };
 
@@ -101,6 +102,9 @@ export default function KPShip({
     orientation === "vertical" ? shipLength * cellSize : cellSize;
   const visualWidth = shipLength * cellSize * 0.9;
   const visualHeight = variant === "carrier" ? 1.1 * cellSize : 0.8 * cellSize;
+
+  const shipRef = useRef<HTMLDivElement>(null);
+  const bounds = useContainerBounds(parentRef, shipRef);
 
   return (
     <motion.div
@@ -114,9 +118,16 @@ export default function KPShip({
         height: containerHeight,
         opacity: disintegrated ? 0.3 : 1,
       }}
-      drag
-      dragConstraints={parentRef}
+      ref={shipRef}
+      drag={bounds !== null && !dragDisabled}
+      dragConstraints={bounds!}
+      dragElastic={0.2}
       dragMomentum={false}
+      dragTransition={{
+        bounceStiffness: 50,
+        bounceDamping: 20,
+        timeConstant: 300,
+      }}
       onDragStart={() => setIsDragging(true)}
       onDragEnd={handleDragEnd}
       onClick={() => {

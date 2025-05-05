@@ -1,25 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import classNames from "classnames";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { useLoadingSequence } from "@/hooks/useLoadingSequence";
+import { useToggleInfo } from "@/hooks/useToggleInfo";
+import { LoadingOverlay } from "./components/LoadingOverlay";
+import { GameHeader } from "./components/GameHeader";
+import { SetupPanel } from "./components/SetupPanel";
+import { GameBoardContainer } from "./components/GameBoardContainer";
+import { GameFooter } from "./components/GameFooter";
+import { GeneralMessageKey } from "./components/general";
+import VictoryStatus from "./components/VictoryStatus";
 
-import {
-  KPClickAnimation,
-  KPFullscreenLoader,
-  KPGameBadge,
-  KPIconButton,
-  KPProfileBadge,
-  KPTimer,
-} from "@/components";
-import { useScreenDetect } from "@/hooks/useScreenDetect";
-import Inventory from "./components/inventory";
-import Board from "./components/board";
-import HowToPlay from "./components/how-to-play";
-import Turn from "./components/turn";
-import Info from "./components/info";
-
-const loadingMessages = [
+const loadingMessages: string[] = [
   "Creating opponent fleet...",
   "Completing fleet coordinates...",
   "Loading battleships and environments...",
@@ -28,7 +21,6 @@ const loadingMessages = [
 ];
 
 const GRID_SIZE = 8;
-// map variants to lengths for overlap and placement logic
 const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
   carrier: 5,
   battleship: 4,
@@ -37,8 +29,7 @@ const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
   destroyer: 2,
 };
 
-// helper to get all occupied cells of a ship
-const getShipCells = (ship: ShipType) => {
+function getShipCells(ship: ShipType): string[] {
   const length = SHIP_LENGTHS[ship.variant];
   const cells: string[] = [];
   for (let i = 0; i < length; i++) {
@@ -49,18 +40,17 @@ const getShipCells = (ship: ShipType) => {
     cells.push(`${x}-${y}`);
   }
   return cells;
-};
+}
 
-const GameSession = () => {
-  const [messages, setMessages] = useState<string[]>([]);
-  const [loadingDone, setLoadingDone] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
+export default function GameSession() {
+  // 1) loading
+  const { messages, loadingDone } = useLoadingSequence(loadingMessages);
+
+  // 2) info toggling
+  const { infoShow, userDismissedInfo, setUserDismissedInfo } = useToggleInfo();
+
+  // 3) core game state
   const [mode, setMode] = useState<"setup" | "game">("setup");
-
-  const [infoShow, setInfoShow] = useState(true);
-  const [userDismissedInfo, setUserDismissedInfo] = useState(false);
-
-  // track which variants have been placed
   const [shipsInPosition, setShipsInPosition] = useState<
     Record<IKPShip["variant"], boolean>
   >({
@@ -70,32 +60,24 @@ const GameSession = () => {
     submarine: false,
     destroyer: false,
   });
-
-  // ships placed on the board
   const [placedShips, setPlacedShips] = useState<ShipType[]>([]);
-
-  // track overlapping cells
   const [overlaps, setOverlaps] = useState<{ x: number; y: number }[]>([]);
+  const [shots, setShots] = useState<
+    Record<string, { type: "hit" | "miss"; stage?: "smoke" }>
+  >({});
+  const [generalMessageKey, setGeneralMessageKey] =
+    useState<GeneralMessageKey>("game-start");
+  const [inventoryVisible, setInventoryVisible] = useState<boolean>(true);
 
-  const [inventoryVisible, setInventoryVisible] = useState(true);
-
-  const { isXSmall, isSmall } = useScreenDetect();
-
-  const isMobile = isXSmall || isSmall;
-
-  const allInPosition = Object.values(shipsInPosition).every(Boolean);
-
-  const disableReadyButton = !allInPosition || overlaps.length > 0;
-
-  // place a ship at a random, non-overlapping, clamped position
-  const placeRandomly = (variant: IKPShip["variant"]) => {
+  // 4) placement helpers
+  function placeRandomly(variant: IKPShip["variant"]) {
     setPlacedShips((prev) => {
-      const otherShips = prev.filter((s) => s.variant !== variant);
+      const other = prev.filter((s) => s.variant !== variant);
       let newShip: ShipType;
       const length = SHIP_LENGTHS[variant];
       const maxX = GRID_SIZE - length;
       const maxY = GRID_SIZE - 1;
-      // try until we find a non-overlapping spot
+
       do {
         const randomX = Math.floor(Math.random() * (maxX + 1));
         const randomY = Math.floor(Math.random() * (maxY + 1));
@@ -108,21 +90,22 @@ const GameSession = () => {
         };
       } while (
         getShipCells(newShip).some((cell) =>
-          otherShips.flatMap(getShipCells).includes(cell)
+          other.flatMap(getShipCells).includes(cell)
         )
       );
-      setShipsInPosition((prevPos) => ({ ...prevPos, [variant]: true }));
-      return [...otherShips, newShip];
-    });
-  };
 
-  // shuffle all placed ships into non-overlapping, clamped positions
-  const shuffleShips = () => {
+      setShipsInPosition((pos) => ({ ...pos, [variant]: true }));
+      return [...other, newShip];
+    });
+  }
+
+  function shuffleShips() {
     setPlacedShips((prev) => {
       const newShips: ShipType[] = [];
       prev.forEach((ship) => {
         let candidate: ShipType;
         const length = SHIP_LENGTHS[ship.variant];
+
         do {
           const maxX =
             ship.orientation === "horizontal"
@@ -140,117 +123,98 @@ const GameSession = () => {
             newShips.flatMap(getShipCells).includes(cell)
           )
         );
+
         newShips.push(candidate);
       });
       return newShips;
     });
-  };
+  }
 
-  // flip orientation when a ship is tapped, then clamp its position
-  const flipShip = (id: string) => {
+  function flipShip(id: string) {
     setPlacedShips((prev) =>
       prev.map((ship) => {
         if (ship.id !== id) return ship;
         const length = SHIP_LENGTHS[ship.variant];
-        const newOri =
+        const newOrientation =
           ship.orientation === "horizontal" ? "vertical" : "horizontal";
         const maxX =
-          newOri === "horizontal" ? GRID_SIZE - length : GRID_SIZE - 1;
-        const maxY = newOri === "vertical" ? GRID_SIZE - length : GRID_SIZE - 1;
+          newOrientation === "horizontal" ? GRID_SIZE - length : GRID_SIZE - 1;
+        const maxY =
+          newOrientation === "vertical" ? GRID_SIZE - length : GRID_SIZE - 1;
         const x = Math.min(ship.position.x, maxX);
         const y = Math.min(ship.position.y, maxY);
-        return { ...ship, orientation: newOri, position: { x, y } };
+        return { ...ship, orientation: newOrientation, position: { x, y } };
       })
     );
-  };
+  }
 
-  // update a ship's snapped position
-  const updateShipPosition = (id: string, newPos: { x: number; y: number }) => {
+  function updateShipPosition(id: string, newPos: { x: number; y: number }) {
     setPlacedShips((prev) =>
       prev.map((ship) =>
         ship.id === id ? { ...ship, position: newPos } : ship
       )
     );
-  };
+  }
 
-  // callback from Board when overlaps change
-  const handleOverlap = (newOverlaps: { x: number; y: number }[]) => {
+  function handleOverlap(newOverlaps: { x: number; y: number }[]) {
     setOverlaps(newOverlaps);
-  };
+  }
 
-  const handleCellClick = (x: number, y: number) => {
-    setPlacedShips((prev) =>
-      prev.map((ship) => {
-        // build the occupied cells for this ship
-        const cells = getShipCells(ship);
-        const key = `${x}-${y}`;
-        const idx = cells.indexOf(key);
-        if (idx >= 0) {
-          // it's a hit on segment idx
+  function handleShoot(x: number, y: number, isHit: boolean) {
+    const key = `${x}-${y}`;
+    setShots((prev) => ({
+      ...prev,
+      [key]: { type: isHit ? "hit" : "miss" },
+    }));
+
+    if (isHit) {
+      setPlacedShips((prev) =>
+        prev.map((ship) => {
+          const cells = getShipCells(ship);
+          const idx = cells.indexOf(key);
+          if (idx < 0) return ship;
           const newHitMap = [...ship.hitMap];
           newHitMap[idx] = true;
           return { ...ship, hitMap: newHitMap };
-        }
-        return ship;
-      })
-    );
-  };
+        })
+      );
 
-  const onReady = () => {
-    if (isMobile) {
-      // on mobile, first hide inventory so user can drag ships
+      const didSink = placedShips.some((ship) => {
+        const cells = getShipCells(ship);
+        const idx = cells.indexOf(key);
+        if (idx < 0) return false;
+        const hypothetical = [...ship.hitMap];
+        hypothetical[idx] = true;
+        return hypothetical.every(Boolean);
+      });
+
+      setGeneralMessageKey(didSink ? "sunk" : "hit");
+
+      setTimeout(() => {
+        setShots((prev) => ({
+          ...prev,
+          [key]: { type: "hit", stage: "smoke" },
+        }));
+      }, 3000);
+    } else {
+      setGeneralMessageKey("missed");
+    }
+  }
+
+  function onReady() {
+    // mobile: hide inventory first
+    if (window.innerWidth < 768) {
       setInventoryVisible(false);
     } else {
-      // on desktop just go straight to game
+      // desktop: go straight to game
       setMode("game");
+      setGeneralMessageKey("waiting");
     }
-  };
-
-  // loading sequence
-  useEffect(() => {
-    if (currentIndex >= loadingMessages.length) {
-      const timer = setTimeout(() => setLoadingDone(true), 2000);
-      return () => clearTimeout(timer);
-    }
-    const timer = setTimeout(() => {
-      setMessages((prev) => [...prev, loadingMessages[currentIndex]]);
-      setCurrentIndex((prev) => prev + 1);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, [currentIndex]);
-
-  useEffect(() => {
-    if (userDismissedInfo) {
-      // once dismissed, hide permanently
-      setInfoShow(false);
-      return;
-    }
-    // else toggle show/hide every 30s
-    const interval = setInterval(() => {
-      setInfoShow((prev) => !prev);
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [userDismissedInfo]);
+  }
 
   return (
     <div className="relative flex items-center justify-center flex-1">
-      <AnimatePresence>
-        {!loadingDone && (
-          <motion.div
-            key="loader"
-            className="absolute inset-0 z-[9999]"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <KPFullscreenLoader
-              title="loading new game..."
-              loadingMessages={messages}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <LoadingOverlay loading={!loadingDone} loadingMessages={messages} />
 
       {loadingDone && (
         <motion.div
@@ -260,116 +224,43 @@ const GameSession = () => {
           transition={{ duration: 0.6 }}
           className="w-full h-full flex flex-col items-center justify-center"
         >
-          <div className="fixed top-[4%] lg:top-[3%] xl:top-[5%] left-0 flex lg:items-center justify-between w-full px-5 lg:px-12 z-[9999]">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-              <KPProfileBadge
-                username="Choco"
-                variant="secondary"
-                balance={37.56}
-              />
-              <HowToPlay />
-            </div>
+          <GameHeader mode={mode} onPause={() => {}} onHam={() => {}} />
 
-            <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-4 lg:gap-6">
-              {mode === "game" && <Turn yourTurn={mode === "game"} />}
-              <KPTimer initialSeconds={60} />
-              <KPIconButton icon="pause" onClick={() => {}} />
-              <KPIconButton icon="ham" onClick={() => {}} />
-            </div>
-          </div>
-
-          <Inventory
-            visible={inventoryVisible}
-            onToggle={() => setInventoryVisible(true)}
+          <SetupPanel
+            inventoryVisible={inventoryVisible}
+            setInventoryVisible={() => setInventoryVisible(true)}
             shipsInPosition={shipsInPosition}
             onPlaceShip={placeRandomly}
             onShuffle={shuffleShips}
             onReady={onReady}
-            disableReady={overlaps.length > 0}
-            show={mode === "setup"}
+            disableReadyButton={overlaps.length > 0}
+            mode={mode}
           />
 
-          <div className="relative">
-            <Board
-              ships={placedShips}
-              onShipPositionChange={updateShipPosition}
-              onShipFlip={flipShip}
-              onOverlap={handleOverlap}
-              onCellClick={handleCellClick}
-              mode={mode}
-            />
+          <GameBoardContainer
+            placedShips={placedShips}
+            updateShipPosition={updateShipPosition}
+            flipShip={flipShip}
+            handleOverlap={handleOverlap}
+            mode={mode}
+            shots={shots}
+            handleShoot={handleShoot}
+            generalMessageKey={generalMessageKey}
+            disableReadyButton={overlaps.length > 0}
+            inventoryVisible={inventoryVisible}
+            setMode={setMode}
+          />
 
-            {mode === "setup" && (
-              <div className="lg:hidden w-full absolute top-[103%] left-0">
-                <KPClickAnimation
-                  disabled={disableReadyButton || inventoryVisible}
-                  className="flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]"
-                  onClick={() => setMode("game")}
-                >
-                  <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
-                    ready
-                  </span>
-                </KPClickAnimation>
-              </div>
-            )}
-          </div>
-
-          <div className="fixed bottom-[2%] right-0 w-full px-5 lg:px-12">
-            <div className="hidden lg:flex items-center justify-between w-full">
-              <KPGameBadge status="ready" username="Choco" isPlayer />
-
-              <Info
-                show={overlaps.length > 0 ? true : infoShow}
-                type={overlaps.length > 0 ? "warning" : "info"}
-                warningTitle={
-                  overlaps.length > 0 ? "INCORRECT PLACEMENT:" : undefined
-                }
-                message={
-                  overlaps.length > 0
-                    ? "You can’t place multiple ships overlapping one grid space."
-                    : "You’ll be notified when your opponent joins. Game starts when both players are ready."
-                }
-                onStopShowing={() => setUserDismissedInfo(true)}
-              />
-
-              <KPGameBadge
-                status="joining..."
-                username="Njoku"
-                avatarUrl="/images/kripson.jpeg"
-                isPlayer={false}
-              />
-            </div>
-
-            <div className="flex flex-col items-center space-y-4 lg:hidden w-full">
-              <Info
-                show={overlaps.length > 0 ? true : infoShow}
-                type={overlaps.length > 0 ? "warning" : "info"}
-                warningTitle={
-                  overlaps.length > 0 ? "INCORRECT PLACEMENT:" : undefined
-                }
-                message={
-                  overlaps.length > 0
-                    ? "You can’t place multiple ships overlapping one grid space."
-                    : "You’ll be notified when your opponent joins. Game starts when both players are ready."
-                }
-                onStopShowing={() => setUserDismissedInfo(true)}
-              />
-
-              <div className="flex space-x-4 w-full justify-between">
-                <KPGameBadge status="ready" username="Choco" isPlayer />
-                <KPGameBadge
-                  status="joining..."
-                  username="Njoku"
-                  avatarUrl="/images/kripson.jpeg"
-                  isPlayer={false}
-                />
-              </div>
-            </div>
-          </div>
+          <GameFooter
+            overlaps={overlaps}
+            infoShow={infoShow}
+            setUserDismissedInfo={setUserDismissedInfo}
+            generalMessageKey={generalMessageKey}
+          />
         </motion.div>
       )}
+
+      <VictoryStatus />
     </div>
   );
-};
-
-export default GameSession;
+}

@@ -29,8 +29,9 @@ interface BoardProps {
   onShipPositionChange: (id: string, pos: { x: number; y: number }) => void;
   onShipFlip: (id: string) => void;
   onOverlap: (overlaps: { x: number; y: number }[]) => void;
-  onCellClick?: (x: number, y: number) => void;
   mode?: "setup" | "game";
+  shots: Record<string, { type: "hit" | "miss"; stage?: "smoke" }>;
+  onShoot: (x: number, y: number, isHit: boolean) => void;
 }
 
 const COL_LABELS = ["A", "B", "C", "D", "E", "F", "G", "H"];
@@ -42,8 +43,9 @@ const Board: React.FC<BoardProps> = ({
   onShipPositionChange,
   onShipFlip,
   onOverlap,
-  onCellClick,
   mode = "setup",
+  onShoot,
+  shots,
 }) => {
   const { isXSmall, isSmall, isMedium, isLarge, isXLarge, is2XLarge } =
     useScreenDetect();
@@ -73,9 +75,6 @@ const Board: React.FC<BoardProps> = ({
     y: number;
   } | null>(null);
   const [overlaps, setOverlaps] = useState<{ x: number; y: number }[]>([]);
-  const [shots, setShots] = useState<
-    Record<string, { type: "hit" | "miss"; stage?: "smoke" }>
-  >({});
   const cellsRef = useRef<HTMLDivElement>(null);
   const shipsRef = useRef<ShipType[]>(ships);
 
@@ -106,15 +105,16 @@ const Board: React.FC<BoardProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ships]);
 
-  // handle cell click
   const handleCellClick = (x: number, y: number) => {
-    if (mode === "setup") {
-      onCellClick?.(x, y);
-      return;
-    }
+    // ignore all clicks unless we're in game mode
+    if (mode !== "game") return;
+
     const key = `${x}-${y}`;
+
+    // already shot here?
     if (shots[key]) return;
-    // determine hit/miss
+
+    // determine hit or miss
     const isHit = ships.some((ship) => {
       const length = SHIP_LENGTHS[ship.variant];
       for (let i = 0; i < length; i++) {
@@ -130,45 +130,14 @@ const Board: React.FC<BoardProps> = ({
       }
       return false;
     });
-    setShots((prev) => ({ ...prev, [key]: { type: isHit ? "hit" : "miss" } }));
 
+    // notify GameSession
+    onShoot(x, y, isHit);
+
+    // if a hit, schedule the smoke stage
     if (isHit) {
-      onCellClick?.(x, y);
-      // after 5s show smoke
       setTimeout(() => {
-        setShots((prev) => ({
-          ...prev,
-          [key]: { type: "hit", stage: "smoke" },
-        }));
-        // then after 4s, only clear if the ship is fully sunk
-        setTimeout(() => {
-          setShots((prev) => {
-            const updated = { ...prev };
-            // parse the coords
-            const [sx, sy] = key.split("-").map(Number);
-            // find that ship
-            const ship = shipsRef.current.find((s) =>
-              Array(SHIP_LENGTHS[s.variant])
-                .fill(0)
-                .some((_, i) => {
-                  const cx =
-                    s.orientation === "horizontal"
-                      ? s.position.x + i
-                      : s.position.x;
-                  const cy =
-                    s.orientation === "vertical"
-                      ? s.position.y + i
-                      : s.position.y;
-                  return cx === sx && cy === sy;
-                })
-            );
-            // if the ship’s hitMap is now all true, delete the smoke
-            if (ship && ship.hitMap.every((h) => h)) {
-              delete updated[key];
-            }
-            return updated;
-          });
-        }, 4000);
+        onShoot(x, y, true);
       }, 5000);
     }
   };
