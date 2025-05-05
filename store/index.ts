@@ -1,6 +1,5 @@
 "use client";
 import { configureStore } from "@reduxjs/toolkit";
-
 import appReducer from "./app";
 
 export interface CallbackProps {
