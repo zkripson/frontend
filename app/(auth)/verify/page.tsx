@@ -30,7 +30,15 @@ const Verify = () => {
     <div className="w-full h-full flex items-center justify-center">
       <KPDialougue
         title="check your email"
-        subtitle="Please check registered email emailname@email.com and enter the code to verify"
+        subtitle={
+          <>
+            Please check registered email{" "}
+            <span className="font-bold text-primary-450">
+              emailname@email.com
+            </span>{" "}
+            and enter the code to verify
+          </>
+        }
         showCloseButton
         onClose={() => {}}
         showKripsonImage
@@ -43,7 +51,7 @@ const Verify = () => {
             }}
           />
 
-          <p className="text-[16px] leading-[16px] text-primary-50">
+          <p className="text-[16px] max-sm:text-[10.69px] leading-[16px] text-primary-50">
             Didn’t get an email?{" "}
             <span
               onClick={resend}

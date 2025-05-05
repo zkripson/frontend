@@ -19,13 +19,13 @@ const KPInput = ({
       {label && (
         <label
           htmlFor={name}
-          className="text-primary-50 mb-2 text-[18px] leading-[100%]"
+          className="text-primary-50 mb-2 text-[18px] max-sm:text-[12px] leading-[100%]"
         >
           {label}
         </label>
       )}
 
-      <div className="relative w-full max-w-[426px] h-[52px]">
+      <div className="relative w-full max-w-[426px] max-sm:max-w-[285px] h-[52px] max-sm:h-[34px]">
         <KPInputBackground />
 
         <input
@@ -34,7 +34,7 @@ const KPInput = ({
           disabled={disabled}
           {...register}
           className={classNames(
-            "absolute inset-0 w-full h-full bg-transparent outline-none px-4 text-primary-250 placeholder-primary-550 text-[18px]",
+            "absolute inset-0 w-full h-full bg-transparent outline-none px-4 text-primary-250 placeholder-primary-550 text-[18px] max-sm:text-[12px]",
             className
           )}
           placeholder={placeholder}

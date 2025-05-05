@@ -47,7 +47,7 @@ const NewGame = () => {
       id: "fm",
       name: "Friend's Match",
       description: "Invite from Farcaster or Email",
-      action: () => setStep("chooseGrid"),
+      action: () => {},
     },
     {
       id: "qm",
@@ -88,11 +88,11 @@ const NewGame = () => {
         }}
         className="pt-[88px]"
       >
-        <div className="flex flex-col items-center gap-16 self-stretch w-full -mt-8">
+        <div className="flex flex-col items-center gap-16 max-sm:gap-7 self-stretch w-full">
           <KPProfileBadge username="Dazeign" />
 
           <div className="flex flex-col gap-2 w-full">
-            <h1 className="text-[26px] leading-none text-primary-50 font-MachineStd">
+            <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">
               choose new game:
             </h1>
 
@@ -111,7 +111,7 @@ const NewGame = () => {
           </div>
 
           <div className="flex flex-col gap-2 w-full">
-            <h1 className="text-[26px] leading-none text-primary-50 font-MachineStd">
+            <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">
               Join match:
             </h1>
 
@@ -124,38 +124,6 @@ const NewGame = () => {
               type="text"
             />
           </div>
-        </div>
-      </KPDialougue>
-    ),
-
-    chooseGrid: (
-      <KPDialougue
-        showBackButton
-        onBack={() => setStep("chooseGame")}
-        primaryCta={{
-          title: "Start Game",
-          onClick: startGame,
-          icon: "arrow",
-          iconPosition: "right",
-        }}
-        className="pt-28"
-      >
-        <div className="flex flex-col items-center gap-20 self-stretch w-full -mt-8">
-          <SelectGrid
-            title="Grid size:"
-            options={gridSizes}
-            selected={selectedGridSize}
-            onSelect={setSelectedGridSize}
-            height="h-[95px]"
-          />
-
-          <SelectGrid
-            title="choose battlefield:"
-            options={battlefields}
-            selected={selectedBattlefield}
-            onSelect={setSelectedBattlefield}
-            height="h-[163px]"
-          />
         </div>
       </KPDialougue>
     ),

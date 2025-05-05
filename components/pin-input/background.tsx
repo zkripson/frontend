@@ -1,10 +1,11 @@
-const KPPinInputBackground = () => (
+const KPPinInputBackground = ({ className }: IconProps) => (
   <svg
     width="80"
     height="82"
     viewBox="0 0 80 82"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className={className}
   >
     <g filter="url(#filter0_i_127_935)">
       <path

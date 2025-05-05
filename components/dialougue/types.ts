@@ -1,7 +1,7 @@
 interface KPDialougueProps {
   title?: string;
   children: React.ReactNode;
-  subtitle?: string;
+  subtitle?: string | React.ReactNode;
   primaryCta?: IKPButton;
   secondaryCta?: IKPButton;
   showKripsonImage?: boolean;

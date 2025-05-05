@@ -35,8 +35,8 @@ const KPFullscreenLoader = ({
         }
       )}
     >
-      <div className="size-full relative flex flex-col items-center justify-center gap-8">
-        <div className="relative w-full max-w-[357px] h-[60px] bg-primary-450 border border-primary-300 px-3.5 py-2.5 overflow-hidden">
+      <div className="size-full relative flex flex-col items-center justify-center gap-8 max-sm:gap-4">
+        <div className="relative w-full max-w-[357px] max-sm:max-w-[277px] h-[60px] max-sm:max-h-[37px] bg-primary-450 border border-primary-300 px-3.5 py-2.5 max-sm:px-2 max-sm:py-1.5 overflow-hidden">
           <motion.div
             className="h-full bg-primary-200 border border-primary-300"
             initial={{ width: "0%" }}
@@ -48,7 +48,7 @@ const KPFullscreenLoader = ({
           />
         </div>
 
-        <h1 className="text-[26px] leading-none text-center text-primary-50 font-MachineStd">
+        <h1 className="text-[26px] max-sm:text-[15.88px] leading-none text-center text-primary-50 font-MachineStd">
           {title}
         </h1>
 

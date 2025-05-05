@@ -15,11 +15,21 @@ const icons = {
       width={32}
       height={32}
       quality={100}
-      className="w-8 h-8 object-cover rounded-md"
+      className="size-8 max-sm:size-[21.39px] object-cover rounded-md"
+    />
+  ),
+  x: (
+    <Image
+      src="/images/x.png"
+      alt="farcaster"
+      width={32}
+      height={32}
+      quality={100}
+      className="size-7 max-sm:size-[17.38px] object-cover rounded-md -mt-2"
     />
   ),
   copy: <CopyIcon />,
-  arrow: <ArrowRightIcon />,
+  arrow: <ArrowRightIcon className="max-sm:size-6" />,
 };
 
 const KPButton = ({
@@ -54,7 +64,7 @@ const KPButton = ({
           "bg-primary-200 border-primary-300": variant === "primary",
           "bg-primary-250 border-primary-350": variant === "secondary",
           "bg-primary-150 border-primary-400": variant === "tertiary",
-          "h-[52px]": isMachine,
+          "h-[52px] max-sm:h-[34.76px]": isMachine,
         },
         className
       )}
@@ -88,10 +98,10 @@ const KPButton = ({
 
           <span
             className={classNames(
-              "uppercase text-[26px] leading-[100%] tracking-[2%]",
+              "uppercase text-[26px] max-sm:text-[17.83px] leading-[100%] tracking-[2%]",
               {
                 "text-white": variant === "primary" || variant === "secondary",
-                "text-primary-100": variant === "tertiary",
+                "text-primary-300": variant === "tertiary",
                 "font-MachineStd": isMachine,
                 "font-Inter": !isMachine,
               }

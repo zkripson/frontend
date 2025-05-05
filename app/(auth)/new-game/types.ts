@@ -1,4 +1,4 @@
-type NewGameStep = "chooseGame" | "chooseGrid";
+type NewGameStep = "chooseGame";
 
 interface GameType {
   id: string;

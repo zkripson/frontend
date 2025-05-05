@@ -114,7 +114,7 @@ export default function KPShip({
         height: containerHeight,
         opacity: disintegrated ? 0.3 : 1,
       }}
-      drag={mounted && !dragDisabled}
+      drag
       dragConstraints={parentRef}
       dragMomentum={false}
       onDragStart={() => setIsDragging(true)}
