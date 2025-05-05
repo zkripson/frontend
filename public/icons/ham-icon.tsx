@@ -2,8 +2,8 @@ import React from "react";
 
 const HamIcon = ({ width = 28, height = 26 }: IconProps) => (
   <svg
-    width="26"
-    height="23"
+    width={width}
+    height={height}
     viewBox="0 0 26 23"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"

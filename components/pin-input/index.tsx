@@ -61,12 +61,15 @@ const KPPinInput = ({ length = 4, onComplete }: KPPinInputProps) => {
   };
 
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 max-sm:gap-2">
       {Array(length)
         .fill(0)
         .map((_, i) => (
-          <div key={i} className="relative w-[80px] h-[82px]">
-            <KPPinInputBackground />
+          <div
+            key={i}
+            className="relative w-[80px] h-[82px] max-sm:w-[53.47px] max-sm:h-[54.81px]"
+          >
+            <KPPinInputBackground className="w-[80px] h-[82px] max-sm:w-[53.47px] max-sm:h-[54.81px" />
 
             <input
               ref={(el) => {
@@ -76,7 +79,7 @@ const KPPinInput = ({ length = 4, onComplete }: KPPinInputProps) => {
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
               onPaste={handlePaste}
-              className="absolute inset-0 w-full h-full flex justify-center items-center bg-transparent outline-none text-center text-[44px] font-bold text-primary-250 placeholder-primary-550 font-MachineStd pt-3"
+              className="absolute inset-0 w-full h-full flex justify-center items-center bg-transparent outline-none text-center text-[44px] max-sm:text-[32px] font-bold text-primary-250 placeholder-primary-550 font-MachineStd pt-3 max-sm:pt-0 max-sm:top-4"
               maxLength={1}
               inputMode="numeric"
               pattern="[0-9]*"

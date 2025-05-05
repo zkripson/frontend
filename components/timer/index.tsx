@@ -26,7 +26,7 @@ const KPTimer = ({ initialSeconds = 60 }: IKPTimer) => {
   };
 
   return (
-    <div className="text-primary-50 text-[32px] leading-none font-MachineStd">
+    <div className="text-primary-50 text-[24px] lg:text-[28px] xl:text-[32px] leading-none font-MachineStd">
       {formatTime(seconds)}
     </div>
   );

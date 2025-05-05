@@ -1,0 +1,3 @@
+interface IKPBackdrop {
+  onClick: () => void;
+}

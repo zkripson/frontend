@@ -14,7 +14,7 @@ const KPProfileBadge = ({
         {
           "bg-primary-450 border-primary-300 w-full max-w-[200px] px-2 py-2.5":
             variant === "primary",
-          "bg-primary-450/25 border-primary-50 max-w-96 p-1.5 backdrop-blur-[1px] gap-6":
+          "bg-primary-450/25 border-primary-50 w-fit lg:max-w-72 xl:max-w-96 h-[31.33px] lg:h-9 xl:h-12 lg:p-1.5 px-1 backdrop-blur-[1px] gap-2 lg:gap-6":
             variant === "secondary",
         }
       )}
@@ -25,12 +25,12 @@ const KPProfileBadge = ({
           alt={username}
           width={300}
           height={300}
-          className="size-8 rounded-full object-cover"
+          className="size-5 lg:size-8 rounded-full object-cover"
           quality={100}
         />
 
         <span
-          className={classNames("text-[14px] leading-none", {
+          className={classNames("text-[9px] lg:text-[14px] leading-none", {
             "text-primary-300": variant === "primary",
             "text-white": variant === "secondary",
           })}
@@ -51,15 +51,15 @@ const KPProfileBadge = ({
           width={32}
           height={32}
           quality={100}
-          className="size-8 object-cover rounded-full"
+          className="size-5 lg:size-8 object-cover rounded-full"
         />
 
         {variant === "secondary" && (
-          <div className="py-2 px-3 rounded-full bg-primary-450/25 border border-primary-50 backdrop-blur-[2px] flex items-center justify-center gap-1.5 text-white">
-            <span className="text-[20px] leading-none font-medium">
+          <div className="py-1 px-1.5 rounded-full bg-primary-450/25 border border-primary-50 backdrop-blur-[2px] flex items-center justify-center gap-1 text-white">
+            <span className="text-[13px] leading-none font-medium">
               ${balance}
             </span>
-            <span className="text-[14px] leading-none">$SHIP</span>
+            <span className="text-[9px] leading-none">$SHIP</span>
           </div>
         )}
       </div>

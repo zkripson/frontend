@@ -10,6 +10,6 @@ interface IKPButton {
   loading?: boolean;
   className?: string;
   isMachine?: boolean;
-  icon?: "farcaster" | "copy" | "arrow";
+  icon?: "farcaster" | "copy" | "arrow" | "x" | "home" | "replay";
   iconPosition?: "left" | "right";
 }

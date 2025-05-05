@@ -24,10 +24,14 @@ const KPDialougue = ({
   return (
     <div
       className={classNames(
-        `relative w-[588px] h-[824.41px] bg-dialougue bg-cover bg-no-repeat bg-center flex flex-col items-center text-center px-6 ${className}`,
+        `relative 
+        w-[588px] h-[824.41px]
+        max-sm:w-[390px] max-sm:h-[551px]
+        bg-dialougue bg-cover bg-no-repeat bg-center
+        flex flex-col items-center text-center px-6 ${className}`,
         {
-          "pt-16": showKripsonImage,
-          "pt-32": !showKripsonImage,
+          "pt-16 max-sm:pt-12": showKripsonImage,
+          "pt-32 max-sm:pt-16": !showKripsonImage,
         }
       )}
     >
@@ -54,20 +58,22 @@ const KPDialougue = ({
           alt="Kripson"
           width={500}
           height={500}
-          className="w-[426px] h-[212px] rounded-lg mb-9"
+          className="w-[426px] h-[212px] max-sm:w-[285px] max-sm:h-[142px] rounded-lg mb-9 max-sm:mb-5"
           quality={100}
         />
       )}
 
-      <div className="px-14 w-full">
-        <div className="flex flex-col items-center text-center gap-10 w-full max-w-[426px]">
-          <div className="flex flex-col items-center gap-1">
-            <h2 className="text-[62px] leading-[100%] font-bold text-primary-50 uppercase font-MachineStd">
+      <div className="px-14 max-sm:px-6 w-full">
+        <div className="flex flex-col items-center text-center gap-10 max-sm:gap-4 w-full max-w-[426px] max-sm:max-w-[285px]">
+          <div className="flex flex-col items-center gap-1 max-sm:gap-1.5">
+            <h2 className="text-[62px] max-sm:text-[41px] max-sm:-mb-2 leading-[100%] font-bold text-primary-50 uppercase font-MachineStd max-sm:tracking-[0%]">
               {title}
             </h2>
 
             {subtitle && (
-              <p className="text-base text-primary-50">{subtitle}</p>
+              <p className="text-base max-sm:text-[10.69px] max-sm:leading-[120%] text-primary-50">
+                {subtitle}
+              </p>
             )}
           </div>
 
@@ -75,25 +81,21 @@ const KPDialougue = ({
         </div>
       </div>
 
-      <div className="absolute bottom-[38px] w-full px-16">
+      <div className="absolute bottom-[38px] w-full px-16 max-sm:bottom-[28px] max-sm:px-10">
         <div
           className={classNames("flex items-stretch w-full", {
-            "gap-2": primaryCta && secondaryCta,
+            "gap-2 flex-row-reverse": primaryCta && secondaryCta,
           })}
         >
           {primaryCta && <KPButton isMachine fullWidth {...primaryCta} />}
-          {secondaryCta && (
-            <button
-              onClick={secondaryCta.onClick}
-              className="bg-transparent border border-white text-white py-3 rounded-md font-semibold"
-            >
-              {secondaryCta.title}
-            </button>
-          )}
+          {secondaryCta && <KPButton isMachine fullWidth {...secondaryCta} />}
+
           {ctaText && (
-            <div className="w-full flex items-center justify-center gap-2 h-[52px]">
-              <CheckIcon />
-              <p className="text-base text-primary-50">{ctaText}</p>
+            <div className="w-full flex items-center justify-center gap-2 h-[52px] max-sm:h-[34.76px]">
+              <CheckIcon className="max-sm:size-[17.38px]" />
+              <p className="text-base max-sm:text-[12.03px] max-sm:leading-none text-primary-50">
+                {ctaText}
+              </p>
             </div>
           )}
         </div>

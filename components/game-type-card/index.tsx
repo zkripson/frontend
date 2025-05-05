@@ -14,11 +14,11 @@ const KPGameTypeCard = ({
     <div
       onClick={action}
       role={action && "button"}
-      className="relative w-full h-[95px]"
+      className="relative w-full h-[95px] max-sm:h-16"
     >
       <div
         className={classNames(
-          `w-full h-full px-6 border border-primary-350 rounded-[4px] bg-primary-250 flex flex-col items-center justify-center gap-2.5 transition-all duration-500 ${className}`,
+          `w-full h-full px-6 max-sm:px-3 border border-primary-350 rounded-[4px] bg-primary-250 flex flex-col items-center justify-center gap-2.5 transition-all duration-500 ${className}`,
           {
             "opacity-50 pointer-events-none": status === "coming soon",
             "cursor-pointer hover:rounded-xl hover:shadow-[0px_4px_0px_0px_#5D656E]":
@@ -29,10 +29,12 @@ const KPGameTypeCard = ({
           boxShadow: cardShadow,
         }}
       >
-        <h2 className="text-[20px] font-medium leading-none text-white">
+        <h2 className="text-[20px] max-sm:text-[16px] font-medium leading-none text-white">
           {name}
         </h2>
-        <p className="text-[16px] leading-none text-white/80">{description}</p>
+        <p className="text-[16px] max-sm:text-[13px] leading-none text-white/80">
+          {description}
+        </p>
       </div>
 
       {status === "coming soon" && (

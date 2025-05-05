@@ -44,7 +44,7 @@ const SignUp = () => {
           onClick: () => handleSubmit(onSubmit)(),
         }}
       >
-        <div className="flex flex-col gap-4 self-stretch w-full">
+        <div className="flex flex-col gap-4 max-sm:gap-4 self-stretch w-full">
           <KPInput
             name="email"
             label="Email address"
@@ -68,8 +68,19 @@ const SignUp = () => {
           <KPCheckbox
             checked={agreed}
             onChange={setAgreed}
-            label="I agree to the Privacy Policy and Terms of Service"
             className="mt-2"
+            label={
+              <>
+                I agree to the{" "}
+                <a href="#" target="_blank" className="underline font-bold">
+                  Privacy Policy
+                </a>{" "}
+                and{" "}
+                <a href="#" target="_blank" className="underline font-bold">
+                  Terms of Service
+                </a>
+              </>
+            }
           />
         </div>
       </KPDialougue>
