@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import FrameSDK from "@farcaster/frame-sdk";
 import { useLoginToFrame } from "@privy-io/react-auth/farcaster";

@@ -1,3 +1,5 @@
+"use client";
+
 import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 
 export default function RootApp({
