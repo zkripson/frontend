@@ -84,18 +84,11 @@ const KPDialougue = ({
       <div className="absolute bottom-[38px] w-full px-16 max-sm:bottom-[28px] max-sm:px-10">
         <div
           className={classNames("flex items-stretch w-full", {
-            "gap-2": primaryCta && secondaryCta,
+            "gap-2 flex-row-reverse": primaryCta && secondaryCta,
           })}
         >
           {primaryCta && <KPButton isMachine fullWidth {...primaryCta} />}
-          {secondaryCta && (
-            <button
-              onClick={secondaryCta.onClick}
-              className="bg-transparent border border-white text-white py-3 rounded-md font-semibold"
-            >
-              {secondaryCta.title}
-            </button>
-          )}
+          {secondaryCta && <KPButton isMachine fullWidth {...secondaryCta} />}
 
           {ctaText && (
             <div className="w-full flex items-center justify-center gap-2 h-[52px] max-sm:h-[34.76px]">

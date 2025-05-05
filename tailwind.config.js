@@ -37,6 +37,8 @@ module.exports = {
           850: "#5D656E",
           900: "#FABABA",
           950: "#631818",
+          1000: "#FCA5A5",
+          1050: "#BFFCA5",
         },
       },
       fontFamily: {

@@ -4,7 +4,7 @@ import classNames from "classnames";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-import { ArrowRightIcon, CopyIcon } from "@/public/icons";
+import { ArrowRightIcon, CopyIcon, RedoIcon, Homeicon } from "@/public/icons";
 import KPLoader from "../loader";
 
 const icons = {
@@ -30,6 +30,8 @@ const icons = {
   ),
   copy: <CopyIcon />,
   arrow: <ArrowRightIcon className="max-sm:size-6" />,
+  home: <Homeicon />,
+  replay: <RedoIcon />,
 };
 
 const KPButton = ({
@@ -89,7 +91,8 @@ const KPButton = ({
           {icon && (
             <span
               className={classNames("flex-shrink-0", {
-                "mb-1.5": icon === "arrow",
+                "mb-1.5":
+                  icon === "arrow" || icon === "home" || icon === "replay",
               })}
             >
               {icons[icon]}

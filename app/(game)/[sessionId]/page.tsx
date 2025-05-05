@@ -260,7 +260,7 @@ export default function GameSession() {
         </motion.div>
       )}
 
-      <VictoryStatus />
+      <VictoryStatus show={false} />
     </div>
   );
 }
