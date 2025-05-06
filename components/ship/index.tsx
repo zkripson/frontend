@@ -1,20 +1,11 @@
 "use client";
-
 import React, { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue } from "framer-motion";
 import Image from "next/image";
 import classNames from "classnames";
+
 import { useContainerBounds } from "@/hooks/useContainerBounds";
-
-const GRID_SIZE = 10;
-
-const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
-  carrier: 5,
-  battleship: 4,
-  cruiser: 3,
-  submarine: 3,
-  destroyer: 2,
-};
+import { GRID_SIZE, SHIP_LENGTHS } from "@/constants/gameConfig";
 
 interface Props {
   variant: IKPShip["variant"];

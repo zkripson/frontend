@@ -1,9 +1,11 @@
 "use client";
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
 import { useToggleInfo } from "@/hooks/useToggleInfo";
+import { isValidPlacement } from "@/utils/shipPlacement";
+import { GRID_SIZE, SHIP_LENGTHS } from "@/constants/gameConfig";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { GameHeader } from "./components/GameHeader";
 import { SetupPanel } from "./components/SetupPanel";
@@ -11,7 +13,6 @@ import { GameBoardContainer } from "./components/GameBoardContainer";
 import { GameFooter } from "./components/GameFooter";
 import { GeneralMessageKey } from "./components/general";
 import VictoryStatus from "./components/VictoryStatus";
-import { isValidPlacement } from "@/utils/shipPlacement";
 
 const loadingMessages: string[] = [
   "Creating opponent fleet...",
@@ -20,15 +21,6 @@ const loadingMessages: string[] = [
   "Initializing smart contract...",
   "Deploying smart contract...",
 ];
-
-export const GRID_SIZE = 8;
-export const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
-  carrier: 5,
-  battleship: 4,
-  cruiser: 3,
-  submarine: 3,
-  destroyer: 2,
-};
 
 function getShipCells(ship: ShipType): string[] {
   const length = SHIP_LENGTHS[ship.variant];

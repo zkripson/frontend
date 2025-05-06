@@ -1,4 +1,4 @@
-import { GRID_SIZE, SHIP_LENGTHS } from "@/app/(game)/[sessionId]/page";
+import { GRID_SIZE, SHIP_LENGTHS } from "@/constants/gameConfig";
 
 export function getShipCells(ship: ShipType): string[] {
   const length = SHIP_LENGTHS[ship.variant];
