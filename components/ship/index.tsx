@@ -5,7 +5,7 @@ import Image from "next/image";
 import classNames from "classnames";
 
 import { useContainerBounds } from "@/hooks/useContainerBounds";
-import { GRID_SIZE, SHIP_LENGTHS } from "@/constants/gameConfig";
+import { SHIP_LENGTHS } from "@/constants/gameConfig";
 
 interface Props {
   variant: IKPShip["variant"];
@@ -17,6 +17,7 @@ interface Props {
   onClick?: () => void;
   cellSize: number;
   dragDisabled?: boolean;
+  gridSize: number;
 }
 
 export default function KPShip({
@@ -29,6 +30,7 @@ export default function KPShip({
   onClick,
   cellSize,
   dragDisabled,
+  gridSize,
 }: Props) {
   const shipLength = SHIP_LENGTHS[variant];
 
@@ -62,16 +64,16 @@ export default function KPShip({
     _: any,
     info: { offset: { x: number; y: number } }
   ) => {
-    const rawX = position.x * cellSize + info.offset.x;
-    const rawY = position.y * cellSize + info.offset.y;
+    const rawX = x.get();
+    const rawY = y.get();
 
     let gridX = Math.round(rawX / cellSize);
     let gridY = Math.round(rawY / cellSize);
 
     const maxX =
-      orientation === "horizontal" ? GRID_SIZE - shipLength : GRID_SIZE - 1;
+      orientation === "horizontal" ? gridSize - shipLength : gridSize - 1;
     const maxY =
-      orientation === "vertical" ? GRID_SIZE - shipLength : GRID_SIZE - 1;
+      orientation === "vertical" ? gridSize - shipLength : gridSize - 1;
 
     gridX = Math.max(0, Math.min(gridX, maxX));
     gridY = Math.max(0, Math.min(gridY, maxY));
@@ -97,6 +99,19 @@ export default function KPShip({
   const shipRef = useRef<HTMLDivElement>(null);
   const bounds = useContainerBounds(parentRef, shipRef);
 
+  const dragBounds = {
+    left: 0,
+    top: 0,
+    right:
+      orientation === "horizontal"
+        ? gridSize * cellSize - shipLength * cellSize
+        : gridSize * cellSize - cellSize,
+    bottom:
+      orientation === "vertical"
+        ? gridSize * cellSize - shipLength * cellSize
+        : gridSize * cellSize - cellSize,
+  };
+
   return (
     <motion.div
       className={classNames("absolute z-10 cursor-grab", {
@@ -111,7 +126,7 @@ export default function KPShip({
       }}
       ref={shipRef}
       drag={bounds !== null && !dragDisabled}
-      dragConstraints={bounds!}
+      dragConstraints={dragBounds}
       dragElastic={0.2}
       dragMomentum={false}
       dragTransition={{
@@ -158,47 +173,48 @@ export default function KPShip({
             draggable={false}
             className="pointer-events-none select-none"
           />
-
-          {/* hit-map overlay */}
-          {showFire && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                display: "grid",
-                gridTemplateColumns:
-                  orientation === "horizontal"
-                    ? `repeat(${shipLength}, 1fr)`
-                    : "1fr",
-                gridTemplateRows:
-                  orientation === "vertical"
-                    ? `repeat(${shipLength}, 1fr)`
-                    : "1fr",
-              }}
-            >
-              {hitMap.map((hit, idx) => (
-                <div
-                  key={idx}
-                  className="flex justify-center items-center pointer-events-none"
-                >
-                  {hit && (
-                    <Image
-                      src="/images/fire.png"
-                      alt="hit"
-                      width={cellSize * 0.85}
-                      height={cellSize * 0.85}
-                      quality={100}
-                      className="animate-pulse"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
         </div>
+        {/* hit-map overlay */}
+        {/* fire overlay on top of the rotated ship image */}
+        {showFire && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexDirection: orientation === "horizontal" ? "row" : "column",
+              zIndex: 20,
+            }}
+          >
+            {hitMap.map((hit, idx) => (
+              <div
+                key={idx}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {hit && (
+                  <Image
+                    src="/images/fire.png"
+                    alt="hit"
+                    width={cellSize * 0.85}
+                    height={cellSize * 0.85}
+                    quality={100}
+                    className={
+                      orientation === "vertical" ? "rotate-[-90deg]" : ""
+                    }
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </motion.div>
   );

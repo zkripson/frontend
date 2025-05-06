@@ -1,12 +1,11 @@
 "use client";
-
 import React, { useRef, useState, useEffect } from "react";
+import Image from "next/image";
 import classNames from "classnames";
+
 import KPShip from "@/components/ship";
 import { useScreenDetect } from "@/hooks/useScreenDetect";
-import Image from "next/image";
-
-const GRID_SIZE = 10;
+import { GRID_SIZE } from "@/constants/gameConfig";
 
 const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
   carrier: 5,
@@ -74,7 +73,7 @@ const Board: React.FC<BoardProps> = ({
   // Detect overlaps
   useEffect(() => {
     const occupied: Record<string, string> = {};
-    const adjacent: Record<string, Set<string>> = {};
+    const adjacentMap: Record<string, Set<string>> = {};
 
     ships.forEach(({ id, variant, orientation, position }) => {
       const length = SHIP_LENGTHS[variant];
@@ -82,31 +81,33 @@ const Board: React.FC<BoardProps> = ({
       for (let i = 0; i < length; i++) {
         const x = orientation === "horizontal" ? position.x + i : position.x;
         const y = orientation === "vertical" ? position.y + i : position.y;
-
         const key = `${x}-${y}`;
+
+        // Mark as occupied
         occupied[key] = id;
 
-        // Add surrounding adjacent cells
+        // Mark surrounding adjacent cells (3x3 around each segment)
         for (let dx = -1; dx <= 1; dx++) {
           for (let dy = -1; dy <= 1; dy++) {
             const nx = x + dx;
             const ny = y + dy;
             const nKey = `${nx}-${ny}`;
 
+            // Skip out-of-bound or center (actual ship cell)
             if (
               nx < 0 ||
               ny < 0 ||
               nx >= GRID_SIZE ||
               ny >= GRID_SIZE ||
-              nKey === key
+              (dx === 0 && dy === 0)
             )
               continue;
 
-            if (!adjacent[nKey]) {
-              adjacent[nKey] = new Set();
+            if (!adjacentMap[nKey]) {
+              adjacentMap[nKey] = new Set();
             }
 
-            adjacent[nKey].add(id);
+            adjacentMap[nKey].add(id);
           }
         }
       }
@@ -114,12 +115,12 @@ const Board: React.FC<BoardProps> = ({
 
     const overlaps: { x: number; y: number }[] = [];
 
-    Object.entries(occupied).forEach(([key, id]) => {
-      if (adjacent[key]) {
-        const touchingOtherShips = [...adjacent[key]].filter(
-          (sid) => sid !== id
+    Object.entries(occupied).forEach(([key, shipId]) => {
+      if (adjacentMap[key]) {
+        const touching = [...adjacentMap[key]].filter(
+          (otherId) => otherId !== shipId
         );
-        if (touchingOtherShips.length > 0) {
+        if (touching.length > 0) {
           const [xStr, yStr] = key.split("-");
           overlaps.push({ x: parseInt(xStr), y: parseInt(yStr) });
         }
@@ -156,7 +157,7 @@ const Board: React.FC<BoardProps> = ({
     if (isHit) {
       setTimeout(() => {
         onShoot(x, y, true);
-      }, 1500);
+      }, 5000);
     }
   };
 
@@ -202,7 +203,16 @@ const Board: React.FC<BoardProps> = ({
               style={{ width: cellSize, height: cellSize }}
             >
               {mode === "game" && shot && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div
+                  className={classNames(
+                    "absolute inset-0 flex items-center justify-center pointer-events-none",
+                    {
+                      "z-[30]": shot.stage === "smoke", // ensure smoke sits on top
+                      "z-[20]": shot.type === "hit" && !shot.stage,
+                      "z-[10]": shot.type === "miss",
+                    }
+                  )}
+                >
                   {shot.type === "miss" ? (
                     <div className="w-3/5 h-3/5 bg-primary-700 rounded-full opacity-80" />
                   ) : shot.stage === "smoke" ? (
@@ -255,6 +265,7 @@ const Board: React.FC<BoardProps> = ({
             onClick={() => onShipFlip(ship.id)}
             cellSize={cellSize}
             dragDisabled={mode === "game"}
+            gridSize={GRID_SIZE}
           />
         ))}
       </div>

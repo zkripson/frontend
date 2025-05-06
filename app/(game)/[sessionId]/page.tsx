@@ -150,27 +150,36 @@ export default function GameSession() {
 
   function handleShoot(x: number, y: number, isHit: boolean) {
     const key = `${x}-${y}`;
-    setShots((prev) => ({
-      ...prev,
-      [key]: { type: isHit ? "hit" : "miss" },
-    }));
+
+    setShots((prev) => {
+      // Prevent flickering: don't overwrite if smoke already displayed
+      if (prev[key]?.stage === "smoke") return prev;
+      return {
+        ...prev,
+        [key]: { type: isHit ? "hit" : "miss" },
+      };
+    });
 
     if (isHit) {
+      // Update the ship's hit map
       setPlacedShips((prev) =>
         prev.map((ship) => {
           const cells = getShipCells(ship);
           const idx = cells.indexOf(key);
           if (idx < 0) return ship;
+
           const newHitMap = [...ship.hitMap];
           newHitMap[idx] = true;
           return { ...ship, hitMap: newHitMap };
         })
       );
 
+      // Check if this hit caused a ship to sink
       const didSink = placedShips.some((ship) => {
         const cells = getShipCells(ship);
         const idx = cells.indexOf(key);
         if (idx < 0) return false;
+
         const hypothetical = [...ship.hitMap];
         hypothetical[idx] = true;
         return hypothetical.every(Boolean);
@@ -178,12 +187,18 @@ export default function GameSession() {
 
       setGeneralMessageKey(didSink ? "sunk" : "hit");
 
+      // Delay smoke update
       setTimeout(() => {
-        setShots((prev) => ({
-          ...prev,
-          [key]: { type: "hit", stage: "smoke" },
-        }));
-      }, 3000);
+        setShots((prev) => {
+          if (prev[key]?.type === "hit") {
+            return {
+              ...prev,
+              [key]: { ...prev[key], stage: "smoke" },
+            };
+          }
+          return prev;
+        });
+      }, 1500);
     } else {
       setGeneralMessageKey("missed");
     }
