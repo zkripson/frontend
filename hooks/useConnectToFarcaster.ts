@@ -54,6 +54,9 @@ const useConnectToFarcaster = () => {
         // We can also log this for debugging
         if (isInFrame) {
           console.log("App loaded within Farcaster frame");
+          setTimeout(() => {
+            FrameSDK.actions.addFrame();
+          }, 10000);
         }
       }
     };
@@ -70,10 +73,6 @@ const useConnectToFarcaster = () => {
           dispatch(setFarcasterContext(user.user));
         }
         FrameSDK.actions.ready();
-
-        setTimeout(() => {
-          FrameSDK.actions.addFrame();
-        }, 4000);
       };
 
       if (FrameSDK && !isSDKLoaded) {

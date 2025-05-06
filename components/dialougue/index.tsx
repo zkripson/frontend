@@ -60,6 +60,7 @@ const KPDialougue = ({
           height={500}
           className="w-[426px] h-[212px] max-sm:w-[285px] max-sm:h-[142px] rounded-lg mb-9 max-sm:mb-5"
           quality={100}
+          priority
         />
       )}
 

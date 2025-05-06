@@ -13,6 +13,8 @@ import {
 } from "@/components";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import SelectGrid from "./selectGrid";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
+import { usePrivy } from "@privy-io/react-auth";
 
 const schema = z.object({
   code: z.string().min(4, "Code is required"),
@@ -25,6 +27,8 @@ const battlefields = [1, 2, 3];
 const dummySessionID = "A1B2C3D4E5F6G7H8I9J0";
 
 const NewGame = () => {
+  const { evmWallet } = usePrivyLinkedAccounts();
+
   const [step, setStep] = useState<NewGameStep>("chooseGame");
   const [selectedGridSize, setSelectedGridSize] = useState<string | null>(null);
   const [selectedBattlefield, setSelectedBattlefield] = useState<number | null>(
@@ -59,6 +63,7 @@ const NewGame = () => {
 
   const onSubmit = (data: NewGame) => {
     console.log("Joining match with code:", data.code);
+    console.log("USER ADDRESS:", evmWallet?.address);
 
     // Eventually navigate to the game screen with the code after other logic
     navigate.push(`${dummySessionID}`);

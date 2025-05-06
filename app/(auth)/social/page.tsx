@@ -3,6 +3,7 @@
 import { useState, useEffect, JSX } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLinkAccount } from "@privy-io/react-auth";
 
 import {
   KPButton,
@@ -19,7 +20,17 @@ const friends = [
   { name: "Kripson", image: "/images/kripson.jpeg" },
 ];
 
-const Farcaster = () => {
+const Social = () => {
+  const { linkTwitter, linkFarcaster } = useLinkAccount({
+    onSuccess: () => {
+      setShowSpinner(false);
+      setStage("connected");
+    },
+    onError: (error) => {
+      console.error("LINK FARCaster ERROR:", error);
+      setShowSpinner(false);
+    },
+  });
   const { navigate } = useSystemFunctions();
 
   const [stage, setStage] = useState<"connect" | "connected" | "setup">(
@@ -27,25 +38,16 @@ const Farcaster = () => {
   );
   const [showSpinner, setShowSpinner] = useState(false);
 
-  const connectFarcaster = () => {
-    setShowSpinner(true);
-
-    setTimeout(() => {
-      setShowSpinner(false);
-      setStage("connected");
-    }, 3000);
-  };
-
   const connectionOptions: Array<IKPButton> = [
     {
       title: "Connect with farcaster",
       icon: "farcaster",
-      onClick: connectFarcaster,
+      onClick: linkFarcaster,
     },
     {
       title: "Connect with twitter",
       icon: "x",
-      onClick: () => {},
+      onClick: linkTwitter,
     },
   ];
 
@@ -190,4 +192,4 @@ const Farcaster = () => {
   );
 };
 
-export default Farcaster;
+export default Social;
