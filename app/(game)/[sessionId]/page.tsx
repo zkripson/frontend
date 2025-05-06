@@ -11,6 +11,7 @@ import { GameBoardContainer } from "./components/GameBoardContainer";
 import { GameFooter } from "./components/GameFooter";
 import { GeneralMessageKey } from "./components/general";
 import VictoryStatus from "./components/VictoryStatus";
+import { isValidPlacement } from "@/utils/shipPlacement";
 
 const loadingMessages: string[] = [
   "Creating opponent fleet...",
@@ -20,8 +21,8 @@ const loadingMessages: string[] = [
   "Deploying smart contract...",
 ];
 
-const GRID_SIZE = 8;
-const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
+export const GRID_SIZE = 8;
+export const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
   carrier: 5,
   battleship: 4,
   cruiser: 3,
@@ -88,11 +89,7 @@ export default function GameSession() {
           position: { x: randomX, y: randomY },
           hitMap: Array(length).fill(false),
         };
-      } while (
-        getShipCells(newShip).some((cell) =>
-          other.flatMap(getShipCells).includes(cell)
-        )
-      );
+      } while (!isValidPlacement(newShip, other));
 
       setShipsInPosition((pos) => ({ ...pos, [variant]: true }));
       return [...other, newShip];
@@ -102,6 +99,7 @@ export default function GameSession() {
   function shuffleShips() {
     setPlacedShips((prev) => {
       const newShips: ShipType[] = [];
+
       prev.forEach((ship) => {
         let candidate: ShipType;
         const length = SHIP_LENGTHS[ship.variant];
@@ -115,17 +113,15 @@ export default function GameSession() {
             ship.orientation === "vertical"
               ? GRID_SIZE - length
               : GRID_SIZE - 1;
+
           const randomX = Math.floor(Math.random() * (maxX + 1));
           const randomY = Math.floor(Math.random() * (maxY + 1));
           candidate = { ...ship, position: { x: randomX, y: randomY } };
-        } while (
-          getShipCells(candidate).some((cell) =>
-            newShips.flatMap(getShipCells).includes(cell)
-          )
-        );
+        } while (!isValidPlacement(candidate, newShips));
 
         newShips.push(candidate);
       });
+
       return newShips;
     });
   }
