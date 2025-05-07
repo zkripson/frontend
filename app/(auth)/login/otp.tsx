@@ -22,6 +22,7 @@ const OTP = ({ state, loginWithCode, sendCode, email }: OTPProps) => {
   };
 
   const loading = state.status === "submitting-code";
+  const error = state.status === "error";
 
   useEffect(() => {
     if (pin.length === 6) {
@@ -52,6 +53,7 @@ const OTP = ({ state, loginWithCode, sendCode, email }: OTPProps) => {
             setPin(pin);
           }}
           loading={loading}
+          error={error}
         />
 
         <p className="text-[16px] max-sm:text-[10.69px] leading-[16px] text-primary-50">

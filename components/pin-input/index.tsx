@@ -2,14 +2,21 @@
 import { useState, useRef } from "react";
 
 import KPPinInputBackground from "./background";
+import classNames from "classnames";
 
 interface KPPinInputProps {
   length?: number;
   onComplete: (pin: string) => void;
   loading?: boolean;
+  error?: boolean;
 }
 
-const KPPinInput = ({ length = 6, onComplete, loading }: KPPinInputProps) => {
+const KPPinInput = ({
+  length = 6,
+  onComplete,
+  loading,
+  error,
+}: KPPinInputProps) => {
   const [values, setValues] = useState<string[]>(Array(length).fill(""));
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -62,13 +69,22 @@ const KPPinInput = ({ length = 6, onComplete, loading }: KPPinInputProps) => {
   };
 
   return (
-    <div className="flex gap-3 max-sm:gap-2">
+    <div
+      className={classNames("flex gap-3 max-sm:gap-2", {
+        "animate-shake": error,
+      })}
+    >
       {Array(length)
         .fill(0)
         .map((_, i) => (
           <div
             key={i}
-            className="relative w-[50px] h-[52px] max-sm:w-[33.47px] max-sm:h-[34.81px]"
+            className={classNames(
+              "relative w-[50px] h-[52px] max-sm:w-[33.47px] max-sm:h-[34.81px]",
+              {
+                "animate-pulse pointer-events-none": loading,
+              }
+            )}
           >
             <KPPinInputBackground className="w-[50px] h-[52px] max-sm:w-[33.47px] max-sm:h-[34.81px" />
 

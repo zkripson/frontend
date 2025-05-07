@@ -1,9 +1,11 @@
 "use client";
-
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
 import { useToggleInfo } from "@/hooks/useToggleInfo";
+import { isValidPlacement } from "@/utils/shipPlacement";
+import { GRID_SIZE, SHIP_LENGTHS } from "@/constants/gameConfig";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { GameHeader } from "./components/GameHeader";
 import { SetupPanel } from "./components/SetupPanel";
@@ -19,15 +21,6 @@ const loadingMessages: string[] = [
   "Initializing smart contract...",
   "Deploying smart contract...",
 ];
-
-const GRID_SIZE = 8;
-const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
-  carrier: 5,
-  battleship: 4,
-  cruiser: 3,
-  submarine: 3,
-  destroyer: 2,
-};
 
 function getShipCells(ship: ShipType): string[] {
   const length = SHIP_LENGTHS[ship.variant];
@@ -88,11 +81,7 @@ export default function GameSession() {
           position: { x: randomX, y: randomY },
           hitMap: Array(length).fill(false),
         };
-      } while (
-        getShipCells(newShip).some((cell) =>
-          other.flatMap(getShipCells).includes(cell)
-        )
-      );
+      } while (!isValidPlacement(newShip, other));
 
       setShipsInPosition((pos) => ({ ...pos, [variant]: true }));
       return [...other, newShip];
@@ -102,6 +91,7 @@ export default function GameSession() {
   function shuffleShips() {
     setPlacedShips((prev) => {
       const newShips: ShipType[] = [];
+
       prev.forEach((ship) => {
         let candidate: ShipType;
         const length = SHIP_LENGTHS[ship.variant];
@@ -115,17 +105,15 @@ export default function GameSession() {
             ship.orientation === "vertical"
               ? GRID_SIZE - length
               : GRID_SIZE - 1;
+
           const randomX = Math.floor(Math.random() * (maxX + 1));
           const randomY = Math.floor(Math.random() * (maxY + 1));
           candidate = { ...ship, position: { x: randomX, y: randomY } };
-        } while (
-          getShipCells(candidate).some((cell) =>
-            newShips.flatMap(getShipCells).includes(cell)
-          )
-        );
+        } while (!isValidPlacement(candidate, newShips));
 
         newShips.push(candidate);
       });
+
       return newShips;
     });
   }
@@ -162,27 +150,36 @@ export default function GameSession() {
 
   function handleShoot(x: number, y: number, isHit: boolean) {
     const key = `${x}-${y}`;
-    setShots((prev) => ({
-      ...prev,
-      [key]: { type: isHit ? "hit" : "miss" },
-    }));
+
+    setShots((prev) => {
+      // Prevent flickering: don't overwrite if smoke already displayed
+      if (prev[key]?.stage === "smoke") return prev;
+      return {
+        ...prev,
+        [key]: { type: isHit ? "hit" : "miss" },
+      };
+    });
 
     if (isHit) {
+      // Update the ship's hit map
       setPlacedShips((prev) =>
         prev.map((ship) => {
           const cells = getShipCells(ship);
           const idx = cells.indexOf(key);
           if (idx < 0) return ship;
+
           const newHitMap = [...ship.hitMap];
           newHitMap[idx] = true;
           return { ...ship, hitMap: newHitMap };
         })
       );
 
+      // Check if this hit caused a ship to sink
       const didSink = placedShips.some((ship) => {
         const cells = getShipCells(ship);
         const idx = cells.indexOf(key);
         if (idx < 0) return false;
+
         const hypothetical = [...ship.hitMap];
         hypothetical[idx] = true;
         return hypothetical.every(Boolean);
@@ -190,12 +187,18 @@ export default function GameSession() {
 
       setGeneralMessageKey(didSink ? "sunk" : "hit");
 
+      // Delay smoke update
       setTimeout(() => {
-        setShots((prev) => ({
-          ...prev,
-          [key]: { type: "hit", stage: "smoke" },
-        }));
-      }, 3000);
+        setShots((prev) => {
+          if (prev[key]?.type === "hit") {
+            return {
+              ...prev,
+              [key]: { ...prev[key], stage: "smoke" },
+            };
+          }
+          return prev;
+        });
+      }, 1500);
     } else {
       setGeneralMessageKey("missed");
     }
