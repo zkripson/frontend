@@ -13,6 +13,8 @@ const KPCheckbox = ({
 }: IKPCheckbox) => {
   return (
     <div
+      aria-checked={checked}
+      role="checkbox"
       className={classNames(`${className}`, {
         "flex items-center gap-2 cursor-pointer": label,
       })}
