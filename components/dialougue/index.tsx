@@ -28,11 +28,14 @@ const KPDialougue = ({
         w-[588px] h-[824.41px]
         max-sm:w-[390px] max-sm:h-[551px]
         bg-dialougue bg-cover bg-no-repeat bg-center
-        flex flex-col items-center text-center px-6 ${className}`,
+        flex flex-col items-center text-center px-6
+        transition-transform duration-300 ease-in-out
+        sm:scale-[0.75] md:scale-[0.8] lg:scale-[0.85] min-[1281px]:scale-100`,
         {
           "pt-16 max-sm:pt-12": showKripsonImage,
           "pt-32 max-sm:pt-16": !showKripsonImage,
-        }
+        },
+        className
       )}
     >
       {showCloseButton && onClose && (

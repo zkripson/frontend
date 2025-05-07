@@ -1,9 +1,10 @@
 "use client";
-import { useState, JSX } from "react";
+import { useState, useEffect, JSX } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
+import classNames from "classnames";
 
 import {
   KPDialougue,
@@ -11,10 +12,8 @@ import {
   KPInput,
   KPProfileBadge,
 } from "@/components";
+import useInviteActions from "@/store/invite/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-import SelectGrid from "./selectGrid";
-import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
-import { usePrivy } from "@privy-io/react-auth";
 
 const schema = z.object({
   code: z.string().min(4, "Code is required"),
@@ -22,36 +21,40 @@ const schema = z.object({
 
 type NewGame = z.infer<typeof schema>;
 
-const gridSizes = ["10x10", "9x9", "8x8"];
-const battlefields = [1, 2, 3];
-const dummySessionID = "A1B2C3D4E5F6G7H8I9J0";
-
 const NewGame = () => {
-  const { evmWallet } = usePrivyLinkedAccounts();
-
+  const {
+    inviteState: { loadingInviteAcceptance, loadingInviteCreation },
+  } = useSystemFunctions();
+  const { acceptInvite, createInvite } = useInviteActions();
   const [step, setStep] = useState<NewGameStep>("chooseGame");
-  const [selectedGridSize, setSelectedGridSize] = useState<string | null>(null);
-  const [selectedBattlefield, setSelectedBattlefield] = useState<number | null>(
-    null
-  );
+  const [gameInitiationType, setGameInitiationType] = useState<
+    "create" | "accept"
+  >("accept");
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<NewGame>({
     mode: "onSubmit",
     resolver: zodResolver(schema),
   });
 
-  const { navigate } = useSystemFunctions();
+  const codeValue = watch("code");
+
+  useEffect(() => {
+    if (codeValue && codeValue.length > 0) {
+      setGameInitiationType("accept");
+    }
+  }, [codeValue]);
 
   const gameTypes: GameType[] = [
     {
       id: "fm",
       name: "Friend's Match",
       description: "Invite from Farcaster or Email",
-      action: () => {},
+      action: () => setGameInitiationType("create"),
     },
     {
       id: "qm",
@@ -61,22 +64,12 @@ const NewGame = () => {
     },
   ];
 
-  const onSubmit = (data: NewGame) => {
-    console.log("Joining match with code:", data.code);
-    console.log("USER ADDRESS:", evmWallet?.address);
-
-    // Eventually navigate to the game screen with the code after other logic
-    navigate.push(`${dummySessionID}`);
-  };
-
-  const startGame = () => {
-    console.log("Starting game with:", {
-      selectedGridSize,
-      selectedBattlefield,
-    });
-
-    // Eventually navigate to the game screen with the code after other logic
-    navigate.push(`${dummySessionID}`);
+  const onSubmit = async ({ code }: NewGame) => {
+    if (gameInitiationType === "create") {
+      await createInvite();
+    } else {
+      await acceptInvite(code);
+    }
   };
 
   const screens: Record<NewGameStep, JSX.Element> = {
@@ -90,6 +83,7 @@ const NewGame = () => {
           onClick: () => handleSubmit(onSubmit)(),
           icon: "arrow",
           iconPosition: "right",
+          loading: loadingInviteAcceptance || loadingInviteCreation,
         }}
         className="pt-[88px]"
       >
@@ -110,7 +104,13 @@ const NewGame = () => {
                   }
                 }}
               >
-                <KPGameTypeCard {...game} />
+                <KPGameTypeCard
+                  {...game}
+                  className={classNames({
+                    "border border-primary-200 transition-all duration-500 rounded-[4px]":
+                      gameInitiationType === "create" && game.id === "fm",
+                  })}
+                />
               </div>
             ))}
           </div>

@@ -1,5 +1,4 @@
 import classNames from "classnames";
-import { a } from "framer-motion/client";
 
 const KPGameTypeCard = ({
   name,
@@ -14,11 +13,11 @@ const KPGameTypeCard = ({
     <div
       onClick={action}
       role={action && "button"}
-      className="relative w-full h-[95px] max-sm:h-16"
+      className={`relative w-full h-[95px] max-sm:h-16 ${className}} hover:rounded-xl`}
     >
       <div
         className={classNames(
-          `w-full h-full px-6 max-sm:px-3 border border-primary-350 rounded-[4px] bg-primary-250 flex flex-col items-center justify-center gap-2.5 transition-all duration-500 ${className}`,
+          `w-full h-full px-6 max-sm:px-3 border border-primary-350 rounded-[4px] bg-primary-250 flex flex-col items-center justify-center gap-2.5 transition-all duration-500`,
           {
             "opacity-50 pointer-events-none": status === "coming soon",
             "cursor-pointer hover:rounded-xl hover:shadow-[0px_4px_0px_0px_#5D656E]":

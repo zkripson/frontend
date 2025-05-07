@@ -155,7 +155,7 @@ const Social = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <KPLoader variant="large" color="#44190c" />
+            <KPLoader />
           </motion.div>
         )}
       </AnimatePresence>

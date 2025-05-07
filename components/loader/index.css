@@ -1,0 +1,121 @@
+.radar-loader {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background-color: rgba(0, 0, 0, 0.9);
+  border: 2px solid #22c55e;
+  overflow: hidden;
+}
+
+.sweep {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(34, 197, 94, 0.3) 0deg,
+    rgba(34, 197, 94, 0.05) 60deg,
+    transparent 360deg
+  );
+  border-radius: 9999px;
+  animation: rotate 2.5s linear infinite;
+}
+
+.pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: pulse 1.2s ease-in-out infinite;
+  z-index: 2;
+}
+
+.rings {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.radar-ring {
+  position: absolute;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: 9999px;
+}
+
+.radar-ring-1 {
+  width: 90%;
+  height: 90%;
+}
+
+.radar-ring-2 {
+  width: 60%;
+  height: 60%;
+}
+
+.radar-ring-3 {
+  width: 30%;
+  height: 30%;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.blips {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.blip {
+  position: absolute;
+  width: 1.5px;
+  height: 1.5px;
+  background-color: #22c55e83;
+  border-radius: 9999px;
+  box-shadow: 0 0 6px #22c55e;
+  animation: blip-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes blip-pulse {
+  0% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+}

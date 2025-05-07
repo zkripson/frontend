@@ -60,7 +60,7 @@ const KPButton = ({
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.95 }}
       className={classNames(
-        `flex justify-center items-center border rounded-[4px]`,
+        `flex justify-center items-center border rounded-[4px] relative`,
         {
           "w-full": fullWidth,
           "bg-primary-200 border-primary-300": variant === "primary",
@@ -77,7 +77,11 @@ const KPButton = ({
         boxShadow: innerShadow,
       }}
     >
-      {loading && <KPLoader variant="small" />}
+      {loading && (
+        <div className="top-0 left-0 w-full h-full flex items-center justify-center">
+          <KPLoader />
+        </div>
+      )}
 
       {!loading && (
         <div
