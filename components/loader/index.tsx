@@ -1,40 +1,24 @@
-import { motion } from "framer-motion";
+"use client";
+import React from "react";
+import "./index.css";
 
-import { LoadingIcon } from "@/public/icons";
-
-const KPLoader = ({ variant = "small", color }: IKPLoader) => {
-  let width, height;
-
-  switch (variant) {
-    case "small":
-      width = 20;
-      height = 20;
-      break;
-    case "medium":
-      width = 30;
-      height = 30;
-      break;
-    case "large":
-      width = 64;
-      height = 64;
-      break;
-  }
-
+const KPBattleshipLoader = () => {
   return (
-    <motion.div
-      animate={{
-        rotate: 360,
-        transition: {
-          duration: 2,
-          ease: "linear",
-          repeat: Infinity,
-          repeatType: "loop",
-        },
-      }}
-    >
-      <LoadingIcon fill={color} width={width} height={height} />
-    </motion.div>
+    <div className="radar-loader">
+      <div className="sweep" />
+      <div className="pulse" />
+      <div className="rings">
+        <div className="radar-ring radar-ring-1" />
+        <div className="radar-ring radar-ring-2" />
+        <div className="radar-ring radar-ring-3" />
+      </div>
+      <div className="blips">
+        <div className="blip" style={{ top: "20%", left: "60%" }} />
+        <div className="blip" style={{ top: "70%", left: "40%" }} />
+        <div className="blip" style={{ top: "35%", left: "25%" }} />
+      </div>
+    </div>
   );
 };
 
-export default KPLoader;
+export default KPBattleshipLoader;
