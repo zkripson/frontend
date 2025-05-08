@@ -14,6 +14,7 @@ import {
 } from "@/components";
 import useInviteActions from "@/store/invite/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 
 const schema = z.object({
   code: z.string().min(4, "Code is required"),
@@ -25,11 +26,12 @@ const NewGame = () => {
   const {
     inviteState: { loadingInviteAcceptance, loadingInviteCreation },
   } = useSystemFunctions();
+  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
   const { acceptInvite, createInvite } = useInviteActions();
   const [step, setStep] = useState<NewGameStep>("chooseGame");
   const [gameInitiationType, setGameInitiationType] = useState<
     "create" | "accept"
-  >("accept");
+  >("create");
 
   const {
     register,
@@ -43,9 +45,15 @@ const NewGame = () => {
 
   const codeValue = watch("code");
 
+  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const pfp =
+    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
+
   useEffect(() => {
     if (codeValue && codeValue.length > 0) {
       setGameInitiationType("accept");
+    } else {
+      setGameInitiationType("create");
     }
   }, [codeValue]);
 
@@ -64,11 +72,11 @@ const NewGame = () => {
     },
   ];
 
-  const onSubmit = async ({ code }: NewGame) => {
+  const onSubmit = async () => {
     if (gameInitiationType === "create") {
       await createInvite();
     } else {
-      await acceptInvite(code);
+      await acceptInvite(codeValue);
     }
   };
 
@@ -80,7 +88,7 @@ const NewGame = () => {
         onClose={() => {}}
         primaryCta={{
           title: "Next",
-          onClick: () => handleSubmit(onSubmit)(),
+          onClick: onSubmit,
           icon: "arrow",
           iconPosition: "right",
           loading: loadingInviteAcceptance || loadingInviteCreation,
@@ -88,7 +96,7 @@ const NewGame = () => {
         className="pt-[88px]"
       >
         <div className="flex flex-col items-center gap-16 max-sm:gap-7 self-stretch w-full">
-          <KPProfileBadge username="Dazeign" />
+          <KPProfileBadge avatarUrl={pfp} username={username} />
 
           <div className="flex flex-col gap-2 w-full">
             <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">

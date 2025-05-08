@@ -1,5 +1,5 @@
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-import { usePrivy } from "@privy-io/react-auth";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import inviteAPI from "./api";
 import {
   setInviteAcceptance,
@@ -11,15 +11,15 @@ import { CallbackProps } from "..";
 
 const useInviteActions = () => {
   const { dispatch, navigate } = useSystemFunctions();
-  const { user } = usePrivy();
+  const { evmWallet } = usePrivyLinkedAccounts();
 
   const createInvite = async (callback?: CallbackProps) => {
     try {
-      if (!user?.wallet) return;
+      if (!evmWallet) return;
 
       dispatch(setLoadingInviteCreation(true));
 
-      const creator = user.wallet.address;
+      const creator = evmWallet.address;
       const sessionId = null;
       const body = { creator, sessionId };
       const response = await inviteAPI.createInvite(body);
@@ -39,11 +39,11 @@ const useInviteActions = () => {
 
   const acceptInvite = async (code: string, callback?: CallbackProps) => {
     try {
-      if (!user?.wallet) return;
+      if (!evmWallet) return;
 
       dispatch(setLoadingInviteAcceptance(true));
 
-      const player = user.wallet.address;
+      const player = evmWallet.address;
       const body = { player, code };
       const response = await inviteAPI.acceptInvite(body);
 
