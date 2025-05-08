@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
-import { usePrivy } from "@privy-io/react-auth";
 
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
 import { useToggleInfo } from "@/hooks/useToggleInfo";
@@ -99,7 +98,8 @@ export default function GameSession() {
     if (sessionId) {
       fetchGameSessionInformation(sessionId);
     }
-  }, [sessionId, fetchGameSessionInformation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionId]);
 
   // Set player ID once Privy is loaded
   useEffect(() => {
