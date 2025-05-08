@@ -1,6 +1,7 @@
 import { KPProfileBadge, KPTimer, KPIconButton } from "@/components";
 import HowToPlay from "./how-to-play";
 import Turn from "./turn";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 
 interface GameHeaderProps {
   mode: "setup" | "game";
@@ -9,10 +10,21 @@ interface GameHeaderProps {
 }
 
 export function GameHeader({ mode, onPause, onHam }: GameHeaderProps) {
+  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
+
+  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const pfp =
+    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
+
   return (
     <div className="fixed top-[4%] lg:top-[3%] xl:top-[5%] left-0 flex lg:items-center justify-between w-full px-5 lg:px-12 z-[9999]">
       <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-        <KPProfileBadge username="Choco" variant="secondary" balance={37.56} />
+        <KPProfileBadge
+          avatarUrl={pfp}
+          username={username}
+          variant="secondary"
+          balance={37.56}
+        />
         <HowToPlay />
       </div>
 
