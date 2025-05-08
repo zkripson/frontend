@@ -8,10 +8,12 @@ import {
   setLoadingInviteCreation,
 } from ".";
 import { CallbackProps } from "..";
+import useAppActions from "../app/actions";
 
 const useInviteActions = () => {
   const { dispatch, navigate } = useSystemFunctions();
   const { evmWallet } = usePrivyLinkedAccounts();
+  const { showToast } = useAppActions();
 
   const createInvite = async (callback?: CallbackProps) => {
     try {
@@ -25,8 +27,6 @@ const useInviteActions = () => {
       const response = await inviteAPI.createInvite(body);
 
       dispatch(setInviteCreation(response));
-
-      navigate.push(`/${response.sessionId}`);
 
       callback?.onSuccess?.(response);
     } catch (error) {
@@ -48,6 +48,8 @@ const useInviteActions = () => {
       const response = await inviteAPI.acceptInvite(body);
 
       dispatch(setInviteAcceptance(response));
+
+      showToast("Invite Accepted", "success");
 
       navigate.push(`/${response.sessionId}`);
 

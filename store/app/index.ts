@@ -5,6 +5,11 @@ const initialState: AppState = {
   isInGame: false,
   appIsReady: false,
   farcasterContext: undefined,
+  toast: {
+    message: "",
+    type: "success",
+    show: false,
+  },
 };
 
 export const appReducer = createSlice({
@@ -22,10 +27,14 @@ export const appReducer = createSlice({
     setFarcasterContext(state, action: PayloadAction<FarcasterContext>) {
       state.farcasterContext = { ...action.payload };
     },
+
+    setToast: (state, action: PayloadAction<ToastState>) => {
+      state.toast = action.payload;
+    },
   },
 });
 
-export const { setIsInGame, setAppIsReady, setFarcasterContext } =
+export const { setIsInGame, setAppIsReady, setFarcasterContext, setToast } =
   appReducer.actions;
 
 export default appReducer.reducer;

@@ -1,14 +1,15 @@
 "use client";
-
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import KPProfileBadge from "../profile-badge";
 
-const user = {
-  username: "Dazeign",
-};
-
 const KPHeader = () => {
   const { pathname } = useSystemFunctions();
+  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
+
+  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const pfp =
+    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
   const showProfileBadge = pathname === "/new-game";
 
   return (
@@ -24,8 +25,8 @@ const KPHeader = () => {
         </div>
 
         {showProfileBadge && (
-          <div className="shrink-0 w-[200px] hidden md:block">
-            <KPProfileBadge {...user} />
+          <div className="shrink-0 w-fit hidden md:block">
+            <KPProfileBadge avatarUrl={pfp} username={username} />
           </div>
         )}
       </header>

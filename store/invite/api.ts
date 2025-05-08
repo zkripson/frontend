@@ -11,13 +11,13 @@ const inviteAPI: InviteAPI = {
   createInvite: async (body: InviteCreationBody) => {
     const response = await axiosInstance.post(`invites/create`, body);
 
-    return response.data?.data;
+    return response?.data;
   },
 
   acceptInvite: async (body: InviteAcceptanceBody) => {
     const response = await axiosInstance.post(`invites/accept`, body);
 
-    return response.data?.data;
+    return response?.data;
   },
 };
 

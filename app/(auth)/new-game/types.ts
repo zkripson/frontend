@@ -1,4 +1,4 @@
-type NewGameStep = "chooseGame";
+type NewGameStep = "joinGame" | "createGame";
 
 interface GameType {
   id: string;

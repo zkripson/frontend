@@ -1,5 +1,6 @@
 "use client";
 
+import { KPToastNotification } from "@/components";
 import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 
 export default function RootApp({
@@ -9,5 +10,10 @@ export default function RootApp({
 }>) {
   const {} = useConnectToFarcaster();
 
-  return children;
+  return (
+    <>
+      {children}
+      <KPToastNotification />
+    </>
+  );
 }

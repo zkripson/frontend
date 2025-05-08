@@ -1,17 +1,15 @@
+import useAppActions from "@/store/app/actions";
 import { useState } from "react";
-// import { toast } from "react-toastify";
 
 const useCopy = (toastText = "Copied url") => {
   const [hasCopied, setHasCopied] = useState(false);
+  const { showToast } = useAppActions();
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setHasCopied(true);
 
-    // toast(toastText, {
-    //   type: "info",
-    //   className: "w-[100px]",
-    // });
+    showToast(toastText, "info");
 
     setTimeout(() => {
       setHasCopied(false);
