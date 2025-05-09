@@ -1,5 +1,8 @@
+"use client";
 import Image from "next/image";
 import classNames from "classnames";
+
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 
 const KPProfileBadge = ({
   username,
@@ -7,6 +10,15 @@ const KPProfileBadge = ({
   variant = "primary",
   balance,
 }: IKPProfileBadge) => {
+  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
+
+  const isTwitter = !!linkedTwitter && !linkedFarcaster;
+  const iconSrc = linkedFarcaster
+    ? "/images/farcaster.png"
+    : linkedTwitter
+    ? "/images/x.png"
+    : "/images/farcaster.png";
+
   return (
     <div
       className={classNames(
@@ -28,7 +40,6 @@ const KPProfileBadge = ({
           className="size-5 lg:size-8 rounded-full object-cover"
           quality={100}
         />
-
         <span
           className={classNames("text-[9px] lg:text-[14px] leading-none", {
             "text-primary-300": variant === "primary",
@@ -46,15 +57,17 @@ const KPProfileBadge = ({
         })}
       >
         <Image
-          src="/images/farcaster.png"
-          alt="farcaster"
-          width={32}
-          height={32}
+          src={iconSrc}
+          alt={linkedFarcaster ? "Farcaster" : "Twitter"}
+          width={200}
+          height={200}
           quality={100}
-          className="size-5 lg:size-8 object-cover rounded-full"
+          className={classNames("size-5 lg:size-7 object-cover rounded-full", {
+            invert: isTwitter && variant === "primary",
+          })}
         />
 
-        {variant === "secondary" && (
+        {variant === "secondary" && balance != null && (
           <div className="py-1 px-1.5 rounded-full bg-primary-450/25 border border-primary-50 backdrop-blur-[2px] flex items-center justify-center gap-1 text-white">
             <span className="text-[13px] leading-none font-medium">
               ${balance}

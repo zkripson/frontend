@@ -77,6 +77,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "pbs.twimg.com",
       },
+      {
+        protocol: "https",
+        hostname: "abs.twimg.com",
+      },
     ],
   },
   headers: async () => {
