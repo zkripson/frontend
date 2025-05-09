@@ -31,7 +31,6 @@ const JoinGameComponent = () => {
       const joinGame = async () => {
         try {
           await acceptInvite(code as string);
-          console.log("accepting");
         } catch (err) {
           setError("Failed to join the game. Please try again later.");
         }

@@ -1,3 +1,5 @@
+import { AxiosError } from "axios";
+
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import inviteAPI from "./api";
@@ -48,15 +50,29 @@ const useInviteActions = () => {
       const response = await inviteAPI.acceptInvite(body);
 
       dispatch(setInviteAcceptance(response));
-
       showToast("Invite Accepted", "success");
-
       navigate.push(`/${response.sessionId}`);
-
       callback?.onSuccess?.(response);
-    } catch (error) {
-      console.error(error);
-      callback?.onError?.(error);
+    } catch (err) {
+      let message = "Error accepting invite";
+      let isAlreadyAcceptedError = false;
+
+      if ((err as AxiosError).isAxiosError) {
+        const axiosErr = err as AxiosError<{ error?: string }>;
+        const apiError = axiosErr.response?.data.error;
+
+        if (apiError) {
+          if (apiError.includes("status: accepted")) {
+            message = "This invite has already been accepted";
+            isAlreadyAcceptedError = true;
+          } else {
+            message = apiError;
+          }
+        }
+      }
+
+      showToast(message, "error");
+      callback?.onError?.(err);
     } finally {
       dispatch(setLoadingInviteAcceptance(false));
     }

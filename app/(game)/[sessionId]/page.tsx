@@ -58,7 +58,8 @@ export default function GameSession() {
     useGameActions();
 
   // 1) WebSocket connection
-  const { isConnected, connectionError, on, off } = useGameWebSocket(sessionId);
+  const { isConnected, connectionError, on, off, send } =
+    useGameWebSocket(sessionId);
 
   // 2) loading
   const { messages, loadingDone } = useLoadingSequence(loadingMessages);
