@@ -5,19 +5,29 @@ import { useSearchParams } from "next/navigation";
 import { KPDialougue } from "@/components";
 import useInviteActions from "@/store/invite/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
+import { usePrivy } from "@privy-io/react-auth";
 
 const JoinGameComponent = () => {
+  const { user, ready } = usePrivy();
   const searchParams = useSearchParams();
   const { acceptInvite } = useInviteActions();
   const {
     inviteState: { loadingInviteAcceptance },
+    navigate,
   } = useSystemFunctions();
   const [error, setError] = useState<string | null>(null);
 
   const code = searchParams.get("code");
 
   useEffect(() => {
-    if (code) {
+    if (!ready) return;
+
+    if (!user && code) {
+      sessionStorage.setItem("redirectToJoin", code);
+      navigate.push("/login");
+    }
+
+    if (user && code) {
       const joinGame = async () => {
         try {
           await acceptInvite(code as string);
@@ -29,7 +39,9 @@ const JoinGameComponent = () => {
       joinGame();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code]);
+  }, [user, ready, code]);
+
+  if (!ready) return;
 
   return (
     <div className="w-full h-full flex items-center justify-center relative">

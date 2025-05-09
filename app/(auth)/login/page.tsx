@@ -33,11 +33,17 @@ const Login = () => {
       await createWallet();
     }
 
-    if (isNewUser || (!linkedFarcaster && !linkedTwitter)) {
-      return navigate.push("/social");
-    }
+    const redirectCode = sessionStorage.getItem("redirectToJoin");
 
-    return navigate.push("/new-game");
+    if (redirectCode) {
+      navigate.push(`/join-game?code=${redirectCode}`);
+      sessionStorage.removeItem("redirectToJoin");
+    } else {
+      if (isNewUser || (!linkedFarcaster && !linkedTwitter)) {
+        return navigate.push("/social");
+      }
+      return navigate.push("/new-game");
+    }
   };
 
   const showOtp = () => {
