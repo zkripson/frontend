@@ -39,7 +39,7 @@ const gameAPI: GameAPI = {
   getGameSessionInformation: async (sessionId: string) => {
     const response = await axiosInstance.get(`sessions/${sessionId}`);
 
-    return response.data?.data;
+    return response?.data;
   },
 
   joinGameSession: async (sessionId: string, joinerAddress: string) => {
@@ -56,7 +56,7 @@ const gameAPI: GameAPI = {
     boardCommitment: string
   ) => {
     const response = await axiosInstance.post(
-      `sessions/${sessionId}/submit-board-commitment`,
+      `sessions/${sessionId}/submit-board`,
       {
         address: playerAddress,
         boardCommitment,

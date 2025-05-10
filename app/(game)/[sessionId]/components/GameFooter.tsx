@@ -1,4 +1,8 @@
+"use client";
+
 import { KPGameBadge } from "@/components";
+import useTruncateText from "@/hooks/useTruncateText";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import General, { GeneralMessageKey } from "./general";
 import Info from "./info";
 
@@ -7,6 +11,10 @@ interface GameFooterProps {
   infoShow: boolean;
   setUserDismissedInfo: (value: boolean) => void;
   generalMessageKey: GeneralMessageKey;
+  playerAddress: string;
+  opponentAddress?: string;
+  playerStatus: string;
+  opponentStatus: string;
 }
 
 export function GameFooter({
@@ -14,14 +22,36 @@ export function GameFooter({
   infoShow,
   setUserDismissedInfo,
   generalMessageKey,
+  playerAddress,
+  opponentAddress,
+  playerStatus,
+  opponentStatus,
 }: GameFooterProps) {
   const showWarning = overlaps.length > 0;
+
+  // YOUR profile from Privy-linked accounts
+  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
+  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const pfp =
+    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
+
+  // Opponent’s truncated address
+  const { truncatedText: opponentName } = useTruncateText(
+    opponentAddress,
+    5,
+    5
+  );
 
   return (
     <div className="fixed bottom-[2%] right-0 w-full px-5 lg:px-12">
       <div className="hidden lg:flex items-center justify-between w-full">
         <div className="flex items-end gap-7 min-w-96">
-          <KPGameBadge status="ready" username="Choco" isPlayer />
+          <KPGameBadge
+            status={playerStatus}
+            username={username || playerAddress}
+            avatarUrl={pfp}
+            isPlayer
+          />
           <General show={true} messageKey={generalMessageKey} />
         </div>
 
@@ -38,9 +68,8 @@ export function GameFooter({
         />
 
         <KPGameBadge
-          status="joining..."
-          username="Njoku"
-          avatarUrl="/images/kripson.jpeg"
+          status={opponentStatus}
+          username={opponentName || "–"}
           isPlayer={false}
         />
       </div>
@@ -59,11 +88,15 @@ export function GameFooter({
         />
 
         <div className="flex space-x-4 w-full justify-between">
-          <KPGameBadge status="ready" username="Choco" isPlayer />
           <KPGameBadge
-            status="joining..."
-            username="Njoku"
-            avatarUrl="/images/kripson.jpeg"
+            status={playerStatus}
+            username={username || playerAddress}
+            avatarUrl={pfp}
+            isPlayer
+          />
+          <KPGameBadge
+            status={opponentStatus}
+            username={opponentName || "–"}
             isPlayer={false}
           />
         </div>
@@ -71,3 +104,5 @@ export function GameFooter({
     </div>
   );
 }
+
+export default GameFooter;

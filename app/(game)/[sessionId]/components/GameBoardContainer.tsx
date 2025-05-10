@@ -14,6 +14,7 @@ interface GameBoardContainerProps {
   disableReadyButton: boolean;
   inventoryVisible: boolean;
   setMode: (mode: "setup" | "game") => void;
+  onReady: () => void;
 }
 
 export function GameBoardContainer({
@@ -28,6 +29,7 @@ export function GameBoardContainer({
   disableReadyButton,
   inventoryVisible,
   setMode,
+  onReady,
 }: GameBoardContainerProps) {
   return (
     <div className="relative">
@@ -46,7 +48,7 @@ export function GameBoardContainer({
           <KPClickAnimation
             disabled={disableReadyButton || inventoryVisible}
             className="flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]"
-            onClick={() => setMode("game")}
+            onClick={onReady}
           >
             <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
               ready

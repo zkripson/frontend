@@ -54,8 +54,11 @@ export default function GameSession() {
   const sessionId = params.sessionId as string;
   const { evmWallet } = usePrivyLinkedAccounts();
   const { gameState } = useSystemFunctions();
-  const { fetchGameSessionInformation, submitBoardCommitment } =
-    useGameActions();
+  const {
+    fetchGameSessionInformation,
+    submitBoardCommitment,
+    registerGameContract,
+  } = useGameActions();
 
   // 1) WebSocket connection
   const { isConnected, connectionError, on, off, send } =
@@ -93,6 +96,9 @@ export default function GameSession() {
     playerId: string;
     isMyTurn: boolean;
   } | null>(null);
+  // track each player’s JOIN status from WS (“WAITING”, “SETUP”, etc.)
+  const [playerStatus, setPlayerStatus] = useState<string>("");
+  const [opponentStatus, setOpponentStatus] = useState<string>("");
 
   // Ensure we have the game session info
   useEffect(() => {
@@ -111,7 +117,10 @@ export default function GameSession() {
 
   // 5) WebSocket Event Handlers
   useEffect(() => {
-    if (!isConnected) return;
+    // 📥 DEBUG: log every incoming message
+    on.message("*", (data) => {
+      console.debug("🔴 WS raw message:", data);
+    });
 
     // Handler for initial session state
     const handleSessionState = (data: SessionStateMessage) => {
@@ -124,7 +133,11 @@ export default function GameSession() {
         // TODO: UI update - show waiting for opponent
       } else if (data.status === "SETUP") {
         // Both players joined, now setting up boards
-        // TODO: UI update - show board setup / placement UI
+        // → register the on‑chain game contract (using dummy values for now)
+        registerGameContract(
+          /* gameContractAddress */ "0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF",
+          /* gameId               */ "dummy-game-id"
+        );
       } else if (data.status === "ACTIVE") {
         // Game has started
         setMode("game");
@@ -144,8 +157,12 @@ export default function GameSession() {
     const handlePlayerJoined = (data: PlayerJoinedMessage) => {
       console.log("Player joined:", data);
 
-      // A new player has joined the game session
-      // TODO: UI update - show new player joined or refresh player list
+      // data.status holds "WAITING" or "SETUP" etc. for that address
+      if (data.address === gamePlayerId) {
+        setPlayerStatus(data.status);
+      } else {
+        setOpponentStatus(data.status);
+      }
 
       // Note: Redux store update for players happens via fetchGameSessionInformation
       // We can trigger a refresh here if needed
@@ -155,15 +172,19 @@ export default function GameSession() {
     const handleBoardSubmitted = (data: BoardSubmittedMessage) => {
       console.log("Board submitted:", data);
 
-      if (data.allBoardsSubmitted) {
-        // All players have submitted their boards
-        // TODO: UI update - show waiting for game to start
-      } else if (data.player === gamePlayerId) {
-        // Current player has submitted board
-        // TODO: UI update - show your board submission confirmed
+      if (data.player === gamePlayerId) {
+        setPlayerStatus("READY");
       } else {
-        // Opponent has submitted board
-        // TODO: UI update - show opponent has submitted board
+        setOpponentStatus("READY");
+      }
+
+      if (data.allBoardsSubmitted) {
+        setMode("game");
+        setGeneralMessageKey("game-start");
+
+        if (isConnected) {
+          send({ type: "game_started_ack", sessionId });
+        }
       }
     };
 
@@ -297,6 +318,16 @@ export default function GameSession() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, gamePlayerId, on, off, placedShips]);
+
+  // Ping the socket
+  useEffect(() => {
+    if (!isConnected) return;
+    const id = setInterval(() => {
+      send({ type: "ping" });
+    }, 30000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isConnected]);
 
   // 6) placement helpers
   function placeRandomly(variant: IKPShip["variant"]) {
@@ -447,32 +478,42 @@ export default function GameSession() {
   const onReady = useCallback(() => {
     if (overlaps.length > 0) return;
 
-    // In a real implementation, we would create a proper board commitment here
-    // For demo purposes, we're just stringifying the ship positions
+    if (window.innerWidth < 768 && inventoryVisible) {
+      setInventoryVisible(false);
+      return;
+    }
+
     const boardCommitment = JSON.stringify(placedShips);
 
-    // Submit board commitment to the backend
     if (evmWallet?.address) {
       submitBoardCommitment(boardCommitment, {
         onSuccess: () => {
           console.log("Board commitment submitted successfully");
 
-          // mobile: hide inventory first
-          if (window.innerWidth < 768) {
-            setInventoryVisible(false);
-          } else {
-            // desktop: go straight to game
-            setMode("game");
-            setGeneralMessageKey("waiting");
+          setMode("game");
+          setGeneralMessageKey("waiting");
+
+          if (isConnected) {
+            send({
+              type: "board_submitted",
+              player: gamePlayerId,
+              allBoardsSubmitted: false,
+              gameStatus: mode,
+            });
           }
-        },
-        onError: (error: any) => {
-          console.error("Error submitting board commitment", error);
-          // Handle error (could show error message)
         },
       });
     }
-  }, [placedShips, overlaps, evmWallet?.address, submitBoardCommitment]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    placedShips,
+    overlaps,
+    evmWallet?.address,
+    inventoryVisible,
+    isConnected,
+    gamePlayerId,
+    mode,
+  ]);
 
   return (
     <div className="relative flex items-center justify-center flex-1">
@@ -517,6 +558,7 @@ export default function GameSession() {
             disableReadyButton={overlaps.length > 0}
             inventoryVisible={inventoryVisible}
             setMode={setMode}
+            onReady={onReady}
           />
 
           <GameFooter
@@ -524,6 +566,22 @@ export default function GameSession() {
             infoShow={infoShow}
             setUserDismissedInfo={setUserDismissedInfo}
             generalMessageKey={generalMessageKey}
+            playerAddress={gamePlayerId}
+            opponentAddress={gameState.gameSessionInfo?.players?.find(
+              (p) => p !== gamePlayerId
+            )}
+            playerStatus={
+              gameState.gameSessionInfo?.players?.includes(gamePlayerId)
+                ? "WAITING"
+                : "JOINING..."
+            }
+            opponentStatus={
+              gameState.gameSessionInfo?.players?.some(
+                (p) => p !== gamePlayerId
+              )
+                ? "WAITING"
+                : "JOINING..."
+            }
           />
         </motion.div>
       )}
