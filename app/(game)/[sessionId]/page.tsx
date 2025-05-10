@@ -99,6 +99,13 @@ export default function GameSession() {
   // track each player’s JOIN status from WS (“WAITING”, “SETUP”, etc.)
   const [playerStatus, setPlayerStatus] = useState<string>("");
   const [opponentStatus, setOpponentStatus] = useState<string>("");
+  // in GameSession component, alongside placedShips, shots…
+  const [playerBoard, setPlayerBoard] = useState<{
+    [key: string]: "ship" | "hit" | "miss" | null;
+  }>({});
+  const [opponentBoard, setOpponentBoard] = useState<{
+    [key: string]: "hit" | "miss" | null;
+  }>({});
 
   // Ensure we have the game session info
   useEffect(() => {
@@ -208,71 +215,51 @@ export default function GameSession() {
       // If needed, we could dispatch an action here to update the store
     };
 
-    // Handler for shot fired event
+    // Handler for shot fired event (opponent attacks you)
     const handleShotFired = (data: ShotFiredMessage) => {
-      console.log("Shot fired:", data);
+      console.log("Shot fired at you:", data);
 
-      // Update whose turn it is
-      const nextTurnIsMe = data.nextTurn === gamePlayerId;
-      setCurrentTurn({
-        playerId: data.nextTurn,
-        isMyTurn: nextTurnIsMe,
-      });
+      const key = `${data.x}-${data.y}`;
 
-      if (data.player === gamePlayerId) {
-        // I fired a shot, waiting for result
-        // TODO: UI update - show waiting for shot result
-      } else {
-        // Opponent fired a shot at coordinates (data.x, data.y)
-        // We'll find out if it hit in the shot_result event
-        // TODO: UI update - show opponent's shot location and it's my turn
+      // Determine hit or miss by checking playerBoard
+      const wasShip = playerBoard[key] === "ship";
+      // Update playerBoard: mark hit or miss
+      setPlayerBoard((pb) => ({
+        ...pb,
+        [key]: wasShip ? "hit" : "miss",
+      }));
+
+      // Update turn
+      const nextIsMe = data.nextTurn === gamePlayerId;
+      setCurrentTurn({ playerId: data.nextTurn, isMyTurn: nextIsMe });
+
+      // Send result back
+      if (isConnected) {
+        send({
+          type: "shot_result",
+          player: gamePlayerId,
+          x: data.x,
+          y: data.y,
+          isHit: wasShip,
+        });
       }
     };
 
-    // Handler for shot result event
+    // Handler for shot result event (response to your attack)
     const handleShotResult = (data: ShotResultMessage) => {
-      console.log("Shot result:", data);
+      console.log("Shot result received:", data);
 
-      if (data.player === gamePlayerId) {
-        // This is result of my shot on opponent's board
-        // Update opponent's board visualization
-        handleShoot(data.x, data.y, data.isHit);
-        // TODO: UI update - show hit/miss on opponent's board
-      } else {
-        // This is result of opponent's shot on my board
-        const key = `${data.x}-${data.y}`;
+      const key = `${data.x}-${data.y}`;
 
-        if (data.isHit) {
-          // Update the ship's hit map for my board
-          setPlacedShips((prev) =>
-            prev.map((ship) => {
-              const cells = getShipCells(ship);
-              const idx = cells.indexOf(key);
-              if (idx < 0) return ship;
+      setOpponentBoard((ob) => ({
+        ...ob,
+        [key]: data.isHit ? "hit" : "miss",
+      }));
 
-              // Mark this ship as hit at this position
-              const newHitMap = [...ship.hitMap];
-              newHitMap[idx] = true;
-              return { ...ship, hitMap: newHitMap };
-            })
-          );
+      setGeneralMessageKey(data.isHit ? "hit" : "missed");
 
-          // Check if hit caused ship to sink
-          const didSink = placedShips.some((ship) => {
-            const cells = getShipCells(ship);
-            const idx = cells.indexOf(key);
-            if (idx < 0) return false;
-
-            const hypothetical = [...ship.hitMap];
-            hypothetical[idx] = true;
-            return hypothetical.every(Boolean);
-          });
-
-          // TODO: UI update - show opponent hit or sunk my ship
-        } else {
-          // TODO: UI update - show opponent missed
-        }
-      }
+      const myNext = data.nextTurn === gamePlayerId;
+      setCurrentTurn({ playerId: data.nextTurn, isMyTurn: myNext });
     };
 
     // Handler for game over event
@@ -317,7 +304,13 @@ export default function GameSession() {
       off.error(handleError);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected, gamePlayerId, on, off, placedShips]);
+  }, [
+    gamePlayerId,
+    placedShips,
+    playerBoard,
+    opponentBoard, // so handler sees latest board if needed
+    isConnected,
+  ]);
 
   // Ping the socket
   useEffect(() => {
@@ -328,6 +321,20 @@ export default function GameSession() {
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected]);
+
+  // 7) derive playerBoard from placedShips
+  useEffect(() => {
+    const board: typeof playerBoard = {};
+
+    // mark every cell occupied by a ship
+    placedShips.forEach((ship) => {
+      getShipCells(ship).forEach((key) => {
+        board[key] = "ship";
+      });
+    });
+
+    setPlayerBoard(board);
+  }, [placedShips]);
 
   // 6) placement helpers
   function placeRandomly(variant: IKPShip["variant"]) {
@@ -552,13 +559,20 @@ export default function GameSession() {
             flipShip={flipShip}
             handleOverlap={handleOverlap}
             mode={mode}
-            shots={shots}
+            currentTurn={currentTurn}
+            opponentBoard={opponentBoard}
+            playerBoard={playerBoard}
             handleShoot={handleShoot}
             generalMessageKey={generalMessageKey}
             disableReadyButton={overlaps.length > 0}
             inventoryVisible={inventoryVisible}
             setMode={setMode}
             onReady={onReady}
+            onFireShot={(x, y) => {
+              if (currentTurn?.isMyTurn && isConnected) {
+                send({ type: "shot_fired", player: gamePlayerId, x, y });
+              }
+            }}
           />
 
           <GameFooter
