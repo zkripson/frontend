@@ -113,6 +113,7 @@ export function GameBoardContainer({
             mode={mode}
             shots={playerShots}
             onShoot={() => {}}
+            showAllShipsInGame
           />
         </>
       )}

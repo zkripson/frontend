@@ -31,6 +31,7 @@ interface BoardProps {
   mode?: "setup" | "game";
   shots: Record<string, { type: "hit" | "miss"; stage?: "smoke" }>;
   onShoot: (x: number, y: number, isHit: boolean) => void;
+  showAllShipsInGame?: boolean;
 }
 
 const Board: React.FC<BoardProps> = ({
@@ -41,6 +42,7 @@ const Board: React.FC<BoardProps> = ({
   mode = "setup",
   onShoot,
   shots,
+  showAllShipsInGame,
 }) => {
   const { isXSmall, isSmall, isMedium, isLarge, isXLarge, is2XLarge } =
     useScreenDetect();
@@ -162,9 +164,9 @@ const Board: React.FC<BoardProps> = ({
   };
 
   const renderedShips =
-    mode === "game"
-      ? ships.filter((ship) => ship.hitMap.every((h) => h))
-      : ships;
+    mode === "setup" || showAllShipsInGame
+      ? ships
+      : ships.filter((ship) => ship.hitMap.every(Boolean));
 
   return (
     <div className="relative inline-block">
