@@ -7,9 +7,15 @@ interface GameHeaderProps {
   mode: "setup" | "game";
   onPause: () => void;
   onHam: () => void;
+  yourTurn?: boolean;
 }
 
-export function GameHeader({ mode, onPause, onHam }: GameHeaderProps) {
+export function GameHeader({
+  mode,
+  onPause,
+  onHam,
+  yourTurn,
+}: GameHeaderProps) {
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
 
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
@@ -29,7 +35,7 @@ export function GameHeader({ mode, onPause, onHam }: GameHeaderProps) {
       </div>
 
       <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-4 lg:gap-6">
-        {mode === "game" && <Turn yourTurn={true} />}
+        {mode === "game" && <Turn yourTurn={yourTurn} />}
         <KPTimer initialSeconds={60} />
         <KPIconButton icon="pause" onClick={onPause} />
         <KPIconButton icon="ham" onClick={onHam} />

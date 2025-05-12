@@ -540,7 +540,12 @@ export default function GameSession() {
             </div>
           )}
 
-          <GameHeader mode={mode} onPause={() => {}} onHam={() => {}} />
+          <GameHeader
+            mode={mode}
+            onPause={() => {}}
+            onHam={() => {}}
+            yourTurn={currentTurn?.isMyTurn!}
+          />
 
           <SetupPanel
             inventoryVisible={inventoryVisible}
