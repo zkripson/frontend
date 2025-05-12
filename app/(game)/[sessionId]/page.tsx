@@ -278,7 +278,7 @@ export default function GameSession() {
 
     // Handler for errors
     const handleError = (data: ErrorMessage) => {
-      console.error("WebSocket error:", data);
+      console.log("WebSocket error:", data);
       // TODO: UI update - show error message to user
     };
 
@@ -599,7 +599,7 @@ export default function GameSession() {
                 (p) => p !== gamePlayerId
               )
                 ? "WAITING"
-                : "JOINING..."
+                : opponentStatus
             }
           />
         </motion.div>
