@@ -12,7 +12,7 @@ const DROPDOWN_ANIMATION = {
 };
 
 const HowToPlay: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const { isXSmall, isSmall, isMedium } = useScreenDetect();
   const isMobile = isXSmall || isSmall || isMedium;
 
@@ -41,7 +41,7 @@ const HowToPlay: React.FC = () => {
               animate={DROPDOWN_ANIMATION.animate}
               exit={DROPDOWN_ANIMATION.exit}
               transition={DROPDOWN_ANIMATION.transition}
-              className="absolute top-full lg:-top-[15%] mt-2 left-0 lg:left-[130%] z-20 w-[80vw] lg:w-[20vw] bg-primary-250 border border-primary-850 rounded-xl"
+              className="absolute top-full lg:-top-[15%] mt-2 left-0 lg:left-[130%] z-20 w-[80vw] md:w-[60vw] lg:w-[30vw] xl:w-[25vw] 2xl:w-[20vw] bg-primary-250 border border-primary-850 rounded-xl"
             >
               <header className="p-4 border-b border-primary-850">
                 <h3 className="text-[20px] leading-none font-medium">

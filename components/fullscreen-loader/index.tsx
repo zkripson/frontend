@@ -21,7 +21,7 @@ const KPFullscreenLoader = ({
     <div
       id="fullscreen-loader"
       className={classNames(
-        "fixed inset-0 z-[9999] bg-loadingBackground bg-cover bg-center p-6",
+        "fixed inset-0 z-[9999] bg-primary-1100 bg-loadingBackground bg-cover bg-center p-6",
         {
           "scale-[1.3333] sm:scale-[1.3333] md:scale-[1.25] lg:scale-[1.176] min-[1281px]:scale-100 [transform-origin:center] [will-change:transform]":
             isAuthLayout,

@@ -15,6 +15,7 @@ interface GameFooterProps {
   opponentAddress?: string;
   playerStatus: string;
   opponentStatus: string;
+  mode: "setup" | "game";
 }
 
 export function GameFooter({
@@ -26,6 +27,7 @@ export function GameFooter({
   opponentAddress,
   playerStatus,
   opponentStatus,
+  mode,
 }: GameFooterProps) {
   const showWarning = overlaps.length > 0;
 
@@ -45,14 +47,14 @@ export function GameFooter({
   return (
     <div className="fixed bottom-[2%] right-0 w-full px-5 lg:px-12">
       <div className="hidden lg:flex items-center justify-between w-full">
-        <div className="flex items-end gap-7 min-w-96">
+        <div className="flex items-end gap-7">
           <KPGameBadge
             status={playerStatus}
             username={username || playerAddress}
             avatarUrl={pfp}
             isPlayer
           />
-          <General show={true} messageKey={generalMessageKey} />
+          <General show={mode === "game"} messageKey={generalMessageKey} />
         </div>
 
         <Info

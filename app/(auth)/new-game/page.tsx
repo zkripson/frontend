@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, JSX } from "react";
+import { useState, JSX } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,17 +8,19 @@ import classNames from "classnames";
 
 import {
   KPButton,
+  KPClickAnimation,
   KPDialougue,
   KPGameTypeCard,
   KPInput,
   KPProfileBadge,
+  KPSecondaryLoader,
 } from "@/components";
 import useInviteActions from "@/store/invite/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useCopy from "@/hooks/useCopy";
 import useAppActions from "@/store/app/actions";
-import { useAudio } from "@/providers/AudioProvider";
+import { BackIcon } from "@/public/icons";
 
 const schema = z.object({
   code: z.string().min(4, "Code is required"),
@@ -39,7 +41,8 @@ const NewGame = () => {
   const { acceptInvite, createInvite } = useInviteActions();
   const { showToast } = useAppActions();
   const { handleCopy } = useCopy("Copied Invite Code");
-  const [step, setStep] = useState<NewGameStep>("joinGame");
+  const [phase, setPhase] = useState<"select" | "create">("select");
+  const [isJoining, setJoining] = useState(false);
 
   const {
     register,
@@ -58,24 +61,36 @@ const NewGame = () => {
     linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
 
   const onCreate = async () => {
-    setStep("createGame");
+    setPhase("create");
 
     if (!inviteCreation || inviteCreation.expiresAt < Date.now()) {
       createInvite();
     }
   };
 
-  const gameTypes: GameType[] = [
+  const toggleJoin = () => setJoining(true);
+
+  const gameTypes = [
     {
-      id: "fm",
-      name: "Friend's Match",
-      description: "Invite from Farcaster or Email",
+      id: "create",
+      name: "Create Invite",
+      description: "Generate a link to share with friends",
       action: onCreate,
+      disabled: false,
     },
     {
-      id: "qm",
+      id: "join",
+      name: "Join a Game",
+      description: "Enter an invite code to join",
+      action: toggleJoin,
+      disabled: false,
+    },
+    {
+      id: "quick",
       name: "Quick Match",
       description: "Get matched with random players",
+      action: () => {},
+      disabled: true,
       status: "coming soon",
     },
   ];
@@ -87,6 +102,9 @@ const NewGame = () => {
       onClick: () => handleCopy(inviteCreation?.code!),
     },
   ];
+
+  const createLoading = loadingInviteCreation || !inviteCreation?.code;
+  const createPhaseActionText = createLoading ? "creating..." : "go to game";
 
   const onSubmit = async () => await acceptInvite(codeValue);
 
@@ -115,8 +133,8 @@ const NewGame = () => {
     }
   };
 
-  const screens: Record<NewGameStep, JSX.Element> = {
-    joinGame: (
+  const screens: Partial<Record<NewGameStep, JSX.Element>> = {
+    select: (
       <KPDialougue
         title="welcome"
         showCloseButton
@@ -126,13 +144,23 @@ const NewGame = () => {
           icon: "arrow",
           iconPosition: "right",
           loading: loadingInviteAcceptance,
+          hide: !isJoining,
         }}
         className="pt-[88px]"
       >
         <div className="flex flex-col items-center gap-16 max-sm:gap-7 self-stretch w-full">
           <KPProfileBadge avatarUrl={pfp} username={username} />
 
-          <div className="flex flex-col gap-2 w-full">
+          <motion.div
+            className="flex flex-col gap-2 w-full overflow-hidden"
+            initial={{ height: "auto", opacity: 1 }}
+            animate={
+              isJoining
+                ? { height: 0, opacity: 0 }
+                : { height: "auto", opacity: 1 }
+            }
+            transition={{ duration: 0.4 }}
+          >
             <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">
               choose new game:
             </h1>
@@ -150,17 +178,33 @@ const NewGame = () => {
                   {...game}
                   className={classNames({
                     "border border-primary-200 transition-all duration-500 rounded-[4px]":
-                      step === "createGame" && game.id === "fm",
+                      phase === "create" && game.id === "create",
                   })}
                 />
               </div>
             ))}
-          </div>
+          </motion.div>
 
-          <div className="flex flex-col gap-2 w-full">
-            <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">
-              Join match:
-            </h1>
+          <motion.div
+            className="flex flex-col gap-2 w-full overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={
+              isJoining
+                ? { height: "auto", opacity: 1 }
+                : { height: 0, opacity: 0 }
+            }
+            transition={{ duration: 0.4 }}
+          >
+            <div className="relative w-full">
+              <div className="absolute h-full top-0 left-0">
+                <KPClickAnimation onClick={() => setJoining(false)}>
+                  <BackIcon width={25} height={18} />
+                </KPClickAnimation>
+              </div>
+              <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">
+                Join match:
+              </h1>
+            </div>
 
             <KPInput
               name="code"
@@ -170,29 +214,46 @@ const NewGame = () => {
               className="w-full"
               type="text"
             />
-          </div>
+          </motion.div>
         </div>
       </KPDialougue>
     ),
-    createGame: (
+    create: (
       <KPDialougue
         title="add opponent"
         showBackButton
-        onBack={() => setStep("joinGame")}
+        onBack={() => setPhase("select")}
         primaryCta={{
-          title: "Next",
+          title: createPhaseActionText,
           onClick: next,
-          icon: "arrow",
+          icon: createLoading ? undefined : "arrow",
           iconPosition: "right",
+          disabled: createLoading,
         }}
         className="pt-[88px]"
       >
         <div className="flex flex-col items-center gap-2 w-full">
-          <p className="bg-material px-2 pt-1.5 md:px-4 md:pt-4 md:pb-1.5 font-MachineStd text-[clamp(21px,_3vw,36px)] tracking-[10px] md:tracking-[20px] rounded-lg mb-3 w-full text-center">
-            {loadingInviteCreation || !inviteCreation?.code
-              ? "•••"
-              : inviteCreation.code}
-          </p>
+          <div
+            className="bg-material rounded-lg mb-3 w-full text-center flex items-center justify-center"
+            style={{
+              height: "clamp(3rem, 8vw, 5rem)",
+              padding: "0 clamp(0.5rem, 2vw, 1rem)",
+            }}
+          >
+            {createLoading ? (
+              <KPSecondaryLoader size={16} />
+            ) : (
+              <span
+                style={{
+                  fontSize: "clamp(21px, 3vw, 36px)",
+                  lineHeight: 1,
+                }}
+                className="tracking-[8px] md:tracking-[12px] font-semibold"
+              >
+                {inviteCreation.code}
+              </span>
+            )}
+          </div>
 
           {shareActions.map(({ onClick, title }, index) => (
             <KPButton
@@ -213,14 +274,14 @@ const NewGame = () => {
     <div className="w-full h-full flex items-center justify-center relative">
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
-          key={step}
+          key={phase}
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ duration: 0.4 }}
           className="absolute w-full h-full flex items-center justify-center"
         >
-          {screens[step]}
+          {screens[phase]}
         </motion.div>
       </AnimatePresence>
     </div>

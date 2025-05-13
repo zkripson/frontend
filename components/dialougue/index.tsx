@@ -30,7 +30,7 @@ const KPDialougue = ({
         bg-dialougue bg-cover bg-no-repeat bg-center
         flex flex-col items-center text-center px-6
         transition-transform duration-300 ease-in-out
-        sm:scale-[0.75] md:scale-[0.8] lg:scale-[0.85] min-[1281px]:scale-100`,
+        sm:scale-[0.75] md:scale-[0.8] lg:scale-[0.85] min-[1281px]:scale-[0.90] min-[1526px]:scale-100`,
         {
           "pt-16 max-sm:pt-12": showKripsonImage,
           "pt-32 max-sm:pt-16": !showKripsonImage,

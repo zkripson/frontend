@@ -14,6 +14,7 @@ import KPTimer from "./timer";
 import KPShip from "./ship";
 import KPBackdrop from "./backdrop";
 import KPToastNotification from "./toast";
+import KPSecondaryLoader from "./loader/secondary";
 
 export {
   KPDialougue,
@@ -32,4 +33,5 @@ export {
   KPShip,
   KPBackdrop,
   KPToastNotification,
+  KPSecondaryLoader,
 };

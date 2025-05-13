@@ -601,6 +601,7 @@ export default function GameSession() {
                 ? "WAITING"
                 : opponentStatus
             }
+            mode={mode}
           />
         </motion.div>
       )}

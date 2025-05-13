@@ -1,4 +1,3 @@
-"use client";
 import Image from "next/image";
 import classNames from "classnames";
 
@@ -17,7 +16,7 @@ const KPGameBadge = ({
         {isPlayer ? "You" : "Opponent"} - {status}
       </h1>
 
-      <div className="w-full px-3 h-11 lg:h-14 xl:h-[69px] rounded-sm lg:rounded-[4px] bg-primary-250 border border-primary-350 flex items-center transition-all duration-500 shadow-[inset_0px_2.64px_0px_0px_#5D656E] lg:shadow-[inset_0px_4px_0px_0px_#5D656E] pr-2 lg:pr-5">
+      <div className="w-full px-3 h-11 lg:h-14 xl:h-[69px] rounded-sm lg:rounded-[4px] bg-primary-250 border border-primary-350 flex items-center transition-all duration-500 shadow-[inset_0px_2.64px_0px_0px_#5D656E] lg:shadow-[inset_0px_4px_0px_0px_#5D656E] pr-2 lg:pr-5 lg:min-w-40">
         <div className="flex items-center gap-3">
           <Image
             src={imageURL}
