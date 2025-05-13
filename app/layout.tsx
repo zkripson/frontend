@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "@/providers";
 import "./globals.css";
 import RootApp from "./app";
+import { AudioProvider } from "@/providers/AudioProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>
-          <RootApp>{children}</RootApp>
+          <AudioProvider>
+            <RootApp>{children}</RootApp>
+          </AudioProvider>
         </Providers>
       </body>
     </html>

@@ -18,6 +18,7 @@ import useSystemFunctions from "@/hooks/useSystemFunctions";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useCopy from "@/hooks/useCopy";
 import useAppActions from "@/store/app/actions";
+import { useAudio } from "@/providers/AudioProvider";
 
 const schema = z.object({
   code: z.string().min(4, "Code is required"),

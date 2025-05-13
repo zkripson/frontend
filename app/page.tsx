@@ -20,7 +20,7 @@ export default function HomePage() {
     if (user) {
       navigate.push("/new-game");
     } else {
-      navigate.push("/login");
+      navigate.push("/connect");
     }
   }, [user, navigate, ready]);
 
