@@ -1,18 +1,16 @@
-import React from "react";
-
 import { useScreenDetect } from "@/hooks/useScreenDetect";
-import { CloseIcon, PauseIcon, HamIcon } from "@/public/icons";
+import { CloseIcon, ShareIcon, HamIcon } from "@/public/icons";
 import KPClickAnimation from "../click-animation";
 
 const iconSizes = {
-  default: { width: 28, height: 26 },
-  medium: { width: 24, height: 23 },
-  small: { width: 22, height: 20 },
+  default: { width: 34, height: 34 },
+  medium: { width: 29, height: 29 },
+  small: { width: 25, height: 25 },
 };
 
 const icons = ({ width, height }: { width: number; height: number }) => ({
   close: <CloseIcon width={width} height={height} />,
-  pause: <PauseIcon width={width} height={height} />,
+  share: <ShareIcon width={width} height={height} />,
   ham: <HamIcon width={width} height={height} />,
 });
 

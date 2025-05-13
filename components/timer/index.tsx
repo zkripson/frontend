@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 
 interface KPTimerProps {
-  turnStartedAt: number;
+  turnStartedAt?: number;
   turnDuration?: number;
   onExpire?: () => void;
 }
@@ -25,7 +25,13 @@ const KPTimer: React.FC<KPTimerProps> = ({
   };
 
   useEffect(() => {
+    if (typeof turnStartedAt !== "number") {
+      setRemaining(turnDuration);
+      return;
+    }
+
     expiredRef.current = false;
+
     const updateRemaining = () => {
       const elapsed = Date.now() - turnStartedAt;
       const rem = Math.max(0, turnDuration - elapsed);
@@ -37,12 +43,8 @@ const KPTimer: React.FC<KPTimerProps> = ({
     };
 
     updateRemaining();
-
     const iv = window.setInterval(updateRemaining, 200);
-
-    return () => {
-      clearInterval(iv);
-    };
+    return () => clearInterval(iv);
   }, [turnStartedAt, turnDuration, onExpire]);
 
   let colorClass = "text-primary-50";
@@ -51,7 +53,8 @@ const KPTimer: React.FC<KPTimerProps> = ({
 
   return (
     <div
-      className={`font-MachineStd leading-none ${colorClass} text-[24px] lg:text-[28px] xl:text-[32px]`}
+      className={`font-MachineStd leading-none ${colorClass}
+                  text-[24px] lg:text-[28px] xl:text-[32px]`}
     >
       {formatTime(remaining)}
     </div>
