@@ -60,7 +60,7 @@ export default function AuthLayout({
       <KPHeader />
 
       <div className="relative z-10 w-full h-full flex items-center justify-center overflow-visible">
-        <div className="w-full h-full flex items-center justify-center 2xl:pt-12 lg:pt-10 transition-transform duration-300 ease-in-out">
+        <div className="w-full h-full flex items-center justify-center pt-[5%] transition-transform duration-300 ease-in-out">
           {children}
         </div>
       </div>

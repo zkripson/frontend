@@ -13,6 +13,7 @@ interface IKPButton {
   icon?: Icons;
   iconPosition?: "left" | "right";
   multipleicons?: Icons[];
+  hide?: boolean;
 }
 
 type Icons = "farcaster" | "copy" | "arrow" | "x" | "home" | "replay";

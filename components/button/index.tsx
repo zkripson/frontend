@@ -47,6 +47,7 @@ const KPButton = ({
   icon,
   iconPosition = "left",
   multipleicons,
+  hide,
 }: IKPButton) => {
   const shadowColor = {
     primary: "#632918",
@@ -61,13 +62,14 @@ const KPButton = ({
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.95 }}
       className={classNames(
-        `flex justify-center items-center border rounded-[4px] relative`,
+        `flex justify-center items-center border rounded-[4px] relative transition-opacity duration-500`,
         {
           "w-full": fullWidth,
           "bg-primary-200 border-primary-300": variant === "primary",
           "bg-primary-250 border-primary-350": variant === "secondary",
           "bg-primary-150 border-primary-400": variant === "tertiary",
           "h-[52px] max-sm:h-[34.76px]": isMachine,
+          "opacity-0 pointer-events-none": hide,
         },
         className
       )}
