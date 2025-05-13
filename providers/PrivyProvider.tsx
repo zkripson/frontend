@@ -2,7 +2,7 @@ import { PropsWithChildren } from "react";
 import { PrivyClientConfig, PrivyProvider } from "@privy-io/react-auth";
 
 export const privyConfig: PrivyClientConfig = {
-  loginMethods: ["farcaster", "email", "twitter"],
+  loginMethods: ["farcaster", "twitter"],
   embeddedWallets: {
     ethereum: {
       createOnLogin: "all-users",

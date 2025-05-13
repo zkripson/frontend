@@ -4,23 +4,16 @@ import { usePrivy } from "@privy-io/react-auth";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 export default function HomePage() {
-  const { user, ready, login } = usePrivy();
+  const { user, ready, logout } = usePrivy();
   const { navigate } = useSystemFunctions();
-
-  useEffect(() => {
-    login();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (!ready) return;
 
-    console.log("USER:", user);
-
     if (user) {
       navigate.push("/new-game");
     } else {
-      navigate.push("/connect");
+      navigate.push("/login");
     }
   }, [user, navigate, ready]);
 

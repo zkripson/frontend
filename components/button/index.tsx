@@ -46,6 +46,7 @@ const KPButton = ({
   isMachine = false,
   icon,
   iconPosition = "left",
+  multipleicons,
 }: IKPButton) => {
   const shadowColor = {
     primary: "#632918",
@@ -103,6 +104,20 @@ const KPButton = ({
             </span>
           )}
 
+          {multipleicons && (
+            <div className="flex items-center gap-2">
+              {multipleicons.map((icon) => (
+                <span
+                  key={icon}
+                  className={classNames("flex-shrink-0", {
+                    "mb-1.5": icon !== "x",
+                  })}
+                >
+                  {icons[icon]}
+                </span>
+              ))}
+            </div>
+          )}
           <span
             className={classNames(
               "uppercase text-[26px] max-sm:text-[17.83px] leading-[100%] tracking-[2%]",
