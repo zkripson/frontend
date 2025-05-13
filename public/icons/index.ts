@@ -1,5 +1,5 @@
 import CloseIcon from "./close-icon";
-import PauseIcon from "./pause-icon";
+import ShareIcon from "./share-icon";
 import HamIcon from "./ham-icon";
 import BackIcon from "./back-icon";
 import ArrowRightIcon from "./arrow-right-icon";
@@ -21,7 +21,7 @@ import ExclaimIcon from "./exclaim-icon";
 
 export {
   CloseIcon,
-  PauseIcon,
+  ShareIcon,
   HamIcon,
   BackIcon,
   ArrowRightIcon,

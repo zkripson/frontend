@@ -546,7 +546,6 @@ export default function GameSession() {
 
           <GameHeader
             mode={mode}
-            onPause={() => {}}
             onHam={() => {}}
             yourTurn={currentTurn?.isMyTurn!}
             turnStartedAt={turnStartedAt}
