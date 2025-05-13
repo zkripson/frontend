@@ -1,5 +1,7 @@
+import { AxiosError } from "axios";
+
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-import { usePrivy } from "@privy-io/react-auth";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import inviteAPI from "./api";
 import {
   setInviteAcceptance,
@@ -8,25 +10,25 @@ import {
   setLoadingInviteCreation,
 } from ".";
 import { CallbackProps } from "..";
+import useAppActions from "../app/actions";
 
 const useInviteActions = () => {
   const { dispatch, navigate } = useSystemFunctions();
-  const { user } = usePrivy();
+  const { evmWallet } = usePrivyLinkedAccounts();
+  const { showToast } = useAppActions();
 
   const createInvite = async (callback?: CallbackProps) => {
     try {
-      if (!user?.wallet) return;
+      if (!evmWallet) return;
 
       dispatch(setLoadingInviteCreation(true));
 
-      const creator = user.wallet.address;
+      const creator = evmWallet.address;
       const sessionId = null;
       const body = { creator, sessionId };
       const response = await inviteAPI.createInvite(body);
 
       dispatch(setInviteCreation(response));
-
-      navigate.push(`/${response.sessionId}`);
 
       callback?.onSuccess?.(response);
     } catch (error) {
@@ -39,22 +41,38 @@ const useInviteActions = () => {
 
   const acceptInvite = async (code: string, callback?: CallbackProps) => {
     try {
-      if (!user?.wallet) return;
+      if (!evmWallet) return;
 
       dispatch(setLoadingInviteAcceptance(true));
 
-      const player = user.wallet.address;
+      const player = evmWallet.address;
       const body = { player, code };
       const response = await inviteAPI.acceptInvite(body);
 
       dispatch(setInviteAcceptance(response));
-
+      showToast("Invite Accepted", "success");
       navigate.push(`/${response.sessionId}`);
-
       callback?.onSuccess?.(response);
-    } catch (error) {
-      console.error(error);
-      callback?.onError?.(error);
+    } catch (err) {
+      let message = "Error accepting invite";
+      let isAlreadyAcceptedError = false;
+
+      if ((err as AxiosError).isAxiosError) {
+        const axiosErr = err as AxiosError<{ error?: string }>;
+        const apiError = axiosErr.response?.data.error;
+
+        if (apiError) {
+          if (apiError.includes("status: accepted")) {
+            message = "This invite has already been accepted";
+            isAlreadyAcceptedError = true;
+          } else {
+            message = apiError;
+          }
+        }
+      }
+
+      showToast(message, "error");
+      callback?.onError?.(err);
     } finally {
       dispatch(setLoadingInviteAcceptance(false));
     }

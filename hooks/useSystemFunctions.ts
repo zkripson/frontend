@@ -9,8 +9,7 @@ import { useAppDispatch, useAppSelector } from "./useRedux";
  *                so we don't have to import and create same funtions everywhere.
  */
 
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const useSystemFunctions = () => {
   const dispatch = useAppDispatch();

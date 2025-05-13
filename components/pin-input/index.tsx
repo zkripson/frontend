@@ -82,7 +82,7 @@ const KPPinInput = ({
             className={classNames(
               "relative w-[50px] h-[52px] max-sm:w-[33.47px] max-sm:h-[34.81px]",
               {
-                "animate-pulse pointer-events-none": loading,
+                "animate-pulse-opacity pointer-events-none": loading,
               }
             )}
           >

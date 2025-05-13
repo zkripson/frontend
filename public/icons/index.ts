@@ -17,6 +17,7 @@ import SubmarineOutline from "./submarine-outline";
 import ShuffleIcon from "./shuffle-icon";
 import QuestionIcon from "./question-icon";
 import InfoCircleIcon from "./info-circle-icon";
+import ExclaimIcon from "./exclaim-icon";
 
 export {
   CloseIcon,
@@ -38,4 +39,5 @@ export {
   ShuffleIcon,
   QuestionIcon,
   InfoCircleIcon,
+  ExclaimIcon,
 };

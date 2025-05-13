@@ -1,6 +1,6 @@
 interface IKPGameBadge {
-  status: "ready" | "joining..." | "setting up";
-  username: string;
+  status: string;
+  username?: string;
   avatarUrl?: string;
   isPlayer?: boolean;
 }

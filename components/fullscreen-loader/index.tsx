@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 
-const authGroup = ["/login", "/social", "/", "/new-game"];
+const authGroup = ["/connect", "/", "/new-game"];
 
 const KPFullscreenLoader = ({
   title,

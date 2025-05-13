@@ -50,9 +50,15 @@ module.exports = {
           "20%, 60%": { transform: "translateX(-6px)" },
           "40%, 80%": { transform: "translateX(6px)" },
         },
+        "pulse-opacity": {
+          "0%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+          "100%": { opacity: "1" },
+        },
       },
       animation: {
         shake: "shake 0.4s ease-in-out",
+        "pulse-opacity": "pulse-opacity 2s ease-in-out infinite",
       },
     },
   },

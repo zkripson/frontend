@@ -13,6 +13,7 @@ import KPGameBadge from "./game-badge";
 import KPTimer from "./timer";
 import KPShip from "./ship";
 import KPBackdrop from "./backdrop";
+import KPToastNotification from "./toast";
 
 export {
   KPDialougue,
@@ -30,4 +31,5 @@ export {
   KPTimer,
   KPShip,
   KPBackdrop,
+  KPToastNotification,
 };

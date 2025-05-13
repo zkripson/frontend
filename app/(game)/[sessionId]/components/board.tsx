@@ -25,12 +25,13 @@ export interface ShipType {
 
 interface BoardProps {
   ships: ShipType[];
-  onShipPositionChange: (id: string, pos: { x: number; y: number }) => void;
-  onShipFlip: (id: string) => void;
-  onOverlap: (overlaps: { x: number; y: number }[]) => void;
+  onShipPositionChange?: (id: string, pos: { x: number; y: number }) => void;
+  onShipFlip?: (id: string) => void;
+  onOverlap?: (overlaps: { x: number; y: number }[]) => void;
   mode?: "setup" | "game";
   shots: Record<string, { type: "hit" | "miss"; stage?: "smoke" }>;
   onShoot: (x: number, y: number, isHit: boolean) => void;
+  showAllShipsInGame?: boolean;
 }
 
 const Board: React.FC<BoardProps> = ({
@@ -41,6 +42,7 @@ const Board: React.FC<BoardProps> = ({
   mode = "setup",
   onShoot,
   shots,
+  showAllShipsInGame,
 }) => {
   const { isXSmall, isSmall, isMedium, isLarge, isXLarge, is2XLarge } =
     useScreenDetect();
@@ -128,7 +130,7 @@ const Board: React.FC<BoardProps> = ({
     });
 
     setOverlaps(overlaps);
-    onOverlap(overlaps);
+    onOverlap?.(overlaps);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ships]);
 
@@ -162,9 +164,9 @@ const Board: React.FC<BoardProps> = ({
   };
 
   const renderedShips =
-    mode === "game"
-      ? ships.filter((ship) => ship.hitMap.every((h) => h))
-      : ships;
+    mode === "setup" || showAllShipsInGame
+      ? ships
+      : ships.filter((ship) => ship.hitMap.every(Boolean));
 
   return (
     <div className="relative inline-block">
@@ -261,8 +263,8 @@ const Board: React.FC<BoardProps> = ({
             orientation={ship.orientation}
             position={ship.position}
             hitMap={ship.hitMap}
-            onPositionChange={(pos) => onShipPositionChange(ship.id, pos)}
-            onClick={() => onShipFlip(ship.id)}
+            onPositionChange={(pos) => onShipPositionChange?.(ship.id, pos)}
+            onClick={() => onShipFlip?.(ship.id)}
             cellSize={cellSize}
             dragDisabled={mode === "game"}
             gridSize={GRID_SIZE}
