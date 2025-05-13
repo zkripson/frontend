@@ -8,8 +8,7 @@ import {
   setLoadingForfeitGame,
   setLoadingGameSessionInfo,
   setLoadingJoinGameSession,
-  setLoadingRegisterGameContract,
-  setLoadingStartGame,
+  setLoadingMakeShot,
   setLoadingSubmitBoardCommitment,
 } from ".";
 import { CallbackProps } from "..";
@@ -76,7 +75,7 @@ const useGameActions = () => {
   };
 
   const submitBoardCommitment = async (
-    boardCommitment: string,
+    board: BoardCommitment,
     callback?: CallbackProps
   ) => {
     try {
@@ -84,14 +83,9 @@ const useGameActions = () => {
 
       dispatch(setLoadingSubmitBoardCommitment(true));
 
-      const playerAddress = user.wallet.address;
       const sessionId = gameSessionInfo.sessionId;
 
-      const response = await gameAPI.submitBoardCommitment(
-        sessionId,
-        playerAddress,
-        boardCommitment
-      );
+      const response = await gameAPI.submitBoardCommitment(sessionId, board);
 
       callback?.onSuccess?.(response);
     } catch (error) {
@@ -102,23 +96,22 @@ const useGameActions = () => {
     }
   };
 
-  const startGame = async (callback?: CallbackProps) => {
+  const makeShot = async (shot: MakeShot, callback?: CallbackProps) => {
     try {
       if (!user?.wallet || !gameSessionInfo) return;
 
-      dispatch(setLoadingStartGame(true));
+      dispatch(setLoadingMakeShot(true));
 
-      const creatorAddress = user.wallet.address;
       const sessionId = gameSessionInfo.sessionId;
 
-      const response = await gameAPI.startGame(sessionId, creatorAddress);
+      const response = await gameAPI.makeShot(sessionId, shot);
 
       callback?.onSuccess?.(response);
     } catch (error) {
       console.error(error);
       callback?.onError?.(error);
     } finally {
-      dispatch(setLoadingStartGame(false));
+      dispatch(setLoadingMakeShot(false));
     }
   };
 
@@ -149,41 +142,13 @@ const useGameActions = () => {
     }
   };
 
-  const registerGameContract = async (
-    gameContractAddress: string,
-    gameId: string,
-    callback?: CallbackProps
-  ) => {
-    try {
-      if (!gameSessionInfo) return;
-
-      dispatch(setLoadingRegisterGameContract(true));
-
-      const sessionId = gameSessionInfo.sessionId;
-
-      const response = await gameAPI.registerGameContract(
-        sessionId,
-        gameContractAddress,
-        gameId
-      );
-
-      callback?.onSuccess?.(response);
-    } catch (error) {
-      console.error(error);
-      callback?.onError?.(error);
-    } finally {
-      dispatch(setLoadingRegisterGameContract(false));
-    }
-  };
-
   return {
     createGameSession,
     fetchGameSessionInformation,
     joinGameSession,
     submitBoardCommitment,
-    startGame,
     forfeitGame,
-    registerGameContract,
+    makeShot,
   };
 };
 

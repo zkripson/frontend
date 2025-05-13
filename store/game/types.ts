@@ -25,18 +25,24 @@ type JoinSession = {
 };
 
 type BoardCommitment = {
+  address: string;
+  ships: Ship[];
+};
+
+type BoardCommitmentResponse = {
   success: boolean;
-  player: string;
   allBoardsSubmitted: boolean;
   gameStatus: string;
 };
 
-type StartGame = {
-  success: boolean;
-  status: string;
-  currentTurn: string;
-  gameContractAddress: string | null;
-  gameId: string | null;
+type Ship = {
+  id: string;
+  length: number;
+  name: string;
+  cells: {
+    x: number;
+    y: number;
+  }[];
 };
 
 type ForfeitGame = {
@@ -52,10 +58,16 @@ enum ForfeitGameReason {
   CHEATING_DETECTED = "CHEATING_DETECTED",
 }
 
-type RegisterGameContract = {
+type MakeShot = {
+  address: string;
+  x: number;
+  y: number;
+};
+
+type MakeShotResponse = {
+  isHit: boolean;
+  nextTurn: string;
+  shipSunk: boolean;
   success: boolean;
-  sessionId: string;
-  status: string;
-  gameContractAddress: string;
-  gameId: string;
+  sunkShips: string[];
 };

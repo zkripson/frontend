@@ -11,20 +11,14 @@ type GameAPI = {
   ) => Promise<JoinSession>;
   submitBoardCommitment: (
     sessionId: string,
-    playerAddress: string,
-    boardCommitment: string
-  ) => Promise<BoardCommitment>;
-  startGame: (sessionId: string, creatorAddress: string) => Promise<StartGame>;
+    board: BoardCommitment
+  ) => Promise<BoardCommitmentResponse>;
   forfeitGame: (
     sessionId: string,
     playerAddress: string,
     reason: ForfeitGameReason
   ) => Promise<ForfeitGame>;
-  registerGameContract: (
-    sessionId: string,
-    gameContractAddress: string,
-    gameId: string
-  ) => Promise<RegisterGameContract>;
+  makeShot: (sessionId: string, shot: MakeShot) => Promise<MakeShotResponse>;
 };
 
 const gameAPI: GameAPI = {
@@ -50,26 +44,11 @@ const gameAPI: GameAPI = {
     return response.data?.data;
   },
 
-  submitBoardCommitment: async (
-    sessionId: string,
-    playerAddress: string,
-    boardCommitment: string
-  ) => {
+  submitBoardCommitment: async (sessionId: string, board: BoardCommitment) => {
     const response = await axiosInstance.post(
       `sessions/${sessionId}/submit-board`,
-      {
-        address: playerAddress,
-        boardCommitment,
-      }
+      board
     );
-
-    return response.data?.data;
-  },
-
-  startGame: async (sessionId: string, creatorAddress: string) => {
-    const response = await axiosInstance.post(`sessions/${sessionId}/start`, {
-      address: creatorAddress,
-    });
 
     return response.data?.data;
   },
@@ -87,16 +66,11 @@ const gameAPI: GameAPI = {
     return response.data?.data;
   },
 
-  registerGameContract: async (
-    sessionId: string,
-    gameContractAddress: string,
-    gameId: string
-  ) => {
-    const response = await axiosInstance.post(`contracts/register-game`, {
-      sessionId,
-      gameContractAddress,
-      gameId,
-    });
+  makeShot: async (sessionId: string, shot: MakeShot) => {
+    const response = await axiosInstance.post(
+      `sessions/${sessionId}/make-shot`,
+      shot
+    );
 
     return response.data?.data;
   },

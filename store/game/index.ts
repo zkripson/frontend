@@ -11,6 +11,7 @@ export interface GameState {
   loadingForfeitGame: boolean;
   loadingRegisterGameContract: boolean;
   loadingGameSessionInfo: boolean;
+  loadingMakeShot: boolean;
 }
 
 const initialState: GameState = {
@@ -23,6 +24,7 @@ const initialState: GameState = {
   loadingForfeitGame: false,
   loadingRegisterGameContract: false,
   loadingGameSessionInfo: false,
+  loadingMakeShot: false,
 };
 
 export const gameReducer = createSlice({
@@ -39,6 +41,10 @@ export const gameReducer = createSlice({
 
     setLoadingSubmitBoardCommitment(state, action: PayloadAction<boolean>) {
       state.loadingSubmitBoardCommitment = action.payload;
+    },
+
+    setLoadingMakeShot(state, action: PayloadAction<boolean>) {
+      state.loadingMakeShot = action.payload;
     },
 
     setLoadingStartGame(state, action: PayloadAction<boolean>) {
@@ -88,6 +94,7 @@ export const {
   setLoadingForfeitGame,
   setLoadingRegisterGameContract,
   setLoadingGameSessionInfo,
+  setLoadingMakeShot,
 } = gameReducer.actions;
 
 export default gameReducer.reducer;
