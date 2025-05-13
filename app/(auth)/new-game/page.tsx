@@ -61,7 +61,7 @@ const NewGame = () => {
     setStep("createGame");
 
     if (!inviteCreation || inviteCreation.expiresAt < Date.now()) {
-      await createInvite();
+      createInvite();
     }
   };
 
