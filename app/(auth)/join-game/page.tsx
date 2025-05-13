@@ -24,7 +24,7 @@ const JoinGameComponent = () => {
 
     if (!user && code) {
       sessionStorage.setItem("redirectToJoin", code);
-      navigate.push("/connect");
+      navigate.push("/login");
     }
 
     if (user && code) {

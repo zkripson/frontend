@@ -1,11 +1,12 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
-import { useLinkAccount } from "@privy-io/react-auth";
+import { useLinkAccount, usePrivy } from "@privy-io/react-auth";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import Social from "../page";
 
 // Mock the hooks
 jest.mock("@privy-io/react-auth", () => ({
   useLinkAccount: jest.fn(),
+  usePrivy: jest.fn(),
 }));
 
 jest.mock("@/hooks/useSystemFunctions", () => jest.fn());
@@ -36,9 +37,15 @@ jest.mock("@/components", () => ({
     variant,
     fullWidth,
     isMachine,
+    multipleicons,
     ...props
   }: any) => (
-    <button data-testid={`kp-button-${title}`} onClick={onClick} {...props}>
+    <button
+      data-testid={`kp-button-${title}`}
+      onClick={onClick}
+      multipleicons={multipleicons ? multipleicons.join(',') : undefined}
+      {...props}
+    >
       {title}
     </button>
   ),
@@ -97,6 +104,12 @@ describe("Social Page", () => {
       linkFarcaster: mockLinkFarcaster,
     });
 
+    (usePrivy as jest.Mock).mockReturnValue({
+      user: null,
+      ready: false,
+      login: jest.fn(),
+    });
+
     (useSystemFunctions as jest.Mock).mockReturnValue({
       navigate: mockNavigate,
     });
@@ -112,52 +125,34 @@ describe("Social Page", () => {
     // Check for title and connection options
     expect(screen.getByText("connect your socials")).toBeInTheDocument();
     expect(
-      screen.getByTestId("kp-button-Connect with farcaster")
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("kp-button-Connect with twitter")
+      screen.getByTestId("kp-button-Connect")
     ).toBeInTheDocument();
     expect(screen.getByTestId("primary-cta-skip for now")).toBeInTheDocument();
   });
 
-  it("shows spinner when connecting with Farcaster", () => {
+  it("shows spinner when connecting", () => {
     render(<Social />);
 
-    // Click the Farcaster connection button
-    const farcasterButton = screen.getByTestId(
-      "kp-button-Connect with farcaster"
+    // Click the Connect button
+    const connectButton = screen.getByTestId(
+      "kp-button-Connect"
     );
-    fireEvent.click(farcasterButton);
+    fireEvent.click(connectButton);
 
-    // Expect linkFarcaster to be called
-    expect(mockLinkFarcaster).toHaveBeenCalled();
+    // Expect login to be called
+    expect(usePrivy().login).toHaveBeenCalled();
   });
 
-  it("shows spinner when connecting with Twitter", () => {
-    render(<Social />);
-
-    // Click the Twitter connection button
-    const twitterButton = screen.getByTestId("kp-button-Connect with twitter");
-    fireEvent.click(twitterButton);
-
-    // Expect linkTwitter to be called
-    expect(mockLinkTwitter).toHaveBeenCalled();
-  });
-
-  it("transitions to connected stage after successful connection", () => {
-    // Mock the onSuccess callback
-    (useLinkAccount as jest.Mock).mockImplementation(({ onSuccess }) => {
-      return {
-        linkTwitter: () => onSuccess(),
-        linkFarcaster: mockLinkFarcaster,
-      };
+  it("transitions to connected stage after successful login", () => {
+    // Mock a successful login with user data
+    const mockLoginFn = jest.fn();
+    (usePrivy as jest.Mock).mockReturnValue({
+      user: { id: "test-user" },
+      ready: true,
+      login: mockLoginFn,
     });
 
     render(<Social />);
-
-    // Click Twitter button to trigger onSuccess
-    const twitterButton = screen.getByTestId("kp-button-Connect with twitter");
-    fireEvent.click(twitterButton);
 
     // Assert we're in the connected stage
     expect(screen.getByTestId("cta-text")).toHaveTextContent(
@@ -166,19 +161,15 @@ describe("Social Page", () => {
   });
 
   it("transitions to setup stage after connection timer expires", () => {
-    // Mock the onSuccess callback
-    (useLinkAccount as jest.Mock).mockImplementation(({ onSuccess }) => {
-      return {
-        linkTwitter: () => onSuccess(),
-        linkFarcaster: mockLinkFarcaster,
-      };
+    // Mock a successful login with user data
+    const mockLoginFn = jest.fn();
+    (usePrivy as jest.Mock).mockReturnValue({
+      user: { id: "test-user" },
+      ready: true,
+      login: mockLoginFn,
     });
 
     render(<Social />);
-
-    // Connect to trigger the connected stage
-    const twitterButton = screen.getByTestId("kp-button-Connect with twitter");
-    fireEvent.click(twitterButton);
 
     // Fast-forward past the connected stage timer
     act(() => {
@@ -192,19 +183,15 @@ describe("Social Page", () => {
   });
 
   it("navigates to new-game after setup timer expires", async () => {
-    // Mock the onSuccess callback
-    (useLinkAccount as jest.Mock).mockImplementation(({ onSuccess }) => {
-      return {
-        linkTwitter: () => onSuccess(),
-        linkFarcaster: mockLinkFarcaster,
-      };
+    // Mock a successful login with user data
+    const mockLoginFn = jest.fn();
+    (usePrivy as jest.Mock).mockReturnValue({
+      user: { id: "test-user" },
+      ready: true,
+      login: mockLoginFn,
     });
 
     render(<Social />);
-
-    // Connect to trigger the connected stage
-    const twitterButton = screen.getByTestId("kp-button-Connect with twitter");
-    fireEvent.click(twitterButton);
 
     // Fast-forward past both timers
     act(() => {
@@ -236,39 +223,26 @@ describe("Social Page", () => {
     );
   });
 
-  it("handles connection errors gracefully", () => {
-    // Mock an error case
-    const mockError = new Error("Connection failed");
-    const mockConsoleErrorSpy = jest.fn();
-    // Temporarily replace our filtered console.error with one that captures calls
-    const originalConsoleError = console.error;
-    console.error = mockConsoleErrorSpy;
-
-    (useLinkAccount as jest.Mock).mockImplementation(({ onError }) => {
-      return {
-        linkTwitter: mockLinkTwitter,
-        linkFarcaster: () => onError(mockError),
-      };
+  it("shows correct connect screen", () => {
+    // Mock login function
+    const mockLoginFn = jest.fn();
+    (usePrivy as jest.Mock).mockReturnValue({
+      user: null,
+      ready: false,
+      login: mockLoginFn
     });
 
     render(<Social />);
 
-    // Click Farcaster button to trigger error
-    const farcasterButton = screen.getByTestId(
-      "kp-button-Connect with farcaster"
-    );
-    fireEvent.click(farcasterButton);
-
-    // Check error was logged
-    expect(mockConsoleErrorSpy).toHaveBeenCalledWith(
-      "LINK FARCaster ERROR:",
-      mockError
-    );
-
-    // We should stay on the connect stage
+    // We should be on the connect stage
     expect(screen.getByText("connect your socials")).toBeInTheDocument();
 
-    // Restore console.error
-    console.error = originalConsoleError;
+    // And we should have a Connect button
+    const connectButton = screen.getByTestId("kp-button-Connect");
+    expect(connectButton).toBeInTheDocument();
+
+    // We should have a skip button
+    const skipButton = screen.getByTestId("primary-cta-skip for now");
+    expect(skipButton).toBeInTheDocument();
   });
 });
