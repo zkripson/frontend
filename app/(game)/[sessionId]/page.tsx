@@ -106,6 +106,7 @@ export default function GameSession() {
   const [opponentBoard, setOpponentBoard] = useState<{
     [key: string]: "hit" | "miss" | null;
   }>({});
+  const [turnStartedAt, setTurnStartedAt] = useState<number>();
 
   // Ensure we have the game session info
   useEffect(() => {
@@ -208,6 +209,7 @@ export default function GameSession() {
         playerId: data.currentTurn,
         isMyTurn,
       });
+      setTurnStartedAt(data.turnStartedAt);
 
       // TODO: UI update - show game has started / active game board
 
@@ -232,6 +234,7 @@ export default function GameSession() {
       // Update turn
       const nextIsMe = data.nextTurn === gamePlayerId;
       setCurrentTurn({ playerId: data.nextTurn, isMyTurn: nextIsMe });
+      setTurnStartedAt(data.turnStartedAt);
 
       // Send result back
       if (isConnected) {
@@ -260,6 +263,7 @@ export default function GameSession() {
 
       const myNext = data.nextTurn === gamePlayerId;
       setCurrentTurn({ playerId: data.nextTurn, isMyTurn: myNext });
+      setTurnStartedAt(data.turnStartedAt);
     };
 
     // Handler for game over event
@@ -545,6 +549,7 @@ export default function GameSession() {
             onPause={() => {}}
             onHam={() => {}}
             yourTurn={currentTurn?.isMyTurn!}
+            turnStartedAt={turnStartedAt}
           />
 
           <SetupPanel
