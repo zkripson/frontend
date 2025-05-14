@@ -105,6 +105,7 @@ export default function GameSession() {
     [key: string]: "hit" | "miss" | null;
   }>({});
   const [turnStartedAt, setTurnStartedAt] = useState<number>();
+  const [gameStartedAt, setGameStartedAt] = useState<number>();
 
   // Ensure we have the game session info
   useEffect(() => {
@@ -167,7 +168,7 @@ export default function GameSession() {
       if (data.address === gamePlayerId) {
         setPlayerStatus(data.status);
       } else {
-        setOpponentStatus(data.status);
+        setOpponentStatus("SETUP");
       }
 
       // Note: Redux store update for players happens via fetchGameSessionInformation
@@ -183,15 +184,6 @@ export default function GameSession() {
       } else {
         setOpponentStatus("READY");
       }
-
-      if (data.allBoardsSubmitted) {
-        setMode("game");
-        setGeneralMessageKey("game-start");
-
-        if (isConnected) {
-          send({ type: "game_started_ack", sessionId });
-        }
-      }
     };
 
     // Handler for game started event
@@ -200,6 +192,7 @@ export default function GameSession() {
 
       // Game has officially started
       setMode("game");
+      setGeneralMessageKey("game-start");
 
       // Track whose turn it is
       const isMyTurn = data.currentTurn === gamePlayerId;
@@ -208,11 +201,7 @@ export default function GameSession() {
         isMyTurn,
       });
       setTurnStartedAt(data.turnStartedAt);
-
-      // TODO: UI update - show game has started / active game board
-
-      // Contract info would be updated in redux
-      // If needed, we could dispatch an action here to update the store
+      setGameStartedAt(data.turnStartedAt);
     };
 
     // Handler for shot fired event (opponent attacks you)

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import useGameActions from "@/store/game/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-import useGameWebSocket from "@/hooks/useGameWebSocket";
+import useGameWebSocket, { TurnTimeoutMessage } from "@/hooks/useGameWebSocket";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useParams } from "next/navigation";
 
@@ -442,6 +442,13 @@ const GameSession = () => {
       });
     };
 
+    // Handler for turn timeout event
+    const handleTurnTimeout = (data: TurnTimeoutMessage) => {
+      console.log("Turn timeout:", data);
+
+      // TODO: UI update - show turn timeout message
+    };
+
     // Handler for shot result event (response to your attack)
     const handleShotResult = (data: any) => {
       console.log("Shot result received:", data);
@@ -500,6 +507,7 @@ const GameSession = () => {
     on.game_started(handleGameStarted);
     on.shot_fired(handleShotFired);
     on.shot_result(handleShotResult);
+    on.turn_timeout(handleTurnTimeout);
     on.game_over(handleGameOver);
     on.error(handleError);
 
@@ -513,6 +521,7 @@ const GameSession = () => {
       off.shot_result(handleShotResult);
       off.game_over(handleGameOver);
       off.error(handleError);
+      off.turn_timeout(handleTurnTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, params?.sessionId]);
