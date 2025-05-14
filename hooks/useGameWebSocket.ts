@@ -205,6 +205,56 @@ export function useGameWebSocket(sessionId: string) {
         wsServiceRef.current.on(eventType, handler as (data: any) => void);
       }
     },
+    // Add off methods for each event type
+    remove_session_state: (handler: (data: SessionStateMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off(
+          "session_state",
+          handler as (data: any) => void
+        );
+      }
+    },
+    remove_player_joined: (handler: (data: PlayerJoinedMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off(
+          "player_joined",
+          handler as (data: any) => void
+        );
+      }
+    },
+    remove_board_submitted: (
+      handler: (data: BoardSubmittedMessage) => void
+    ) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off(
+          "board_submitted",
+          handler as (data: any) => void
+        );
+      }
+    },
+    remove_game_started: (handler: (data: GameStartedMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off(
+          "game_started",
+          handler as (data: any) => void
+        );
+      }
+    },
+    remove_shot_fired: (handler: (data: ShotFiredMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off("shot_fired", handler as (data: any) => void);
+      }
+    },
+    remove_shot_result: (handler: (data: ShotResultMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off("shot_result", handler as (data: any) => void);
+      }
+    },
+    remove_game_over: (handler: (data: GameOverMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off("game_over", handler as (data: any) => void);
+      }
+    },
   };
 
   /**

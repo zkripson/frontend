@@ -1,5 +1,5 @@
 interface IKPShip {
-  variant: "carrier" | "battleship" | "cruiser" | "submarine" | "destroyer";
+  variant: "Carrier" | "Battleship" | "Cruiser" | "Submarine" | "Destroyer";
   orientation: "horizontal" | "vertical";
   hitMap: boolean[];
   position?: { x: number; y: number };

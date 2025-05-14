@@ -19,10 +19,10 @@ const sounds = {
     loop: true,
     volume: 0,
   }),
-  hit: new Howl({ src: ["/sounds/hit.wav"], volume: 1.0 }),
-  miss: new Howl({ src: ["/sounds/miss.wav"], volume: 0.8 }),
-  shot: new Howl({ src: ["/sounds/shot.wav"], volume: 0.9 }),
-  victory: new Howl({ src: ["/sounds/victory.mp3"], volume: 0.6 }),
+  // hit: new Howl({ src: ["/sounds/hit.wav"], volume: 1.0 }),
+  // miss: new Howl({ src: ["/sounds/miss.wav"], volume: 0.8 }),
+  // shot: new Howl({ src: ["/sounds/shot.wav"], volume: 0.9 }),
+  // victory: new Howl({ src: ["/sounds/victory.mp3"], volume: 0.6 }),
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({

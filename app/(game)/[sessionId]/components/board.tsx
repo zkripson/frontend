@@ -8,11 +8,11 @@ import { useScreenDetect } from "@/hooks/useScreenDetect";
 import { GRID_SIZE } from "@/constants/gameConfig";
 
 const SHIP_LENGTHS: Record<IKPShip["variant"], number> = {
-  carrier: 5,
-  battleship: 4,
-  cruiser: 3,
-  submarine: 3,
-  destroyer: 2,
+  Carrier: 5,
+  Battleship: 4,
+  Cruiser: 3,
+  Submarine: 3,
+  Destroyer: 2,
 };
 
 export interface ShipType {

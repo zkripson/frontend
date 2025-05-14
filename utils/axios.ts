@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 import { getAccessToken } from "@privy-io/react-auth";
 
 const axiosInstance = axios.create({
-  baseURL: "https://zk-battleship-backend.nj-345.workers.dev/api/",
+  baseURL: "https://zk-battleship-backend.nj-345.workers.dev/",
 });
 
 axiosInstance.interceptors.response.use(

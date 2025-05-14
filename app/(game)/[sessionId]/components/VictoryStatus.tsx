@@ -1,6 +1,7 @@
+"use client";
+
 import { AnimatePresence, motion } from "framer-motion";
 import classNames from "classnames";
-
 import { KPDialougue } from "@/components";
 
 const titles = {
@@ -8,38 +9,37 @@ const titles = {
   loss: "You Lost!",
 } as const;
 
-const statsData: Record<
-  "win" | "loss",
-  Record<string, { title: string; value: string | number }>
-> = {
+const statsData = {
   win: {
     totalGamesPlayed: { title: "Total Games Played", value: 12 },
     winRate: { title: "Win Rate", value: "60%" },
     avgMoveSpeed: { title: "Avg. Move Speed", value: "3.4s" },
-    matchLength: { title: "Match Length", value: "2m 15s" },
-    longestMatch: { title: "Longest Match", value: "5m 02s" },
+    matchLength: { title: "Match Length", value: "2m 15s" },
+    longestMatch: { title: "Longest Match", value: "5m 02s" },
   },
   loss: {
     totalGamesPlayed: { title: "Total Games Played", value: 8 },
     winRate: { title: "Win Rate", value: "25%" },
     avgMoveSpeed: { title: "Avg. Move Speed", value: "4.8s" },
-    matchLength: { title: "Match Length", value: "3m 40s" },
-    longestMatch: { title: "Longest Match", value: "6m 10s" },
+    matchLength: { title: "Match Length", value: "3m 40s" },
+    longestMatch: { title: "Longest Match", value: "6m 10s" },
   },
-};
+} as const;
 
 interface VictoryStatusProps {
   status?: "win" | "loss";
   onPlayAgain?: () => void;
+  onHome?: () => void;
   show?: boolean;
 }
 
 const VictoryStatus = ({
   status = "win",
   onPlayAgain,
+  onHome,
   show,
 }: VictoryStatusProps) => {
-  // safe‑guard: if status isn’t exactly "win" or "loss", fallback to "win"
+  // safe‑guard: if status isn't exactly "win" or "loss", fallback to "win"
   if (status !== "win" && status !== "loss") {
     console.warn("VictoryStatus got unexpected status:", status);
     status = "win";
@@ -62,14 +62,14 @@ const VictoryStatus = ({
             primaryCta={{
               title: "Replay",
               icon: "replay",
-              onClick: () => {},
+              onClick: onPlayAgain,
               iconPosition: "right",
             }}
             secondaryCta={{
               title: "Back Home",
               icon: "home",
               variant: "tertiary",
-              onClick: () => {},
+              onClick: onHome,
             }}
           >
             <div className="flex flex-col gap-6 max-sm:gap-3">
@@ -96,7 +96,7 @@ const VictoryStatus = ({
                       key={key}
                       className="flex items-center justify-center text-[12px] max-sm:text-[10.69px] leading-none text-primary-50"
                     >
-                      <span>{title}: </span>
+                      <span>{title}:&nbsp;</span>
                       <span className="font-bold">{value}</span>
                     </div>
                   ))}

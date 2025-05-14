@@ -27,6 +27,7 @@ type JoinSession = {
 type BoardCommitment = {
   address: string;
   ships: Ship[];
+  boardCommitment: string;
 };
 
 type BoardCommitmentResponse = {

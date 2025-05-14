@@ -11,6 +11,7 @@ interface GameHeaderProps {
   yourTurn?: boolean;
   turnStartedAt?: number;
   gameCode?: string;
+  onTurnExpiry?: () => void;
 }
 
 export function GameHeader({
@@ -18,18 +19,20 @@ export function GameHeader({
   onHam,
   yourTurn,
   turnStartedAt,
+  gameCode,
+  onTurnExpiry,
 }: GameHeaderProps) {
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
   const { showToast } = useAppActions();
   const {
-    inviteState: { inviteCreation, inviteAcceptance },
+    inviteState: { inviteCreation },
   } = useSystemFunctions();
 
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
   const pfp =
     linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
 
-  const gameCode = inviteCreation?.code;
+  const inviteCode = inviteCreation?.code;
 
   const handleShareInvite = () => {
     if (navigator.share) {
@@ -64,7 +67,7 @@ export function GameHeader({
 
       <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-4 lg:gap-6">
         {mode === "game" && <Turn yourTurn={yourTurn} />}
-        <KPTimer turnStartedAt={turnStartedAt!} />
+        <KPTimer turnStartedAt={turnStartedAt} onExpire={onTurnExpiry} />
         {gameCode && <KPIconButton icon="share" onClick={handleShareInvite} />}
         <KPIconButton icon="ham" onClick={onHam} />
       </div>

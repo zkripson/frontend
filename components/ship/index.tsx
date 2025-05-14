@@ -94,7 +94,7 @@ export default function KPShip({
   const containerHeight =
     orientation === "vertical" ? shipLength * cellSize : cellSize;
   const visualWidth = shipLength * cellSize * 0.9;
-  const visualHeight = variant === "carrier" ? 1.1 * cellSize : 0.8 * cellSize;
+  const visualHeight = variant === "Carrier" ? 1.1 * cellSize : 0.8 * cellSize;
 
   const shipRef = useRef<HTMLDivElement>(null);
   const bounds = useContainerBounds(parentRef, shipRef);

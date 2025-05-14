@@ -9,7 +9,7 @@ interface KPTimerProps {
 
 const KPTimer: React.FC<KPTimerProps> = ({
   turnStartedAt,
-  turnDuration = 15_000,
+  turnDuration = 30_000, // 30 seconds per turn
   onExpire,
 }) => {
   const [remaining, setRemaining] = useState(turnDuration);
@@ -27,6 +27,7 @@ const KPTimer: React.FC<KPTimerProps> = ({
   useEffect(() => {
     if (typeof turnStartedAt !== "number") {
       setRemaining(turnDuration);
+      expiredRef.current = false;
       return;
     }
 
@@ -35,7 +36,9 @@ const KPTimer: React.FC<KPTimerProps> = ({
     const updateRemaining = () => {
       const elapsed = Date.now() - turnStartedAt;
       const rem = Math.max(0, turnDuration - elapsed);
+
       setRemaining(rem);
+
       if (rem <= 0 && !expiredRef.current) {
         expiredRef.current = true;
         onExpire?.();
@@ -48,8 +51,8 @@ const KPTimer: React.FC<KPTimerProps> = ({
   }, [turnStartedAt, turnDuration, onExpire]);
 
   let colorClass = "text-primary-50";
-  if (remaining <= 3_000) colorClass = "text-red-500";
-  else if (remaining <= 5_000) colorClass = "text-yellow-400";
+  if (remaining <= 5_000) colorClass = "text-red-500";
+  else if (remaining <= 10_000) colorClass = "text-yellow-400";
 
   return (
     <div

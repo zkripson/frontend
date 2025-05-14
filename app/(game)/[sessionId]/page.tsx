@@ -1,129 +1,334 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import useGameActions from "@/store/game/actions";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
+import useGameWebSocket from "@/hooks/useGameWebSocket";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useParams } from "next/navigation";
 
-import { useLoadingSequence } from "@/hooks/useLoadingSequence";
-import { useToggleInfo } from "@/hooks/useToggleInfo";
-import { isValidPlacement } from "@/utils/shipPlacement";
-import { GRID_SIZE, SHIP_LENGTHS } from "@/constants/gameConfig";
-import { LoadingOverlay } from "./components/LoadingOverlay";
-import { GameHeader } from "./components/GameHeader";
-import { SetupPanel } from "./components/SetupPanel";
-import { GameBoardContainer } from "./components/GameBoardContainer";
-import { GameFooter } from "./components/GameFooter";
-import { GeneralMessageKey } from "./components/general";
-import VictoryStatus from "./components/VictoryStatus";
-import useGameWebSocket, {
-  BoardSubmittedMessage,
-  ErrorMessage,
-  GameOverMessage,
-  GameStartedMessage,
-  PlayerJoinedMessage,
-  SessionStateMessage,
-  ShotFiredMessage,
-  ShotResultMessage,
-} from "@/hooks/useGameWebSocket";
-import useSystemFunctions from "@/hooks/useSystemFunctions";
-import useGameActions from "@/store/game/actions";
-import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
-
-const loadingMessages: string[] = [
-  "Creating opponent fleet...",
-  "Completing fleet coordinates...",
-  "Loading battleships and environments...",
-  "Initializing smart contract...",
-  "Deploying smart contract...",
-];
-
-function getShipCells(ship: ShipType): string[] {
-  const length = SHIP_LENGTHS[ship.variant];
-  const cells: string[] = [];
-  for (let i = 0; i < length; i++) {
-    const x =
-      ship.orientation === "horizontal" ? ship.position.x + i : ship.position.x;
-    const y =
-      ship.orientation === "vertical" ? ship.position.y + i : ship.position.y;
-    cells.push(`${x}-${y}`);
-  }
-  return cells;
+// Game state types
+interface GameState {
+  sessionId: string | null;
+  players: string[];
+  gameStatus: string;
+  currentTurn: string | null;
+  gameStartedAt: number | null;
+  turnStartedAt: number | null;
+  playerBoard: number[][];
+  enemyBoard: number[][];
+  ships: Ship[];
+  statistics: {
+    yourShots: number;
+    yourHits: number;
+    yourSunk: number;
+    enemyShots: number;
+    enemyHits: number;
+    enemySunk: number;
+  };
 }
 
-export default function GameSession() {
+interface Ship {
+  id: string;
+  name: string;
+  length: number;
+  cells: { x: number; y: number }[];
+}
+
+const formatTime = (seconds: number) => {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+};
+
+const GameSession = () => {
   const params = useParams();
-  const sessionId = params.sessionId as string;
   const { evmWallet } = usePrivyLinkedAccounts();
   const { gameState } = useSystemFunctions();
-  const {
-    fetchGameSessionInformation,
-    submitBoardCommitment,
-    registerGameContract,
-  } = useGameActions();
+  const gameActions = useGameActions();
+  const [turnTimer, setTurnTimer] = useState<NodeJS.Timeout | null>(null);
+  const [gameTimer, setGameTimer] = useState<NodeJS.Timeout | null>(null);
 
-  // 1) WebSocket connection
-  const { isConnected, connectionError, on, off, send } =
-    useGameWebSocket(sessionId);
-
-  // 2) loading
-  const { messages, loadingDone } = useLoadingSequence(loadingMessages);
-
-  // 3) info toggling
-  const { infoShow, userDismissedInfo, setUserDismissedInfo } = useToggleInfo();
-
-  // 4) core game state
-  const [mode, setMode] = useState<"setup" | "game">("setup");
-  const [shipsInPosition, setShipsInPosition] = useState<
-    Record<IKPShip["variant"], boolean>
-  >({
-    carrier: false,
-    battleship: false,
-    cruiser: false,
-    submarine: false,
-    destroyer: false,
+  // Initialize game state
+  const [gameStateLocal, setGameStateLocal] = useState<GameState>({
+    sessionId: params.sessionId as string,
+    players: [],
+    gameStatus: "CREATED",
+    currentTurn: null,
+    gameStartedAt: null,
+    turnStartedAt: null,
+    playerBoard: Array(10)
+      .fill(0)
+      .map(() => Array(10).fill(0)),
+    enemyBoard: Array(10)
+      .fill(0)
+      .map(() => Array(10).fill(0)),
+    ships: [],
+    statistics: {
+      yourShots: 0,
+      yourHits: 0,
+      yourSunk: 0,
+      enemyShots: 0,
+      enemyHits: 0,
+      enemySunk: 0,
+    },
   });
-  const [placedShips, setPlacedShips] = useState<ShipType[]>([]);
-  const [overlaps, setOverlaps] = useState<{ x: number; y: number }[]>([]);
-  const [shots, setShots] = useState<
-    Record<string, { type: "hit" | "miss"; stage?: "smoke" }>
-  >({});
-  const [generalMessageKey, setGeneralMessageKey] =
-    useState<GeneralMessageKey>("game-start");
-  const [inventoryVisible, setInventoryVisible] = useState<boolean>(true);
-  const [showVictory, setShowVictory] = useState<boolean>(false);
-  const [isWinner, setIsWinner] = useState<boolean>(false);
-  const [gamePlayerId, setGamePlayerId] = useState<string>("");
-  const [currentTurn, setCurrentTurn] = useState<{
-    playerId: string;
-    isMyTurn: boolean;
-  } | null>(null);
-  // track each player’s JOIN status from WS (“WAITING”, “SETUP”, etc.)
-  const [playerStatus, setPlayerStatus] = useState<string>("");
-  const [opponentStatus, setOpponentStatus] = useState<string>("");
-  // in GameSession component, alongside placedShips, shots…
-  const [playerBoard, setPlayerBoard] = useState<{
-    [key: string]: "ship" | "hit" | "miss" | null;
-  }>({});
-  const [opponentBoard, setOpponentBoard] = useState<{
-    [key: string]: "hit" | "miss" | null;
-  }>({});
-  const [turnStartedAt, setTurnStartedAt] = useState<number>();
 
-  // Ensure we have the game session info
+  const [turnTimeRemaining, setTurnTimeRemaining] = useState(15);
+  const [gameTimeRemaining, setGameTimeRemaining] = useState(180);
+
+  // Audio refs
+  const hitSoundRef = useRef<HTMLAudioElement | null>(null);
+  const missSoundRef = useRef<HTMLAudioElement | null>(null);
+  const placementSoundRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
-    if (sessionId) {
-      fetchGameSessionInformation(sessionId);
+    // Initialize audio elements
+    hitSoundRef.current = new Audio("/sounds/hit.mp3");
+    missSoundRef.current = new Audio("/sounds/miss.mp3");
+    placementSoundRef.current = new Audio("/sounds/place.mp3");
+
+    // Set volume
+    if (hitSoundRef.current) hitSoundRef.current.volume = 0.5;
+    if (missSoundRef.current) missSoundRef.current.volume = 0.5;
+    if (placementSoundRef.current) placementSoundRef.current.volume = 0.5;
+
+    // Cleanup
+    return () => {
+      if (hitSoundRef.current) hitSoundRef.current = null;
+      if (missSoundRef.current) missSoundRef.current = null;
+      if (placementSoundRef.current) placementSoundRef.current = null;
+    };
+  }, []);
+
+  // Play sound effects
+  const playSound = useCallback((type: "hit" | "miss" | "place") => {
+    const sound =
+      type === "hit"
+        ? hitSoundRef.current
+        : type === "miss"
+        ? missSoundRef.current
+        : placementSoundRef.current;
+
+    if (sound) {
+      sound.currentTime = 0;
+      sound.play().catch(console.error);
+    }
+  }, []);
+
+  // Game functions
+  const makeShot = async (x: number, y: number) => {
+    if (!evmWallet?.address || gameStateLocal.currentTurn !== evmWallet.address)
+      return;
+    if (gameStateLocal.enemyBoard[y][x] !== 0) return;
+
+    try {
+      await gameActions.makeShot({
+        x,
+        y,
+        address: evmWallet.address,
+      });
+    } catch (error) {
+      console.error("Error making shot:", error);
+    }
+  };
+
+  // Timer functions
+  const clearTimers = useCallback(() => {
+    if (turnTimer) {
+      clearInterval(turnTimer);
+      setTurnTimer(null);
+    }
+    if (gameTimer) {
+      clearInterval(gameTimer);
+      setGameTimer(null);
+    }
+  }, [turnTimer, gameTimer]);
+
+  const resetTurnTimer = useCallback(
+    (startTime: number) => {
+      if (turnTimer) clearInterval(turnTimer);
+
+      const timer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 15000 - elapsed); // 15 seconds turn timeout
+        setTurnTimeRemaining(Math.ceil(remaining / 1000));
+
+        if (remaining <= 0) {
+          clearInterval(timer);
+          // Auto-submit random shot if it's our turn
+          if (gameStateLocal.currentTurn === evmWallet?.address) {
+            console.log("Turn timeout - auto submitting random shot");
+            // Find available cells
+            const availableCells: [number, number][] = [];
+            gameStateLocal.enemyBoard.forEach((row, y) => {
+              row.forEach((cell, x) => {
+                if (cell === 0) availableCells.push([x, y]);
+              });
+            });
+
+            if (availableCells.length > 0) {
+              const [x, y] =
+                availableCells[
+                  Math.floor(Math.random() * availableCells.length)
+                ];
+              makeShot(x, y);
+            }
+          }
+        }
+      }, 1000);
+
+      setTurnTimer(timer);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      turnTimer,
+      gameStateLocal.currentTurn,
+      evmWallet?.address,
+      gameStateLocal.enemyBoard,
+    ]
+  );
+
+  const resetGameTimer = useCallback(
+    (startTime: number) => {
+      if (gameTimer) clearInterval(gameTimer);
+
+      const timer = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, 180000 - elapsed); // 3 minutes
+        if (remaining <= 0) {
+          clearInterval(timer);
+          // Handle game timeout
+        }
+      }, 1000);
+
+      setGameTimer(timer);
+    },
+    [gameTimer]
+  );
+
+  const startTimers = useCallback(
+    (startTime: number) => {
+      clearTimers();
+      resetTurnTimer(startTime);
+      resetGameTimer(startTime);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  // Setup WebSocket connection
+  const { isConnected, on, off } = useGameWebSocket(
+    params?.sessionId as string
+  );
+
+  // Effect to sync remote game state with local state
+  useEffect(() => {
+    if (gameState.gameSessionInfo) {
+      setGameStateLocal((prev) => {
+        // Create new state while explicitly preserving all local properties
+        const newState = {
+          ...prev, // Start with all existing state
+          sessionId: gameState?.gameSessionInfo?.sessionId || prev.sessionId,
+          gameStatus: gameState?.gameSessionInfo?.status || prev.gameStatus,
+          players: gameState?.gameSessionInfo?.players || prev.players,
+          currentTurn:
+            gameState.gameSessionInfo?.currentTurn || prev.currentTurn,
+          gameStartedAt:
+            gameState.gameSessionInfo?.turnStartedAt || prev.gameStartedAt,
+          turnStartedAt:
+            gameState.gameSessionInfo?.turnStartedAt || prev.turnStartedAt,
+          // Explicitly preserve these properties
+          playerBoard: prev.playerBoard,
+          enemyBoard: prev.enemyBoard,
+          ships: prev.ships,
+          statistics: prev.statistics,
+        };
+        console.log("Updating game state:", { before: prev, after: newState });
+        return newState;
+      });
+
+      // If game is active, start timers
+      if (
+        gameState.gameSessionInfo.turnStartedAt &&
+        gameState.gameSessionInfo.status === "ACTIVE"
+      ) {
+        startTimers(gameState.gameSessionInfo.turnStartedAt);
+      }
+    }
+  }, [gameState.gameSessionInfo, startTimers]);
+
+  // Initial fetch of game state
+  useEffect(() => {
+    if (params.sessionId) {
+      gameActions.fetchGameSessionInformation(params?.sessionId as string);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [params.sessionId]);
 
-  // Set player ID once Privy is loaded
-  useEffect(() => {
-    if (evmWallet?.address) {
-      setGamePlayerId(evmWallet.address);
-    }
-  }, [evmWallet?.address]);
+  const handleGameOver = useCallback(
+    (data: any) => {
+      clearTimers();
+      const { winner, reason } = data;
+      const isWinner = winner === evmWallet?.address;
 
-  // 5) WebSocket Event Handlers
+      setGameStateLocal((prev) => ({
+        ...prev,
+        gameStatus: "COMPLETED",
+      }));
+
+      // Show game over overlay
+      return (
+        <div
+          className={`fixed inset-0 flex items-center justify-center bg-black/50 z-50 ${
+            gameStateLocal.gameStatus === "COMPLETED"
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
+          } transition-opacity duration-500`}
+        >
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 transform transition-transform duration-500 scale-100">
+            <h2 className="text-2xl font-bold mb-4 text-center">Game Over!</h2>
+            <div className="text-center mb-6">
+              <div
+                className={`text-xl font-semibold mb-2 ${
+                  isWinner ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {isWinner ? "Victory!" : "Defeat!"}
+              </div>
+              <p className="text-gray-600">{reason}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4 text-center mb-6">
+              <div>
+                <div className="text-lg font-semibold">Your Stats</div>
+                <div>Shots: {gameStateLocal.statistics.yourShots}</div>
+                <div>Hits: {gameStateLocal.statistics.yourHits}</div>
+                <div>Ships Sunk: {gameStateLocal.statistics.yourSunk}</div>
+              </div>
+              <div>
+                <div className="text-lg font-semibold">Enemy Stats</div>
+                <div>Shots: {gameStateLocal.statistics.enemyShots}</div>
+                <div>Hits: {gameStateLocal.statistics.enemyHits}</div>
+                <div>Ships Sunk: {gameStateLocal.statistics.enemySunk}</div>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <button
+                onClick={() => (window.location.href = "/")}
+                className="bg-[#1a73e8] text-white px-6 py-2 rounded hover:bg-[#1557b0] transition-colors"
+              >
+                Return to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [evmWallet?.address, gameStateLocal.statistics, gameStateLocal.gameStatus]
+  );
+
+  // WebSocket connection setup
   useEffect(() => {
     // 📥 DEBUG: log every incoming message
     on.message("*", (data) => {
@@ -131,157 +336,159 @@ export default function GameSession() {
     });
 
     // Handler for initial session state
-    const handleSessionState = (data: SessionStateMessage) => {
+    const handleSessionState = (data: any) => {
       console.log("Session state received:", data);
 
-      // We'll just store data and let the UI update later
-      // Handle different game states
-      if (data.status === "WAITING") {
-        // Waiting for another player to join
-        // TODO: UI update - show waiting for opponent
-      } else if (data.status === "SETUP") {
-        // Both players joined, now setting up boards
-        // → register the on‑chain game contract (using dummy values for now)
-        registerGameContract(
-          /* gameContractAddress */ "0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF",
-          /* gameId               */ "dummy-game-id"
-        );
-      } else if (data.status === "ACTIVE") {
-        // Game has started
-        setMode("game");
+      // Update game state while preserving all properties
+      setGameStateLocal((prev) => ({
+        ...prev, // Preserve ALL existing state properties
+        sessionId: data.sessionId || prev.sessionId,
+        gameStatus: data.status || prev.gameStatus,
+        players: data.players || prev.players,
+        currentTurn: data.currentTurn || prev.currentTurn,
+        gameStartedAt: data.gameStartedAt || prev.gameStartedAt,
+        turnStartedAt: data.turnStartedAt || prev.turnStartedAt,
+        // Preserve these important properties if they exist in prev state
+        playerBoard: prev.playerBoard,
+        enemyBoard: prev.enemyBoard,
+        ships: prev.ships,
+        statistics: prev.statistics,
+      }));
 
-        // Track whose turn it is
-        const isMyTurn = data.currentTurn === gamePlayerId;
-        setCurrentTurn({
-          playerId: data.currentTurn || "",
-          isMyTurn,
-        });
-
-        // TODO: UI update - show active game / your turn or opponent turn
+      // Handle status-specific logic
+      if (data.status === "ACTIVE" && data.turnStartedAt) {
+        startTimers(data.turnStartedAt);
       }
     };
 
     // Handler for player joined event
-    const handlePlayerJoined = (data: PlayerJoinedMessage) => {
+    const handlePlayerJoined = (data: any) => {
       console.log("Player joined:", data);
 
-      // data.status holds "WAITING" or "SETUP" etc. for that address
-      if (data.address === gamePlayerId) {
-        setPlayerStatus(data.status);
-      } else {
-        setOpponentStatus(data.status);
-      }
+      setGameStateLocal((prev) => ({
+        ...prev,
+        players: data.players || prev.players,
+        gameStatus: data.status || prev.gameStatus,
+      }));
 
-      // Note: Redux store update for players happens via fetchGameSessionInformation
-      // We can trigger a refresh here if needed
+      // Could also play a sound or show a notification here
+      // playSound("join") // if we had this sound effect
     };
 
     // Handler for board submitted event
-    const handleBoardSubmitted = (data: BoardSubmittedMessage) => {
+    const handleBoardSubmitted = (data: any) => {
       console.log("Board submitted:", data);
 
-      if (data.player === gamePlayerId) {
-        setPlayerStatus("READY");
-      } else {
-        setOpponentStatus("READY");
-      }
+      // if (data.player === gamePlayerId) {
+      //   setPlayerStatus("READY");
+      // } else {
+      //   setOpponentStatus("READY");
+      // }
 
-      if (data.allBoardsSubmitted) {
-        setMode("game");
-        setGeneralMessageKey("game-start");
+      // if (data.allBoardsSubmitted) {
+      //   setMode("game");
+      //   setGeneralMessageKey("game-start");
 
-        if (isConnected) {
-          send({ type: "game_started_ack", sessionId });
-        }
-      }
+      //   if (isConnected) {
+      //     send({ type: "game_started_ack", sessionId });
+      //   }
+      // }
     };
 
     // Handler for game started event
-    const handleGameStarted = (data: GameStartedMessage) => {
+    const handleGameStarted = (data: any) => {
       console.log("Game started:", data);
 
-      // Game has officially started
-      setMode("game");
-
-      // Track whose turn it is
-      const isMyTurn = data.currentTurn === gamePlayerId;
-      setCurrentTurn({
-        playerId: data.currentTurn,
-        isMyTurn,
-      });
-      setTurnStartedAt(data.turnStartedAt);
-
-      // TODO: UI update - show game has started / active game board
-
-      // Contract info would be updated in redux
-      // If needed, we could dispatch an action here to update the store
-    };
-
-    // Handler for shot fired event (opponent attacks you)
-    const handleShotFired = (data: ShotFiredMessage) => {
-      console.log("Shot fired at you:", data);
-
-      const key = `${data.x}-${data.y}`;
-
-      // Determine hit or miss by checking playerBoard
-      const wasShip = playerBoard[key] === "ship";
-      // Update playerBoard: mark hit or miss
-      setPlayerBoard((pb) => ({
-        ...pb,
-        [key]: wasShip ? "hit" : "miss",
+      setGameStateLocal((prev) => ({
+        ...prev,
+        gameStatus: "ACTIVE",
+        currentTurn: data.currentTurn,
+        turnStartedAt: data.turnStartedAt,
+        gameStartedAt: data.turnStartedAt,
       }));
 
-      // Update turn
-      const nextIsMe = data.nextTurn === gamePlayerId;
-      setCurrentTurn({ playerId: data.nextTurn, isMyTurn: nextIsMe });
-      setTurnStartedAt(data.turnStartedAt);
-
-      // Send result back
-      if (isConnected) {
-        send({
-          type: "shot_result",
-          player: gamePlayerId,
-          x: data.x,
-          y: data.y,
-          isHit: wasShip,
-        });
+      if (data.turnStartedAt) {
+        startTimers(data.turnStartedAt);
       }
     };
 
+    // Handler for shot fired event (opponent attacks you)
+    const handleShotFired = (data: any) => {
+      console.log("Shot fired at you:", data);
+      const { x, y, player } = data;
+
+      setGameStateLocal((prev) => {
+        // Deep clone the player board
+        const newPlayerBoard = prev.playerBoard.map((row) => [...row]);
+        // Check if it was a hit
+        const wasHit = newPlayerBoard[y][x] > 0;
+        // Mark the cell
+        newPlayerBoard[y][x] = wasHit ? -2 : -1; // -2 for hit, -1 for miss
+
+        const newState = {
+          ...prev,
+          playerBoard: newPlayerBoard,
+          statistics: {
+            ...prev.statistics,
+            enemyShots: prev.statistics.enemyShots + 1,
+            enemyHits: prev.statistics.enemyHits + (wasHit ? 1 : 0),
+          },
+        };
+
+        // Play appropriate sound after state update
+        setTimeout(() => playSound(wasHit ? "hit" : "miss"), 0);
+
+        return newState;
+      });
+    };
+
     // Handler for shot result event (response to your attack)
-    const handleShotResult = (data: ShotResultMessage) => {
+    const handleShotResult = (data: any) => {
       console.log("Shot result received:", data);
+      const { x, y, isHit, nextTurn, turnStartedAt } = data;
 
-      const key = `${data.x}-${data.y}`;
+      setGameStateLocal((prev) => {
+        // Deep clone the enemy board
+        const newEnemyBoard = prev.enemyBoard.map((row) => [...row]);
+        // Mark the cell
+        newEnemyBoard[y][x] = isHit ? 2 : 1; // 2 for hit, 1 for miss
 
-      setOpponentBoard((ob) => ({
-        ...ob,
-        [key]: data.isHit ? "hit" : "miss",
-      }));
+        return {
+          ...prev,
+          enemyBoard: newEnemyBoard,
+          currentTurn: nextTurn,
+          turnStartedAt: turnStartedAt,
+          statistics: {
+            ...prev.statistics,
+            yourShots: prev.statistics.yourShots + 1,
+            yourHits: prev.statistics.yourHits + (isHit ? 1 : 0),
+          },
+        };
+      });
 
-      setGeneralMessageKey(data.isHit ? "hit" : "missed");
-
-      const myNext = data.nextTurn === gamePlayerId;
-      setCurrentTurn({ playerId: data.nextTurn, isMyTurn: myNext });
-      setTurnStartedAt(data.turnStartedAt);
+      // Play appropriate sound and start new turn timer
+      playSound(isHit ? "hit" : "miss");
+      if (turnStartedAt) {
+        resetTurnTimer(turnStartedAt);
+      }
     };
 
     // Handler for game over event
-    const handleGameOver = (data: GameOverMessage) => {
+    const handleGameOver = (data: any) => {
       console.log("Game over:", data);
 
       // Game has ended, determine if I won
-      const playerWon = data.winner === gamePlayerId;
+      // const playerWon = data.winner === gamePlayerId;
 
       // Update victory/defeat state
-      setIsWinner(playerWon);
-      setShowVictory(true);
+      // setIsWinner(playerWon);
+      // setShowVictory(true);
 
       // TODO: UI update - show victory or defeat screen
     };
 
     // Handler for errors
-    const handleError = (data: ErrorMessage) => {
+    const handleError = (data: any) => {
       console.log("WebSocket error:", data);
       // TODO: UI update - show error message to user
     };
@@ -308,309 +515,393 @@ export default function GameSession() {
       off.error(handleError);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    gamePlayerId,
-    placedShips,
-    playerBoard,
-    opponentBoard, // so handler sees latest board if needed
-    isConnected,
-  ]);
+  }, [isConnected, params?.sessionId]);
 
-  // Ping the socket
-  useEffect(() => {
-    if (!isConnected) return;
-    const id = setInterval(() => {
-      send({ type: "ping" });
-    }, 30000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected]);
+  const generateRandomShipPlacement = () => {
+    const ships: Ship[] = [];
+    const shipLengths = [5, 4, 3, 3, 2];
+    const shipNames = [
+      "Carrier",
+      "Battleship",
+      "Cruiser",
+      "Submarine",
+      "Destroyer",
+    ];
+    const newBoard = Array(10)
+      .fill(0)
+      .map(() => Array(10).fill(0));
 
-  // 7) derive playerBoard from placedShips
-  useEffect(() => {
-    const board: typeof playerBoard = {};
+    for (let i = 0; i < shipLengths.length; i++) {
+      let placed = false;
+      let attempts = 0;
 
-    // mark every cell occupied by a ship
-    placedShips.forEach((ship) => {
-      getShipCells(ship).forEach((key) => {
-        board[key] = "ship";
-      });
-    });
-
-    setPlayerBoard(board);
-  }, [placedShips]);
-
-  // 6) placement helpers
-  function placeRandomly(variant: IKPShip["variant"]) {
-    setPlacedShips((prev) => {
-      const other = prev.filter((s) => s.variant !== variant);
-      let newShip: ShipType;
-      const length = SHIP_LENGTHS[variant];
-      const maxX = GRID_SIZE - length;
-      const maxY = GRID_SIZE - 1;
-
-      do {
-        const randomX = Math.floor(Math.random() * (maxX + 1));
-        const randomY = Math.floor(Math.random() * (maxY + 1));
-        newShip = {
-          id: variant,
-          variant,
-          orientation: "horizontal",
-          position: { x: randomX, y: randomY },
-          hitMap: Array(length).fill(false),
-        };
-      } while (!isValidPlacement(newShip, other));
-
-      setShipsInPosition((pos) => ({ ...pos, [variant]: true }));
-      return [...other, newShip];
-    });
-  }
-
-  function shuffleShips() {
-    setPlacedShips((prev) => {
-      const newShips: ShipType[] = [];
-
-      prev.forEach((ship) => {
-        let candidate: ShipType;
-        const length = SHIP_LENGTHS[ship.variant];
-
-        do {
-          const maxX =
-            ship.orientation === "horizontal"
-              ? GRID_SIZE - length
-              : GRID_SIZE - 1;
-          const maxY =
-            ship.orientation === "vertical"
-              ? GRID_SIZE - length
-              : GRID_SIZE - 1;
-
-          const randomX = Math.floor(Math.random() * (maxX + 1));
-          const randomY = Math.floor(Math.random() * (maxY + 1));
-          candidate = { ...ship, position: { x: randomX, y: randomY } };
-        } while (!isValidPlacement(candidate, newShips));
-
-        newShips.push(candidate);
-      });
-
-      return newShips;
-    });
-  }
-
-  function flipShip(id: string) {
-    setPlacedShips((prev) =>
-      prev.map((ship) => {
-        if (ship.id !== id) return ship;
-        const length = SHIP_LENGTHS[ship.variant];
-        const newOrientation =
-          ship.orientation === "horizontal" ? "vertical" : "horizontal";
-        const maxX =
-          newOrientation === "horizontal" ? GRID_SIZE - length : GRID_SIZE - 1;
-        const maxY =
-          newOrientation === "vertical" ? GRID_SIZE - length : GRID_SIZE - 1;
-        const x = Math.min(ship.position.x, maxX);
-        const y = Math.min(ship.position.y, maxY);
-        return { ...ship, orientation: newOrientation, position: { x, y } };
-      })
-    );
-  }
-
-  function updateShipPosition(id: string, newPos: { x: number; y: number }) {
-    setPlacedShips((prev) =>
-      prev.map((ship) =>
-        ship.id === id ? { ...ship, position: newPos } : ship
-      )
-    );
-  }
-
-  function handleOverlap(newOverlaps: { x: number; y: number }[]) {
-    setOverlaps(newOverlaps);
-  }
-
-  const handleShoot = useCallback(
-    (x: number, y: number, isHit: boolean) => {
-      const key = `${x}-${y}`;
-
-      setShots((prev) => {
-        // Prevent flickering: don't overwrite if smoke already displayed
-        if (prev[key]?.stage === "smoke") return prev;
-        return {
-          ...prev,
-          [key]: { type: isHit ? "hit" : "miss" },
-        };
-      });
-
-      if (isHit) {
-        // Update the ship's hit map
-        setPlacedShips((prev) =>
-          prev.map((ship) => {
-            const cells = getShipCells(ship);
-            const idx = cells.indexOf(key);
-            if (idx < 0) return ship;
-
-            const newHitMap = [...ship.hitMap];
-            newHitMap[idx] = true;
-            return { ...ship, hitMap: newHitMap };
-          })
+      while (!placed && attempts < 1000) {
+        const isHorizontal = Math.random() > 0.5;
+        const startX = Math.floor(
+          Math.random() * (10 - (isHorizontal ? shipLengths[i] : 1))
+        );
+        const startY = Math.floor(
+          Math.random() * (10 - (isHorizontal ? 1 : shipLengths[i]))
         );
 
-        // Check if this hit caused a ship to sink
-        const didSink = placedShips.some((ship) => {
-          const cells = getShipCells(ship);
-          const idx = cells.indexOf(key);
-          if (idx < 0) return false;
-
-          const hypothetical = [...ship.hitMap];
-          hypothetical[idx] = true;
-          return hypothetical.every(Boolean);
-        });
-
-        setGeneralMessageKey(didSink ? "sunk" : "hit");
-
-        // Delay smoke update
-        setTimeout(() => {
-          setShots((prev) => {
-            if (prev[key]?.type === "hit") {
-              return {
-                ...prev,
-                [key]: { ...prev[key], stage: "smoke" },
-              };
-            }
-            return prev;
-          });
-        }, 1500);
-      } else {
-        setGeneralMessageKey("missed");
-      }
-    },
-    [placedShips, setPlacedShips, setShots, setGeneralMessageKey]
-  );
-
-  // Prepare board commitment from placed ships and submit it
-  const onReady = useCallback(() => {
-    if (overlaps.length > 0) return;
-
-    if (window.innerWidth < 768 && inventoryVisible) {
-      setInventoryVisible(false);
-      return;
-    }
-
-    const boardCommitment = JSON.stringify(placedShips);
-
-    if (evmWallet?.address) {
-      submitBoardCommitment(boardCommitment, {
-        onSuccess: () => {
-          console.log("Board commitment submitted successfully");
-
-          setMode("game");
-          setGeneralMessageKey("waiting");
-
-          if (isConnected) {
-            send({
-              type: "board_submitted",
-              player: gamePlayerId,
-              allBoardsSubmitted: false,
-              gameStatus: mode,
-            });
+        const cells = [];
+        for (let j = 0; j < shipLengths[i]; j++) {
+          if (isHorizontal) {
+            cells.push({ x: startX + j, y: startY });
+          } else {
+            cells.push({ x: startX, y: startY + j });
           }
-        },
-      });
+        }
+
+        if (canPlaceShip(cells, newBoard)) {
+          cells.forEach((cell) => {
+            newBoard[cell.y][cell.x] = i + 1;
+          });
+
+          ships.push({
+            id: `ship-${i}`,
+            name: shipNames[i],
+            length: shipLengths[i],
+            cells: cells,
+          });
+          placed = true;
+          playSound("place");
+        }
+        attempts++;
+      }
+
+      if (!placed) {
+        throw new Error(`Failed to place ship ${shipNames[i]}`);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    placedShips,
-    overlaps,
-    evmWallet?.address,
-    inventoryVisible,
-    isConnected,
-    gamePlayerId,
-    mode,
-  ]);
+
+    setGameStateLocal((prev) => ({
+      ...prev,
+      ships: ships,
+      playerBoard: newBoard,
+    }));
+  };
+
+  const canPlaceShip = (
+    cells: { x: number; y: number }[],
+    board: number[][]
+  ) => {
+    for (const cell of cells) {
+      if (board[cell.y][cell.x] !== 0) return false;
+
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          const adjX = cell.x + dx;
+          const adjY = cell.y + dy;
+          if (adjX >= 0 && adjX < 10 && adjY >= 0 && adjY < 10) {
+            if (board[adjY][adjX] !== 0) return false;
+          }
+        }
+      }
+    }
+    return true;
+  };
+
+  const submitBoard = async () => {
+    if (!evmWallet?.address || gameStateLocal.ships.length === 0) return;
+
+    try {
+      await gameActions.submitBoardCommitment({
+        address: evmWallet.address,
+        boardCommitment: generateBoardCommitment(),
+        ships: gameStateLocal.ships,
+      });
+    } catch (error) {
+      console.error("Error submitting board:", error);
+    }
+  };
+
+  const generateBoardCommitment = () => {
+    // Simplified commitment generation for demo
+    const boardString = JSON.stringify(gameStateLocal.ships);
+    const salt = Math.random().toString(36).substr(2, 9);
+    return (
+      "0x" +
+      btoa(boardString + salt)
+        .replace(/[^a-f0-9]/gi, "")
+        .substr(0, 64)
+    );
+  };
+
+  console.log("gameStateLocal", gameStateLocal);
 
   return (
-    <div className="relative flex items-center justify-center flex-1">
-      <LoadingOverlay loading={!loadingDone} loadingMessages={messages} />
+    <div className="max-w-[1400px] mx-auto">
+      <style jsx global>{`
+        @keyframes placed {
+          0% {
+            transform: scale(0.8);
+            opacity: 0.5;
+          }
+          50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
 
-      {loadingDone && (
-        <motion.div
-          key="game"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="w-full h-full flex flex-col items-center justify-center"
-        >
-          {connectionError && (
-            <div className="absolute top-0 w-full bg-red-500 text-white p-2 text-center">
-              {connectionError}
+        @keyframes hit {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.2);
+            background-color: #dc3545;
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+
+        @keyframes miss {
+          0% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.2);
+            background-color: #6c757d;
+          }
+          100% {
+            transform: scale(1);
+          }
+        }
+
+        .cell-ship-placed {
+          animation: placed 0.5s ease-out;
+        }
+
+        .cell-hit {
+          animation: hit 0.5s ease-out;
+        }
+
+        .cell-miss {
+          animation: miss 0.5s ease-out;
+        }
+      `}</style>
+
+      <h1 className="text-[#1a73e8] mt-0 mb-4">🚢 ZK Battleship</h1>
+
+      {/* Connection Status */}
+      <div className="bg-white rounded-lg shadow p-5 mb-5">
+        <h2 className="text-[#1a73e8] mt-0 mb-4">Connection Status</h2>
+        <div className="flex gap-2.5 mb-2.5">
+          <div
+            className={`px-2.5 py-1.5 rounded text-xs font-medium ${
+              isConnected
+                ? "bg-[#d4edda] text-[#155724]"
+                : "bg-[#f8d7da] text-[#721c24]"
+            }`}
+          >
+            WebSocket: {isConnected ? "Connected" : "Disconnected"}
+          </div>
+          <div
+            className={`px-2.5 py-1.5 rounded text-xs font-medium ${
+              gameStateLocal.gameStatus !== "CREATED"
+                ? "bg-[#d4edda] text-[#155724]"
+                : "bg-[#f8d7da] text-[#721c24]"
+            }`}
+          >
+            Game:{" "}
+            {gameStateLocal.gameStatus !== "CREATED"
+              ? "Connected"
+              : "Not Started"}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-5 mb-5">
+        {/* Game Setup */}
+        <div className="bg-white rounded-lg shadow p-5">
+          <h2 className="text-[#1a73e8] mt-0 mb-4">Game Setup</h2>
+
+          <div className="mb-5 pb-[15px] border-b border-[#eee]">
+            <h3 className="text-[#1a73e8] mt-0 mb-4">Session Info</h3>
+            <div className="bg-[#f8f9fa] border border-[#dee2e6] rounded p-[15px] my-2.5 text-black">
+              <div>
+                <strong>Session ID:</strong> {gameStateLocal.sessionId}
+              </div>
+              <div>
+                <strong>Players:</strong> {gameStateLocal?.players?.join(", ")}
+              </div>
+              <div>
+                <strong>Game Status:</strong>{" "}
+                <span
+                  className={`inline-block px-2.5 py-1.5 rounded font-medium my-1.5 ${
+                    gameStateLocal.gameStatus === "CREATED"
+                      ? "bg-[#fff3cd] text-[#856404] border border-[#ffeaa7]"
+                      : gameStateLocal.gameStatus === "ACTIVE"
+                      ? "bg-[#d4edda] text-[#155724] border border-[#c3e6cb]"
+                      : gameStateLocal.gameStatus === "COMPLETED"
+                      ? "bg-[#d1ecf1] text-[#0c5460] border border-[#bee5eb]"
+                      : ""
+                  }`}
+                >
+                  {gameStateLocal.gameStatus}
+                </span>
+              </div>
+              <div>
+                <strong>Current Turn:</strong> {gameStateLocal?.currentTurn}
+              </div>
             </div>
-          )}
+          </div>
 
-          <GameHeader
-            mode={mode}
-            onHam={() => {}}
-            yourTurn={currentTurn?.isMyTurn!}
-            turnStartedAt={turnStartedAt}
-          />
+          <div className="mb-5 pb-[15px] border-b border-[#eee]">
+            <h3 className="text-[#1a73e8] mt-0 mb-4">Setup Board</h3>
+            <div className="grid grid-cols-5 gap-2.5 my-2.5">
+              {[
+                "Carrier",
+                "Battleship",
+                "Cruiser",
+                "Submarine",
+                "Destroyer",
+              ].map((ship, index) => (
+                <div
+                  key={ship}
+                  className={`bg-[#e9ecef] p-2 rounded text-center text-xs ${
+                    gameStateLocal.ships.some((s) => s.name === ship)
+                      ? "bg-[#d4edda] text-[#155724]"
+                      : ""
+                  }`}
+                >
+                  <div>{ship}</div>
+                  <div>Length: {[5, 4, 3, 3, 2][index]}</div>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={generateRandomShipPlacement}
+              className="bg-[#1a73e8] text-white border-none px-4 py-2 rounded cursor-pointer text-sm mr-2.5 transition-colors hover:bg-[#0d62c9]"
+            >
+              Randomize Ships
+            </button>
+            <button
+              onClick={submitBoard}
+              className="bg-[#28a745] text-white border-none px-4 py-2 rounded cursor-pointer text-sm transition-colors hover:bg-[#218838]"
+            >
+              Submit Board
+            </button>
+          </div>
+        </div>
 
-          <SetupPanel
-            inventoryVisible={inventoryVisible}
-            setInventoryVisible={() => setInventoryVisible(true)}
-            shipsInPosition={shipsInPosition}
-            onPlaceShip={placeRandomly}
-            onShuffle={shuffleShips}
-            onReady={onReady}
-            disableReadyButton={overlaps.length > 0}
-            mode={mode}
-          />
+        {/* Game Board & Controls */}
+        <div className="bg-white rounded-lg shadow p-5">
+          <h2 className="text-[#1a73e8] mt-0 mb-4">Game Board</h2>
 
-          <GameBoardContainer
-            placedShips={placedShips}
-            updateShipPosition={updateShipPosition}
-            flipShip={flipShip}
-            handleOverlap={handleOverlap}
-            mode={mode}
-            currentTurn={currentTurn}
-            opponentBoard={opponentBoard}
-            playerBoard={playerBoard}
-            handleShoot={handleShoot}
-            generalMessageKey={generalMessageKey}
-            disableReadyButton={overlaps.length > 0}
-            inventoryVisible={inventoryVisible}
-            setMode={setMode}
-            onReady={onReady}
-            onFireShot={(x, y) => {
-              if (currentTurn?.isMyTurn && isConnected) {
-                send({ type: "shot_fired", player: gamePlayerId, x, y });
-              }
-            }}
-          />
+          <div className="mb-5 pb-[15px] border-b border-[#eee]">
+            <h3 className="text-[#1a73e8] mt-0 mb-4">Your Board</h3>
+            <div className="grid grid-cols-10 gap-[2px] max-w-[300px] my-5">
+              {gameStateLocal.playerBoard.map((row, y) =>
+                row.map((cell, x) => (
+                  <div
+                    key={`player-${x}-${y}`}
+                    className={`aspect-square border border-[#ccc] bg-[#f0f0f0] cursor-pointer flex items-center justify-center text-xs transition-colors hover:bg-[#e0e0e0] ${
+                      cell > 0 ? "bg-[#007bff] text-white cell-ship-placed" : ""
+                    } ${
+                      cell === -2 ? "bg-[#dc3545] text-white cell-hit" : ""
+                    } ${
+                      cell === -1 ? "bg-[#6c757d] text-white cell-miss" : ""
+                    }`}
+                  >
+                    {cell > 0 && "S"}
+                    {cell === -2 && "H"}
+                    {cell === -1 && "M"}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
 
-          <GameFooter
-            overlaps={overlaps}
-            infoShow={infoShow}
-            setUserDismissedInfo={setUserDismissedInfo}
-            generalMessageKey={generalMessageKey}
-            playerAddress={gamePlayerId}
-            opponentAddress={gameState.gameSessionInfo?.players?.find(
-              (p) => p !== gamePlayerId
-            )}
-            playerStatus={
-              gameState.gameSessionInfo?.players?.includes(gamePlayerId)
-                ? "WAITING"
-                : "JOINING..."
-            }
-            opponentStatus={
-              gameState.gameSessionInfo?.players?.some(
-                (p) => p !== gamePlayerId
-              )
-                ? "WAITING"
-                : opponentStatus
-            }
-            mode={mode}
-          />
-        </motion.div>
-      )}
+          <div className="mb-5 pb-[15px] border-b border-[#eee]">
+            <h3 className="text-[#1a73e8] mt-0 mb-4">Enemy Board</h3>
+            <div className="grid grid-cols-10 gap-[2px] max-w-[300px] my-5">
+              {gameStateLocal.enemyBoard.map((row, y) =>
+                row.map((cell, x) => (
+                  <div
+                    key={`enemy-${x}-${y}`}
+                    onClick={() => makeShot(x, y)}
+                    className={`aspect-square border border-[#ccc] bg-[#f0f0f0] cursor-pointer flex items-center justify-center text-xs transition-colors hover:bg-[#e0e0e0] ${
+                      cell === 2 ? "bg-[#dc3545] text-white cell-hit" : ""
+                    } ${cell === 1 ? "bg-[#6c757d] text-white cell-miss" : ""}`}
+                  >
+                    {cell === 2 ? "H" : cell === 1 ? "M" : ""}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
 
-      <VictoryStatus show={showVictory} status={isWinner ? "win" : "loss"} />
+          <div className="mb-5">
+            <h3 className="text-[#1a73e8] mt-0 mb-4">Game Timers</h3>
+            <div className="bg-[#f8f9fa] p-2.5 rounded border border-[#dee2e6]">
+              <h4 className="m-0 mb-2.5 text-[#495057]">Turn Timer</h4>
+              <div
+                className={`text-lg font-bold p-2.5 rounded text-center ${
+                  gameStateLocal.turnStartedAt
+                    ? "bg-[#fff3cd] text-[#856404]"
+                    : "bg-[#f8f9fa]"
+                }`}
+              >
+                {turnTimeRemaining}s
+              </div>
+            </div>
+            <div className="bg-[#f8f9fa] p-2.5 rounded border border-[#dee2e6] mt-2.5">
+              <h4 className="m-0 mb-2.5 text-[#495057]">Game Timer</h4>
+              <div
+                className={`text-lg font-bold p-2.5 rounded text-center ${
+                  gameStateLocal.gameStartedAt
+                    ? "bg-[#fff3cd] text-[#856404]"
+                    : "bg-[#f8f9fa]"
+                }`}
+              >
+                {formatTime(gameTimeRemaining)}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Game Information */}
+      <div className="bg-white rounded-lg shadow p-5">
+        <h2 className="text-[#1a73e8] mt-0 mb-4">Game Information</h2>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2.5 my-[15px]">
+          <div className="bg-[#f8f9fa] p-2.5 rounded border border-[#dee2e6]">
+            <h4 className="m-0 mb-2.5 text-[#495057]">Your Stats</h4>
+            <div>Shots Fired: {gameStateLocal.statistics.yourShots}</div>
+            <div>Hits: {gameStateLocal.statistics.yourHits}</div>
+            <div>Ships Sunk: {gameStateLocal.statistics.yourSunk}</div>
+            <div>
+              Accuracy:{" "}
+              {gameStateLocal.statistics.yourShots > 0
+                ? Math.round(
+                    (gameStateLocal.statistics.yourHits /
+                      gameStateLocal.statistics.yourShots) *
+                      100
+                  )
+                : 0}
+              %
+            </div>
+          </div>
+          <div className="bg-[#f8f9fa] p-2.5 rounded border border-[#dee2e6]">
+            <h4 className="m-0 mb-2.5 text-[#495057]">Enemy Stats</h4>
+            <div>Shots Received: {gameStateLocal.statistics.enemyShots}</div>
+            <div>Hits Taken: {gameStateLocal.statistics.enemyHits}</div>
+            <div>Your Ships Sunk: {gameStateLocal.statistics.enemySunk}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Render game over screen when game is completed */}
+      {gameStateLocal.gameStatus === "COMPLETED" && handleGameOver({})}
     </div>
   );
-}
+};
+
+export default GameSession;
