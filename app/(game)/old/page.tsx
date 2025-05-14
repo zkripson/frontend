@@ -23,6 +23,7 @@ import useGameWebSocket, {
   SessionStateMessage,
   ShotFiredMessage,
   ShotResultMessage,
+  TurnTimeoutMessage,
 } from "@/hooks/useGameWebSocket";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import useGameActions from "@/store/game/actions";
@@ -277,6 +278,13 @@ export default function GameSession() {
       // TODO: UI update - show victory or defeat screen
     };
 
+    // Handler for turn timeout event
+    const handleTurnTimeout = (data: TurnTimeoutMessage) => {
+      console.log("Turn timeout:", data);
+
+      // TODO: UI update - show turn timeout message
+    };
+
     // Handler for errors
     const handleError = (data: ErrorMessage) => {
       console.log("WebSocket error:", data);
@@ -290,6 +298,7 @@ export default function GameSession() {
     on.game_started(handleGameStarted);
     on.shot_fired(handleShotFired);
     on.shot_result(handleShotResult);
+    on.turn_timeout(handleTurnTimeout);
     on.game_over(handleGameOver);
     on.error(handleError);
 
@@ -301,6 +310,7 @@ export default function GameSession() {
       off.game_started(handleGameStarted);
       off.shot_fired(handleShotFired);
       off.shot_result(handleShotResult);
+      off.turn_timeout(handleTurnTimeout);
       off.game_over(handleGameOver);
       off.error(handleError);
     };

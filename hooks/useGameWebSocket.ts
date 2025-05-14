@@ -68,6 +68,14 @@ export interface GameOverMessage extends WebSocketMessage {
   reason: "COMPLETED" | "FORFEIT" | "TIMEOUT";
 }
 
+export interface TurnTimeoutMessage extends WebSocketMessage {
+  message: string;
+  nextTurn: string;
+  previousPlayer: string;
+  turnStartedAt: number;
+  type: "turn_timeout";
+}
+
 export interface ErrorMessage extends WebSocketMessage {
   type: "error";
   error: string;
@@ -186,6 +194,11 @@ export function useGameWebSocket(sessionId: string) {
         wsServiceRef.current.on("game_over", handler as (data: any) => void);
       }
     },
+    turn_timeout: (handler: (data: TurnTimeoutMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on("turn_timeout", handler as (data: any) => void);
+      }
+    },
     error: (handler: (data: ErrorMessage) => void) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.on("error", handler as (data: any) => void);
@@ -255,6 +268,14 @@ export function useGameWebSocket(sessionId: string) {
         wsServiceRef.current.off("game_over", handler as (data: any) => void);
       }
     },
+    remove_turn_timeout: (handler: (data: TurnTimeoutMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off(
+          "turn_timeout",
+          handler as (data: any) => void
+        );
+      }
+    },
   };
 
   /**
@@ -301,6 +322,14 @@ export function useGameWebSocket(sessionId: string) {
     shot_result: (handler: (data: ShotResultMessage) => void) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.off("shot_result", handler as (data: any) => void);
+      }
+    },
+    turn_timeout: (handler: (data: TurnTimeoutMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off(
+          "turn_timeout",
+          handler as (data: any) => void
+        );
       }
     },
     game_over: (handler: (data: GameOverMessage) => void) => {
