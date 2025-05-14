@@ -209,30 +209,18 @@ export default function GameSession() {
       console.log("Shot fired at you:", data);
 
       const key = `${data.x}-${data.y}`;
+      const isHit = data.isHit;
 
-      // Determine hit or miss by checking playerBoard
-      const wasShip = playerBoard[key] === "ship";
       // Update playerBoard: mark hit or miss
       setPlayerBoard((pb) => ({
         ...pb,
-        [key]: wasShip ? "hit" : "miss",
+        [key]: isHit ? "hit" : "miss",
       }));
 
       // Update turn
       const nextIsMe = data.nextTurn === gamePlayerId;
       setCurrentTurn({ playerId: data.nextTurn, isMyTurn: nextIsMe });
       setTurnStartedAt(data.turnStartedAt);
-
-      // Send result back
-      if (isConnected) {
-        send({
-          type: "shot_result",
-          player: gamePlayerId,
-          x: data.x,
-          y: data.y,
-          isHit: wasShip,
-        });
-      }
     };
 
     // Handler for shot result event (response to your attack)
