@@ -10,7 +10,6 @@ import useGameWebSocket, {
 } from "@/hooks/useGameWebSocket";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useParams } from "next/navigation";
-import { ForfeitGameReason } from "@/store/game/types";
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { GameHeader } from "./components/GameHeader";
