@@ -65,12 +65,10 @@ const Board: React.FC<BoardProps> = ({
     y: number;
   } | null>(null);
   const [overlaps, setOverlaps] = useState<{ x: number; y: number }[]>([]);
+  const prevOverlapsRef = useRef<{ x: number; y: number }[]>([]);
   const cellsRef = useRef<HTMLDivElement>(null);
   const shipsRef = useRef<ShipType[]>(ships);
-
-  useEffect(() => {
-    shipsRef.current = ships;
-  }, [ships]);
+  shipsRef.current = ships;
 
   // Detect overlaps
   useEffect(() => {
@@ -115,7 +113,7 @@ const Board: React.FC<BoardProps> = ({
       }
     });
 
-    const overlaps: { x: number; y: number }[] = [];
+    const newOverlaps: { x: number; y: number }[] = [];
 
     Object.entries(occupied).forEach(([key, shipId]) => {
       if (adjacentMap[key]) {
@@ -124,13 +122,22 @@ const Board: React.FC<BoardProps> = ({
         );
         if (touching.length > 0) {
           const [xStr, yStr] = key.split("-");
-          overlaps.push({ x: parseInt(xStr), y: parseInt(yStr) });
+          newOverlaps.push({ x: parseInt(xStr), y: parseInt(yStr) });
         }
       }
     });
 
-    setOverlaps(overlaps);
-    onOverlap?.(overlaps);
+    // Deep equality check
+    const overlapsEqual =
+      newOverlaps.length === overlaps.length &&
+      newOverlaps.every(
+        (o, i) => o.x === overlaps[i]?.x && o.y === overlaps[i]?.y
+      );
+
+    if (!overlapsEqual) {
+      setOverlaps(newOverlaps);
+      onOverlap?.(newOverlaps);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ships]);
 
@@ -224,7 +231,7 @@ const Board: React.FC<BoardProps> = ({
                       width={Math.floor(cellSize * 0.9)}
                       height={Math.floor(cellSize * 0.9)}
                       unoptimized
-                      className="pointer-events-none"
+                      className="pointer-events-none block mx-auto my-auto object-contain"
                     />
                   ) : (
                     <Image
@@ -233,7 +240,7 @@ const Board: React.FC<BoardProps> = ({
                       width={Math.floor(cellSize * 0.85)}
                       height={Math.floor(cellSize * 0.85)}
                       quality={100}
-                      className="animate-pulse pointer-events-none"
+                      className="pointer-events-none block mx-auto my-auto object-contain"
                     />
                   )}
                 </div>

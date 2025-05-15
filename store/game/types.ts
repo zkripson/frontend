@@ -52,7 +52,7 @@ type ForfeitGame = {
   winner: string;
 };
 
-enum ForfeitGameReason {
+export enum ForfeitGameReason {
   TIMEOUT = "TIMEOUT",
   PLAYER_QUIT = "PLAYER_QUIT",
   TECHNICAL_ISSUE = "TECHNICAL_ISSUE",

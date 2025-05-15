@@ -7,6 +7,7 @@ import { KPDialougue } from "@/components";
 const titles = {
   win: "You Win!",
   loss: "You Lost!",
+  draw: "It's a Draw!",
 } as const;
 
 const statsData = {
@@ -24,10 +25,17 @@ const statsData = {
     matchLength: { title: "Match Length", value: "3m 40s" },
     longestMatch: { title: "Longest Match", value: "6m 10s" },
   },
+  draw: {
+    totalGamesPlayed: { title: "Total Games Played", value: 10 },
+    winRate: { title: "Win Rate", value: "50%" },
+    avgMoveSpeed: { title: "Avg. Move Speed", value: "4.0s" },
+    matchLength: { title: "Match Length", value: "3m 00s" },
+    longestMatch: { title: "Longest Match", value: "6m 00s" },
+  },
 } as const;
 
 interface VictoryStatusProps {
-  status?: "win" | "loss";
+  status?: "win" | "loss" | "draw";
   onPlayAgain?: () => void;
   onHome?: () => void;
   show?: boolean;
@@ -40,7 +48,7 @@ const VictoryStatus = ({
   show,
 }: VictoryStatusProps) => {
   // safe‑guard: if status isn't exactly "win" or "loss", fallback to "win"
-  if (status !== "win" && status !== "loss") {
+  if (status !== "win" && status !== "loss" && status !== "draw") {
     console.warn("VictoryStatus got unexpected status:", status);
     status = "win";
   }
@@ -79,6 +87,7 @@ const VictoryStatus = ({
                   {
                     "text-primary-1050": status === "win",
                     "text-primary-1000": status === "loss",
+                    "text-primary-250/80": status === "draw",
                   }
                 )}
               >

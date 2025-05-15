@@ -63,17 +63,16 @@ const Social = () => {
         showCloseButton
         onClose={() => {}}
         showKripsonImage
+        primaryCta={{
+          title: "Connect",
+          onClick: login,
+          variant: "primary",
+          isMachine: true,
+          fullWidth: true,
+          multipleicons: ["x", "farcaster"],
+        }}
       >
-        <div className="w-full flex flex-col items-stretch mt-5 gap-1">
-          <KPButton
-            title="Connect"
-            onClick={login}
-            variant="primary"
-            isMachine
-            fullWidth
-            multipleicons={["x", "farcaster"]}
-          />
-        </div>
+        <div className="w-full flex flex-col items-stretch mt-5 gap-1"></div>
       </KPDialougue>
     ),
 

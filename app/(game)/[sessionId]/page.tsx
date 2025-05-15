@@ -1,11 +1,25 @@
 "use client";
-
 import { useState, useEffect, useCallback, useRef } from "react";
+import { motion } from "framer-motion";
+
 import useGameActions from "@/store/game/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-import useGameWebSocket, { TurnTimeoutMessage } from "@/hooks/useGameWebSocket";
+import useGameWebSocket, {
+  BoardSubmittedMessage,
+  TurnTimeoutMessage,
+} from "@/hooks/useGameWebSocket";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useParams } from "next/navigation";
+import { ForfeitGameReason } from "@/store/game/types";
+import { useLoadingSequence } from "@/hooks/useLoadingSequence";
+import { LoadingOverlay } from "./components/LoadingOverlay";
+import { GameHeader } from "./components/GameHeader";
+import { SetupPanel } from "./components/SetupPanel";
+import GameBoardContainer from "./components/GameBoardContainer";
+import GameFooter from "./components/GameFooter";
+import VictoryStatus from "./components/VictoryStatus";
+import { useToggleInfo } from "@/hooks/useToggleInfo";
+import { GeneralMessageKey } from "./components/general";
 
 // Game state types
 interface GameState {
@@ -26,6 +40,7 @@ interface GameState {
     enemyHits: number;
     enemySunk: number;
   };
+  winner: string | null;
 }
 
 interface Ship {
@@ -41,16 +56,71 @@ const formatTime = (seconds: number) => {
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
 };
 
+const loadingMessages: string[] = [
+  "Creating opponent fleet...",
+  "Completing fleet coordinates...",
+  "Loading battleships and environments...",
+  "Initializing smart contract...",
+  "Deploying smart contract...",
+];
+
+function getPlayerStatus({
+  gameStatus,
+  players,
+  address,
+  hasSubmitted,
+  isSelf,
+  selfAddress,
+  opponentAddress,
+}: {
+  gameStatus: string;
+  players: string[];
+  address: string;
+  hasSubmitted: boolean;
+  isSelf: boolean;
+  selfAddress: string;
+  opponentAddress: string;
+}) {
+  const isJoined = players.includes(address);
+  const bothJoined =
+    players.length === 2 &&
+    players.includes(selfAddress) &&
+    players.includes(opponentAddress);
+
+  if (!isJoined) return isSelf ? "Waiting..." : "joining";
+
+  if (!bothJoined) return isSelf ? "Waiting..." : "joining";
+
+  if (gameStatus === "CREATED" || gameStatus === "WAITING") return "Joined";
+  if (gameStatus === "SETUP") return hasSubmitted ? "Ready" : "Setup";
+  if (gameStatus === "ACTIVE") return "Active";
+  if (gameStatus === "COMPLETED") return "Completed";
+  return "";
+}
+
 const GameSession = () => {
   const params = useParams();
   const { evmWallet } = usePrivyLinkedAccounts();
-  const { gameState } = useSystemFunctions();
+  const { gameState, navigate } = useSystemFunctions();
   const gameActions = useGameActions();
   const [turnTimer, setTurnTimer] = useState<NodeJS.Timeout | null>(null);
   const [gameTimer, setGameTimer] = useState<NodeJS.Timeout | null>(null);
+  const { messages, loadingDone } = useLoadingSequence(loadingMessages);
+  const [generalMessage, setGeneralMessage] = useState<{
+    key: GeneralMessageKey;
+    id: number;
+  } | null>(null);
 
   // Initialize game state
-  const [gameStateLocal, setGameStateLocal] = useState<GameState>({
+  const [gameStateLocal, setGameStateLocal] = useState<
+    GameState & {
+      sunkEnemyShips: {
+        id: string;
+        name: string;
+        cells: { x: number; y: number }[];
+      }[];
+    }
+  >({
     sessionId: params.sessionId as string,
     players: [],
     gameStatus: "CREATED",
@@ -72,6 +142,8 @@ const GameSession = () => {
       enemyHits: 0,
       enemySunk: 0,
     },
+    winner: null,
+    sunkEnemyShips: [],
   });
 
   const [turnTimeRemaining, setTurnTimeRemaining] = useState(15);
@@ -90,14 +162,14 @@ const GameSession = () => {
 
     // Set volume
     if (hitSoundRef.current) hitSoundRef.current.volume = 0.5;
-    if (missSoundRef.current) missSoundRef.current.volume = 0.5;
-    if (placementSoundRef.current) placementSoundRef.current.volume = 0.5;
+    if (missSoundRef.current) hitSoundRef.current.volume = 0.5;
+    if (placementSoundRef.current) hitSoundRef.current.volume = 0.5;
 
     // Cleanup
     return () => {
       if (hitSoundRef.current) hitSoundRef.current = null;
-      if (missSoundRef.current) missSoundRef.current = null;
-      if (placementSoundRef.current) placementSoundRef.current = null;
+      if (missSoundRef.current) hitSoundRef.current = null;
+      if (placementSoundRef.current) hitSoundRef.current = null;
     };
   }, []);
 
@@ -118,9 +190,24 @@ const GameSession = () => {
 
   // Game functions
   const makeShot = async (x: number, y: number) => {
-    if (!evmWallet?.address || gameStateLocal.currentTurn !== evmWallet.address)
+    // First check if game is active
+    if (gameStateLocal.gameStatus !== "ACTIVE") {
+      console.error("Game is not active");
       return;
-    if (gameStateLocal.enemyBoard[y][x] !== 0) return;
+    }
+
+    // Then check if it's the player's turn and cell hasn't been shot
+    if (
+      !evmWallet?.address ||
+      gameStateLocal.currentTurn !== evmWallet.address
+    ) {
+      console.error("Not your turn");
+      return;
+    }
+    if (gameStateLocal.enemyBoard[y][x] !== 0) {
+      console.error("Cell already shot");
+      return;
+    }
 
     try {
       await gameActions.makeShot({
@@ -145,80 +232,78 @@ const GameSession = () => {
     }
   }, [turnTimer, gameTimer]);
 
-  const resetTurnTimer = useCallback(
-    (startTime: number) => {
-      if (turnTimer) clearInterval(turnTimer);
+  // Monitor turnStartedAt changes directly
+  useEffect(() => {
+    const turnStartTime = gameStateLocal.turnStartedAt;
+    if (turnStartTime && gameStateLocal.gameStatus === "ACTIVE") {
+      // Set initial turn time to 15 seconds
+      setTurnTimeRemaining(15);
 
+      // Start new timer
       const timer = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(0, 15000 - elapsed); // 15 seconds turn timeout
-        setTurnTimeRemaining(Math.ceil(remaining / 1000));
-
-        if (remaining <= 0) {
-          clearInterval(timer);
-          // Auto-submit random shot if it's our turn
-          if (gameStateLocal.currentTurn === evmWallet?.address) {
-            console.log("Turn timeout - auto submitting random shot");
-            // Find available cells
-            const availableCells: [number, number][] = [];
-            gameStateLocal.enemyBoard.forEach((row, y) => {
-              row.forEach((cell, x) => {
-                if (cell === 0) availableCells.push([x, y]);
-              });
-            });
-
-            if (availableCells.length > 0) {
-              const [x, y] =
-                availableCells[
-                  Math.floor(Math.random() * availableCells.length)
-                ];
-              makeShot(x, y);
-            }
+        setTurnTimeRemaining((prev) => {
+          const newValue = Math.max(0, prev - 1);
+          if (newValue === 0) {
+            clearInterval(timer);
           }
-        }
+          return newValue;
+        });
       }, 1000);
 
-      setTurnTimer(timer);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      turnTimer,
-      gameStateLocal.currentTurn,
-      evmWallet?.address,
-      gameStateLocal.enemyBoard,
-    ]
-  );
+      // Cleanup on unmount or when turnStartedAt changes
+      return () => clearInterval(timer);
+    }
+  }, [gameStateLocal.turnStartedAt, gameStateLocal.gameStatus]);
 
-  const resetGameTimer = useCallback(
-    (startTime: number) => {
-      if (gameTimer) clearInterval(gameTimer);
+  // Monitor game time separately
+  useEffect(() => {
+    const gameStartTime = gameStateLocal.gameStartedAt;
+    if (gameStartTime && gameStateLocal.gameStatus === "ACTIVE") {
+      // Calculate initial time remaining
+      const initialRemaining = Math.max(
+        0,
+        Math.ceil((180000 - (Date.now() - gameStartTime)) / 1000)
+      );
+      setGameTimeRemaining(initialRemaining);
 
+      // Start new timer
       const timer = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(0, 180000 - elapsed); // 3 minutes
-        if (remaining <= 0) {
-          clearInterval(timer);
-          // Handle game timeout
-        }
+        const now = Date.now();
+        const remaining = Math.max(
+          0,
+          Math.ceil((180000 - (now - gameStartTime)) / 1000)
+        );
+
+        // Only update if the time has actually changed
+        setGameTimeRemaining((prev) => {
+          if (prev === remaining) return prev;
+
+          // Check for game timeout
+          if (remaining <= 0 && evmWallet?.address) {
+            clearInterval(timer);
+            gameActions.forfeitGame(ForfeitGameReason.TIMEOUT, {
+              onSuccess: () => console.log("Game forfeited due to timeout"),
+            });
+          }
+
+          return remaining;
+        });
       }, 1000);
 
-      setGameTimer(timer);
-    },
-    [gameTimer]
-  );
+      // Cleanup on unmount or when gameStartedAt changes
+      return () => clearInterval(timer);
+    }
+  }, [
+    gameStateLocal.gameStartedAt,
+    gameStateLocal.gameStatus,
+    evmWallet?.address,
+    gameActions,
+  ]);
 
-  const startTimers = useCallback(
-    (startTime: number) => {
-      clearTimers();
-      resetTurnTimer(startTime);
-      resetGameTimer(startTime);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  // Timer resets are no longer needed since effects handle everything
 
   // Setup WebSocket connection
-  const { isConnected, on, off } = useGameWebSocket(
+  const { isConnected, on, off, connectionError } = useGameWebSocket(
     params?.sessionId as string
   );
 
@@ -226,7 +311,6 @@ const GameSession = () => {
   useEffect(() => {
     if (gameState.gameSessionInfo) {
       setGameStateLocal((prev) => {
-        // Create new state while explicitly preserving all local properties
         const newState = {
           ...prev, // Start with all existing state
           sessionId: gameState?.gameSessionInfo?.sessionId || prev.sessionId,
@@ -243,20 +327,15 @@ const GameSession = () => {
           enemyBoard: prev.enemyBoard,
           ships: prev.ships,
           statistics: prev.statistics,
+          sunkEnemyShips: prev.sunkEnemyShips,
         };
         console.log("Updating game state:", { before: prev, after: newState });
         return newState;
       });
 
-      // If game is active, start timers
-      if (
-        gameState.gameSessionInfo.turnStartedAt &&
-        gameState.gameSessionInfo.status === "ACTIVE"
-      ) {
-        startTimers(gameState.gameSessionInfo.turnStartedAt);
-      }
+      // Timer updates are handled by effects now
     }
-  }, [gameState.gameSessionInfo, startTimers]);
+  }, [gameState.gameSessionInfo]);
 
   // Initial fetch of game state
   useEffect(() => {
@@ -265,68 +344,6 @@ const GameSession = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.sessionId]);
-
-  const handleGameOver = useCallback(
-    (data: any) => {
-      clearTimers();
-      const { winner, reason } = data;
-      const isWinner = winner === evmWallet?.address;
-
-      setGameStateLocal((prev) => ({
-        ...prev,
-        gameStatus: "COMPLETED",
-      }));
-
-      // Show game over overlay
-      return (
-        <div
-          className={`fixed inset-0 flex items-center justify-center bg-black/50 z-50 ${
-            gameStateLocal.gameStatus === "COMPLETED"
-              ? "opacity-100"
-              : "opacity-0 pointer-events-none"
-          } transition-opacity duration-500`}
-        >
-          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4 transform transition-transform duration-500 scale-100">
-            <h2 className="text-2xl font-bold mb-4 text-center">Game Over!</h2>
-            <div className="text-center mb-6">
-              <div
-                className={`text-xl font-semibold mb-2 ${
-                  isWinner ? "text-green-600" : "text-red-600"
-                }`}
-              >
-                {isWinner ? "Victory!" : "Defeat!"}
-              </div>
-              <p className="text-gray-600">{reason}</p>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-center mb-6">
-              <div>
-                <div className="text-lg font-semibold">Your Stats</div>
-                <div>Shots: {gameStateLocal.statistics.yourShots}</div>
-                <div>Hits: {gameStateLocal.statistics.yourHits}</div>
-                <div>Ships Sunk: {gameStateLocal.statistics.yourSunk}</div>
-              </div>
-              <div>
-                <div className="text-lg font-semibold">Enemy Stats</div>
-                <div>Shots: {gameStateLocal.statistics.enemyShots}</div>
-                <div>Hits: {gameStateLocal.statistics.enemyHits}</div>
-                <div>Ships Sunk: {gameStateLocal.statistics.enemySunk}</div>
-              </div>
-            </div>
-            <div className="flex justify-center">
-              <button
-                onClick={() => (window.location.href = "/")}
-                className="bg-[#1a73e8] text-white px-6 py-2 rounded hover:bg-[#1557b0] transition-colors"
-              >
-                Return to Home
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [evmWallet?.address, gameStateLocal.statistics, gameStateLocal.gameStatus]
-  );
 
   // WebSocket connection setup
   useEffect(() => {
@@ -353,12 +370,10 @@ const GameSession = () => {
         enemyBoard: prev.enemyBoard,
         ships: prev.ships,
         statistics: prev.statistics,
+        sunkEnemyShips: prev.sunkEnemyShips,
       }));
 
-      // Handle status-specific logic
-      if (data.status === "ACTIVE" && data.turnStartedAt) {
-        startTimers(data.turnStartedAt);
-      }
+      // Timer updates are handled by effects
     };
 
     // Handler for player joined event
@@ -376,23 +391,27 @@ const GameSession = () => {
     };
 
     // Handler for board submitted event
-    const handleBoardSubmitted = (data: any) => {
+    const handleBoardSubmitted = (data: BoardSubmittedMessage) => {
       console.log("Board submitted:", data);
 
-      // if (data.player === gamePlayerId) {
-      //   setPlayerStatus("READY");
-      // } else {
-      //   setOpponentStatus("READY");
-      // }
+      setGameStateLocal((prev) => ({
+        ...prev,
+        gameStatus: data.gameStatus,
+        players: data.players || prev.players,
+        currentTurn: data.currentTurn || prev.currentTurn,
+        gameStartedAt: data.gameStartedAt || prev.gameStartedAt,
+        turnStartedAt: data.turnStartedAt || prev.turnStartedAt,
+        // Preserve these important properties if they exist in prev state
+        playerBoard: prev.playerBoard,
+        enemyBoard: prev.enemyBoard,
+        ships: prev.ships,
+        statistics: prev.statistics,
+        sunkEnemyShips: prev.sunkEnemyShips,
+      }));
 
-      // if (data.allBoardsSubmitted) {
-      //   setMode("game");
-      //   setGeneralMessageKey("game-start");
-
-      //   if (isConnected) {
-      //     send({ type: "game_started_ack", sessionId });
-      //   }
-      // }
+      if (!data.allBoardsSubmitted && data.player === evmWallet?.address) {
+        setGeneralMessage({ key: "waiting", id: Date.now() });
+      }
     };
 
     // Handler for game started event
@@ -407,91 +426,165 @@ const GameSession = () => {
         gameStartedAt: data.turnStartedAt,
       }));
 
-      if (data.turnStartedAt) {
-        startTimers(data.turnStartedAt);
-      }
+      setGeneralMessage({ key: "game-start", id: Date.now() });
+
+      // Timer updates are handled by effects
     };
 
-    // Handler for shot fired event (opponent attacks you)
+    // Handler for shot fired event (handles all shot updates)
     const handleShotFired = (data: any) => {
-      console.log("Shot fired at you:", data);
-      const { x, y, player } = data;
+      console.log("Shot fired:", data);
+      const { x, y, player, isHit, nextTurn, turnStartedAt, sunkShips, sunk } =
+        data;
+
+      if (!evmWallet?.address) return;
 
       setGameStateLocal((prev) => {
-        // Deep clone the player board
-        const newPlayerBoard = prev.playerBoard.map((row) => [...row]);
-        // Check if it was a hit
-        const wasHit = newPlayerBoard[y][x] > 0;
-        // Mark the cell
-        newPlayerBoard[y][x] = wasHit ? -2 : -1; // -2 for hit, -1 for miss
+        // If I'm the shooter, update enemy board
+        if (player === evmWallet.address) {
+          const newEnemyBoard = prev.enemyBoard.map((row) => [...row]);
+          newEnemyBoard[y][x] = isHit ? 2 : 1; // 2 for hit, 1 for miss
 
-        const newState = {
-          ...prev,
-          playerBoard: newPlayerBoard,
-          statistics: {
-            ...prev.statistics,
-            enemyShots: prev.statistics.enemyShots + 1,
-            enemyHits: prev.statistics.enemyHits + (wasHit ? 1 : 0),
-          },
-        };
+          const opponentAddress =
+            prev.players.find((p) => p !== evmWallet.address) || "";
 
-        // Play appropriate sound after state update
-        setTimeout(() => playSound(wasHit ? "hit" : "miss"), 0);
+          return {
+            ...prev,
+            enemyBoard: newEnemyBoard,
+            currentTurn: nextTurn,
+            turnStartedAt: turnStartedAt,
+            statistics: {
+              ...prev.statistics,
+              yourShots: prev.statistics.yourShots + 1,
+              yourHits: prev.statistics.yourHits + (isHit ? 1 : 0),
+              yourSunk: sunkShips[evmWallet.address] || 0,
+              enemySunk: sunkShips[opponentAddress] || 0,
+            },
+          };
+        }
+        // If I'm being shot at, update my board
+        else {
+          const newPlayerBoard = prev.playerBoard.map((row) => [...row]);
+          newPlayerBoard[y][x] = isHit ? -2 : -1; // -2 for hit, -1 for miss
 
-        return newState;
+          const opponentAddress =
+            prev.players.find((p) => p !== evmWallet.address) || "";
+
+          return {
+            ...prev,
+            playerBoard: newPlayerBoard,
+            currentTurn: nextTurn,
+            turnStartedAt: turnStartedAt,
+            statistics: {
+              ...prev.statistics,
+              enemyShots: prev.statistics.enemyShots + 1,
+              enemyHits: prev.statistics.enemyHits + (isHit ? 1 : 0),
+              yourSunk: sunkShips[evmWallet.address] || 0,
+              enemySunk: sunkShips[opponentAddress] || 0,
+            },
+          };
+        }
       });
+
+      // Play appropriate sound
+      playSound(isHit ? "hit" : "miss");
+
+      // Set general message for shot events
+      if (player === evmWallet?.address) {
+        if (sunk) {
+          setGeneralMessage({ key: "sunk", id: Date.now() });
+        } else if (isHit) {
+          setGeneralMessage({ key: "hit", id: Date.now() });
+        }
+        // Do not set message for miss if player made the shot
+      } else {
+        // Only show 'opponent missed' if opponent shot and missed
+        if (!isHit) {
+          setGeneralMessage({ key: "missed", id: Date.now() });
+        }
+      }
+      // Timer updates are handled by effects
     };
 
     // Handler for turn timeout event
     const handleTurnTimeout = (data: TurnTimeoutMessage) => {
       console.log("Turn timeout:", data);
+      const { previousPlayer, nextTurn, turnStartedAt, message } = data;
 
-      // TODO: UI update - show turn timeout message
-    };
+      // Simply update the game state with the new turn info
+      // The useEffect hook monitoring turnStartedAt will handle the timer update
+      setGameStateLocal((prev) => ({
+        ...prev,
+        currentTurn: nextTurn,
+        turnStartedAt: turnStartedAt,
+      }));
 
-    // Handler for shot result event (response to your attack)
-    const handleShotResult = (data: any) => {
-      console.log("Shot result received:", data);
-      const { x, y, isHit, nextTurn, turnStartedAt } = data;
-
-      setGameStateLocal((prev) => {
-        // Deep clone the enemy board
-        const newEnemyBoard = prev.enemyBoard.map((row) => [...row]);
-        // Mark the cell
-        newEnemyBoard[y][x] = isHit ? 2 : 1; // 2 for hit, 1 for miss
-
-        return {
-          ...prev,
-          enemyBoard: newEnemyBoard,
-          currentTurn: nextTurn,
-          turnStartedAt: turnStartedAt,
-          statistics: {
-            ...prev.statistics,
-            yourShots: prev.statistics.yourShots + 1,
-            yourHits: prev.statistics.yourHits + (isHit ? 1 : 0),
-          },
-        };
-      });
-
-      // Play appropriate sound and start new turn timer
-      playSound(isHit ? "hit" : "miss");
-      if (turnStartedAt) {
-        resetTurnTimer(turnStartedAt);
-      }
+      // TODO: Add a turn change sound effect
+      console.log("Turn changed due to timeout:", message);
     };
 
     // Handler for game over event
     const handleGameOver = (data: any) => {
       console.log("Game over:", data);
+      const { winner, reason } = data;
 
-      // Game has ended, determine if I won
-      // const playerWon = data.winner === gamePlayerId;
+      // Stop all timers
+      clearTimers();
 
-      // Update victory/defeat state
-      // setIsWinner(playerWon);
-      // setShowVictory(true);
+      setGameStateLocal((prev) => ({
+        ...prev,
+        gameStatus: "COMPLETED",
+        winner: winner || null,
+        statistics: {
+          ...prev.statistics,
+          // Update final statistics if they were sent
+          ...(data.statistics || {}),
+        },
+      }));
 
-      // TODO: UI update - show victory or defeat screen
+      // Play victory/defeat sound
+      // TODO: Add game over sound effects
+      // playSound(winner === evmWallet?.address ? "victory" : "defeat");
+    };
+
+    // Handler for ship sunk event
+    const handleShipSunk = (data: any) => {
+      // Only show 'sunk' message and update sunkEnemyShips if the player made the shot
+      if (data.player === evmWallet?.address) {
+        setGeneralMessage({ key: "sunk", id: Date.now() });
+        setGameStateLocal((prev) => {
+          // Avoid duplicates by ship id
+          const alreadySunk = prev.sunkEnemyShips.some(
+            (s) => s.id === data.ship.id
+          );
+          if (alreadySunk) return prev;
+          return {
+            ...prev,
+            sunkEnemyShips: [
+              ...prev.sunkEnemyShips,
+              {
+                id: data.ship.id,
+                name: data.ship.name,
+                cells: data.ship.cells,
+              },
+            ],
+          };
+        });
+      }
+      // Update hitMap for the sunk ship ONLY if the sunk ship belongs to the local player
+      if (data.targetPlayer === evmWallet?.address) {
+        setGameStateLocal((prev) => ({
+          ...prev,
+          ships: prev.ships.map((ship) =>
+            ship.id === data.ship.id
+              ? {
+                  ...ship,
+                  hitMap: Array(ship.length).fill(true),
+                }
+              : ship
+          ),
+        }));
+      }
     };
 
     // Handler for errors
@@ -506,9 +599,9 @@ const GameSession = () => {
     on.board_submitted(handleBoardSubmitted);
     on.game_started(handleGameStarted);
     on.shot_fired(handleShotFired);
-    on.shot_result(handleShotResult);
     on.turn_timeout(handleTurnTimeout);
     on.game_over(handleGameOver);
+    on.message("ship_sunk", handleShipSunk);
     on.error(handleError);
 
     // Cleanup function to remove event handlers
@@ -518,78 +611,13 @@ const GameSession = () => {
       off.board_submitted(handleBoardSubmitted);
       off.game_started(handleGameStarted);
       off.shot_fired(handleShotFired);
-      off.shot_result(handleShotResult);
       off.game_over(handleGameOver);
       off.error(handleError);
       off.turn_timeout(handleTurnTimeout);
+      off.message("ship_sunk", handleShipSunk);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, params?.sessionId]);
-
-  const generateRandomShipPlacement = () => {
-    const ships: Ship[] = [];
-    const shipLengths = [5, 4, 3, 3, 2];
-    const shipNames = [
-      "Carrier",
-      "Battleship",
-      "Cruiser",
-      "Submarine",
-      "Destroyer",
-    ];
-    const newBoard = Array(10)
-      .fill(0)
-      .map(() => Array(10).fill(0));
-
-    for (let i = 0; i < shipLengths.length; i++) {
-      let placed = false;
-      let attempts = 0;
-
-      while (!placed && attempts < 1000) {
-        const isHorizontal = Math.random() > 0.5;
-        const startX = Math.floor(
-          Math.random() * (10 - (isHorizontal ? shipLengths[i] : 1))
-        );
-        const startY = Math.floor(
-          Math.random() * (10 - (isHorizontal ? 1 : shipLengths[i]))
-        );
-
-        const cells = [];
-        for (let j = 0; j < shipLengths[i]; j++) {
-          if (isHorizontal) {
-            cells.push({ x: startX + j, y: startY });
-          } else {
-            cells.push({ x: startX, y: startY + j });
-          }
-        }
-
-        if (canPlaceShip(cells, newBoard)) {
-          cells.forEach((cell) => {
-            newBoard[cell.y][cell.x] = i + 1;
-          });
-
-          ships.push({
-            id: `ship-${i}`,
-            name: shipNames[i],
-            length: shipLengths[i],
-            cells: cells,
-          });
-          placed = true;
-          playSound("place");
-        }
-        attempts++;
-      }
-
-      if (!placed) {
-        throw new Error(`Failed to place ship ${shipNames[i]}`);
-      }
-    }
-
-    setGameStateLocal((prev) => ({
-      ...prev,
-      ships: ships,
-      playerBoard: newBoard,
-    }));
-  };
 
   const canPlaceShip = (
     cells: { x: number; y: number }[],
@@ -613,13 +641,22 @@ const GameSession = () => {
 
   const submitBoard = async () => {
     if (!evmWallet?.address || gameStateLocal.ships.length === 0) return;
-
+    setGameStateLocal((prev) => ({
+      ...prev,
+      gameStatus: "SETUP",
+    }));
+    // Hide inventory permanently after submission
     try {
-      await gameActions.submitBoardCommitment({
-        address: evmWallet.address,
-        boardCommitment: generateBoardCommitment(),
-        ships: gameStateLocal.ships,
-      });
+      await gameActions.submitBoardCommitment(
+        {
+          address: evmWallet.address,
+          boardCommitment: generateBoardCommitment(),
+          ships: gameStateLocal.ships,
+        },
+        {
+          onSuccess: () => setInventoryVisible(false),
+        }
+      );
     } catch (error) {
       console.error("Error submitting board:", error);
     }
@@ -637,278 +674,361 @@ const GameSession = () => {
     );
   };
 
-  console.log("gameStateLocal", gameStateLocal);
+  // New UI State for simplicity
+  const mode = gameStateLocal.gameStatus === "ACTIVE" ? "game" : "setup";
+  const yourTurn = evmWallet?.address === gameStateLocal.currentTurn;
+  const turnStartedAt = gameStateLocal.turnStartedAt ?? undefined;
+  const gameCode = gameStateLocal.sessionId ?? undefined;
+  const onHam = () => {}; // Placeholder, implement as needed
+  const onTurnExpiry = () => {}; // Placeholder, implement as needed
+
+  // State for inventory panel visibility
+  const [inventoryVisible, setInventoryVisible] = useState(true);
+  const shipsInPosition: Record<string, boolean> = {
+    Carrier: !!gameStateLocal.ships.find((s) => s.name === "Carrier"),
+    Battleship: !!gameStateLocal.ships.find((s) => s.name === "Battleship"),
+    Cruiser: !!gameStateLocal.ships.find((s) => s.name === "Cruiser"),
+    Submarine: !!gameStateLocal.ships.find((s) => s.name === "Submarine"),
+    Destroyer: !!gameStateLocal.ships.find((s) => s.name === "Destroyer"),
+  };
+
+  const shipConfigs = [
+    { name: "Carrier", length: 5 },
+    { name: "Battleship", length: 4 },
+    { name: "Cruiser", length: 3 },
+    { name: "Submarine", length: 3 },
+    { name: "Destroyer", length: 2 },
+  ];
+
+  function findRandomShipPlacement(
+    length: number,
+    board: number[][]
+  ): { x: number; y: number }[] | null {
+    for (let attempt = 0; attempt < 1000; attempt++) {
+      const isHorizontal = Math.random() > 0.5;
+      const startX = Math.floor(
+        Math.random() * (10 - (isHorizontal ? length : 1))
+      );
+      const startY = Math.floor(
+        Math.random() * (10 - (isHorizontal ? 1 : length))
+      );
+      const cells = [];
+      for (let j = 0; j < length; j++) {
+        if (isHorizontal) {
+          cells.push({ x: startX + j, y: startY });
+        } else {
+          cells.push({ x: startX, y: startY + j });
+        }
+      }
+      if (canPlaceShip(cells, board)) return cells;
+    }
+    return null;
+  }
+
+  const onPlaceShip = (variant: string) => {
+    if (gameStateLocal.ships.find((s) => s.name === variant)) return;
+    const config = shipConfigs.find((s) => s.name === variant);
+    if (!config) return;
+    // Copy board
+    const board = gameStateLocal.playerBoard.map((row) => [...row]);
+    // Place the new ship
+    const cells = findRandomShipPlacement(config.length, board);
+    if (!cells) return;
+    const shipIndex = shipConfigs.findIndex((s) => s.name === variant) + 1;
+    cells.forEach((cell) => {
+      board[cell.y][cell.x] = shipIndex;
+    });
+    setGameStateLocal((prev) => ({
+      ...prev,
+      ships: [
+        ...prev.ships,
+        {
+          id: `ship-${variant}`,
+          name: variant,
+          length: config.length,
+          cells,
+        },
+      ],
+      playerBoard: board,
+    }));
+    playSound("place");
+  };
+
+  const onShuffle = () => {
+    const placedShips = gameStateLocal.ships;
+    const board = Array(10)
+      .fill(0)
+      .map(() => Array(10).fill(0));
+    const newShips: Ship[] = [];
+    for (const ship of placedShips) {
+      const cells = findRandomShipPlacement(ship.length, board);
+      if (!cells) continue;
+      const shipIndex = shipConfigs.findIndex((s) => s.name === ship.name) + 1;
+      cells.forEach((cell) => {
+        board[cell.y][cell.x] = shipIndex;
+      });
+      newShips.push({ ...ship, cells });
+    }
+    setGameStateLocal((prev) => ({
+      ...prev,
+      ships: newShips,
+      playerBoard: board,
+    }));
+    playSound("place");
+  };
+
+  const onReady = () => {
+    submitBoard();
+  };
+
+  const disableReadyButton =
+    Object.values(shipsInPosition).some((placed) => !placed) ||
+    gameStateLocal.gameStatus !== "CREATED";
+
+  const selfAddress = evmWallet?.address ?? "";
+  const opponentAddress =
+    gameStateLocal.players.find((p) => p !== selfAddress) ?? "";
+
+  const hasSelfSubmitted = gameStateLocal.ships.length > 0;
+  const hasOpponentSubmitted = false;
+
+  const playerStatus = getPlayerStatus({
+    gameStatus: gameStateLocal.gameStatus,
+    players: gameStateLocal.players,
+    address: selfAddress,
+    hasSubmitted: hasSelfSubmitted,
+    isSelf: true,
+    selfAddress,
+    opponentAddress,
+  });
+
+  const opponentStatus = getPlayerStatus({
+    gameStatus: gameStateLocal.gameStatus,
+    players: gameStateLocal.players,
+    address: opponentAddress,
+    hasSubmitted: hasOpponentSubmitted,
+    isSelf: false,
+    selfAddress,
+    opponentAddress,
+  });
+
+  const { infoShow, userDismissedInfo, setUserDismissedInfo } = useToggleInfo();
+
+  const showVictory = gameStateLocal.gameStatus === "COMPLETED";
+  const isDraw =
+    gameStateLocal.gameStatus === "COMPLETED" && !gameStateLocal.winner;
+  const isWinner = gameStateLocal.winner === evmWallet?.address;
+  const victoryStatus = isDraw ? "draw" : isWinner ? "win" : "loss";
+  const handlePlayAgain = () => navigate.push("/new-game");
+
+  const updateShipPosition = (id: string, pos: { x: number; y: number }) => {
+    setGameStateLocal((prev) => ({
+      ...prev,
+      ships: prev.ships.map((ship) =>
+        ship.id === id
+          ? {
+              ...ship,
+              cells: ship.cells.map((cell, idx) => ({
+                x: pos.x + (ship.cells[idx].x - ship.cells[0].x),
+                y: pos.y + (ship.cells[idx].y - ship.cells[0].y),
+              })),
+            }
+          : ship
+      ),
+    }));
+    playSound("place");
+  };
+
+  const flipShip = (id: string) => {
+    setGameStateLocal((prev) => ({
+      ...prev,
+      ships: prev.ships.map((ship) => {
+        if (ship.id !== id) return ship;
+        // Flip orientation by swapping x/y deltas
+        const base = ship.cells[0];
+        const isHorizontal =
+          ship.cells.length > 1 && ship.cells[0].y === ship.cells[1].y;
+        const newCells = ship.cells.map((cell, idx) =>
+          isHorizontal
+            ? { x: base.x, y: base.y + idx }
+            : { x: base.x + idx, y: base.y }
+        );
+        return { ...ship, cells: newCells };
+      }),
+    }));
+    playSound("place");
+  };
+
+  const [overlaps, setOverlaps] = useState<{ x: number; y: number }[]>([]);
+  const handleOverlap = useCallback(
+    (overlapCells: { x: number; y: number }[]) => {
+      // Only update overlaps if the value actually changes (shallow compare)
+      if (
+        overlaps.length === overlapCells.length &&
+        overlaps.every(
+          (cell, idx) =>
+            cell.x === overlapCells[idx].x && cell.y === overlapCells[idx].y
+        )
+      ) {
+        return;
+      }
+      setOverlaps(overlapCells);
+    },
+    [overlaps]
+  );
+
+  const [modeState, setModeState] = useState<"setup" | "game">(
+    mode as "setup" | "game"
+  );
+  const setMode = (newMode: "setup" | "game") => setModeState(newMode);
+
+  // --- Board/ShipType adapters ---
+  const allowedVariants = [
+    "Carrier",
+    "Battleship",
+    "Cruiser",
+    "Submarine",
+    "Destroyer",
+  ] as const;
+  type Variant = (typeof allowedVariants)[number];
+
+  function getOrientation(
+    cells: { x: number; y: number }[]
+  ): "horizontal" | "vertical" {
+    if (cells.length < 2) return "horizontal";
+    return cells[0].y === cells[1].y ? "horizontal" : "vertical";
+  }
+
+  const placedShips = gameStateLocal.ships
+    .filter((ship) => allowedVariants.includes(ship.name as Variant))
+    .map((ship) => {
+      const orientation = getOrientation(ship.cells);
+      const position = ship.cells[0];
+      return {
+        id: ship.id,
+        variant: ship.name as Variant,
+        orientation,
+        position,
+        hitMap: Array(ship.length).fill(false), // TODO: update with real hit data if available
+      };
+    });
+
+  function boardArrayToRecord(
+    board: number[][],
+    isPlayer: boolean = false
+  ): Record<string, "ship" | "hit" | "miss" | null> {
+    const result: Record<string, "ship" | "hit" | "miss" | null> = {};
+    for (let y = 0; y < board.length; y++) {
+      for (let x = 0; x < board[y].length; x++) {
+        const val = board[y][x];
+        const key = `${x}-${y}`;
+        if (isPlayer) {
+          if (val > 0) result[key] = "ship";
+          else if (val === -2) result[key] = "hit";
+          else if (val === -1) result[key] = "miss";
+          else result[key] = null;
+        } else {
+          if (val === 2) result[key] = "hit";
+          else if (val === 1) result[key] = "miss";
+          else result[key] = null;
+        }
+      }
+    }
+    return result;
+  }
+
+  const playerBoard = boardArrayToRecord(gameStateLocal.playerBoard, true);
+  // For opponentBoard, filter out 'ship' values to match expected type
+  const rawOpponentBoard = boardArrayToRecord(gameStateLocal.enemyBoard, false);
+  const opponentBoard: Record<string, "hit" | "miss" | null> = {};
+  Object.entries(rawOpponentBoard).forEach(([k, v]) => {
+    opponentBoard[k] = v === "hit" || v === "miss" ? v : null;
+  });
+
+  const currentTurn =
+    gameStateLocal.currentTurn && evmWallet?.address
+      ? {
+          playerId: gameStateLocal.currentTurn,
+          isMyTurn: gameStateLocal.currentTurn === evmWallet.address,
+        }
+      : null;
 
   return (
-    <div className="max-w-[1400px] mx-auto">
-      <style jsx global>{`
-        @keyframes placed {
-          0% {
-            transform: scale(0.8);
-            opacity: 0.5;
-          }
-          50% {
-            transform: scale(1.1);
-            opacity: 0.8;
-          }
-          100% {
-            transform: scale(1);
-            opacity: 1;
-          }
-        }
+    <div className="relative flex items-center justify-center flex-1">
+      <LoadingOverlay loading={!loadingDone} loadingMessages={messages} />
 
-        @keyframes hit {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.2);
-            background-color: #dc3545;
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        @keyframes miss {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.2);
-            background-color: #6c757d;
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        .cell-ship-placed {
-          animation: placed 0.5s ease-out;
-        }
-
-        .cell-hit {
-          animation: hit 0.5s ease-out;
-        }
-
-        .cell-miss {
-          animation: miss 0.5s ease-out;
-        }
-      `}</style>
-
-      <h1 className="text-[#1a73e8] mt-0 mb-4">🚢 ZK Battleship</h1>
-
-      {/* Connection Status */}
-      <div className="bg-white rounded-lg shadow p-5 mb-5">
-        <h2 className="text-[#1a73e8] mt-0 mb-4">Connection Status</h2>
-        <div className="flex gap-2.5 mb-2.5">
-          <div
-            className={`px-2.5 py-1.5 rounded text-xs font-medium ${
-              isConnected
-                ? "bg-[#d4edda] text-[#155724]"
-                : "bg-[#f8d7da] text-[#721c24]"
-            }`}
-          >
-            WebSocket: {isConnected ? "Connected" : "Disconnected"}
-          </div>
-          <div
-            className={`px-2.5 py-1.5 rounded text-xs font-medium ${
-              gameStateLocal.gameStatus !== "CREATED"
-                ? "bg-[#d4edda] text-[#155724]"
-                : "bg-[#f8d7da] text-[#721c24]"
-            }`}
-          >
-            Game:{" "}
-            {gameStateLocal.gameStatus !== "CREATED"
-              ? "Connected"
-              : "Not Started"}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-5 mb-5">
-        {/* Game Setup */}
-        <div className="bg-white rounded-lg shadow p-5">
-          <h2 className="text-[#1a73e8] mt-0 mb-4">Game Setup</h2>
-
-          <div className="mb-5 pb-[15px] border-b border-[#eee]">
-            <h3 className="text-[#1a73e8] mt-0 mb-4">Session Info</h3>
-            <div className="bg-[#f8f9fa] border border-[#dee2e6] rounded p-[15px] my-2.5 text-black">
-              <div>
-                <strong>Session ID:</strong> {gameStateLocal.sessionId}
-              </div>
-              <div>
-                <strong>Players:</strong> {gameStateLocal?.players?.join(", ")}
-              </div>
-              <div>
-                <strong>Game Status:</strong>{" "}
-                <span
-                  className={`inline-block px-2.5 py-1.5 rounded font-medium my-1.5 ${
-                    gameStateLocal.gameStatus === "CREATED"
-                      ? "bg-[#fff3cd] text-[#856404] border border-[#ffeaa7]"
-                      : gameStateLocal.gameStatus === "ACTIVE"
-                      ? "bg-[#d4edda] text-[#155724] border border-[#c3e6cb]"
-                      : gameStateLocal.gameStatus === "COMPLETED"
-                      ? "bg-[#d1ecf1] text-[#0c5460] border border-[#bee5eb]"
-                      : ""
-                  }`}
-                >
-                  {gameStateLocal.gameStatus}
-                </span>
-              </div>
-              <div>
-                <strong>Current Turn:</strong> {gameStateLocal?.currentTurn}
-              </div>
+      {loadingDone && (
+        <motion.div
+          key="game"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="w-full h-full flex flex-col items-center justify-center"
+        >
+          {connectionError && (
+            <div className="absolute top-0 w-full bg-red-500 text-white p-2 text-center">
+              {connectionError}
             </div>
-          </div>
+          )}
 
-          <div className="mb-5 pb-[15px] border-b border-[#eee]">
-            <h3 className="text-[#1a73e8] mt-0 mb-4">Setup Board</h3>
-            <div className="grid grid-cols-5 gap-2.5 my-2.5">
-              {[
-                "Carrier",
-                "Battleship",
-                "Cruiser",
-                "Submarine",
-                "Destroyer",
-              ].map((ship, index) => (
-                <div
-                  key={ship}
-                  className={`bg-[#e9ecef] p-2 rounded text-center text-xs ${
-                    gameStateLocal.ships.some((s) => s.name === ship)
-                      ? "bg-[#d4edda] text-[#155724]"
-                      : ""
-                  }`}
-                >
-                  <div>{ship}</div>
-                  <div>Length: {[5, 4, 3, 3, 2][index]}</div>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={generateRandomShipPlacement}
-              className="bg-[#1a73e8] text-white border-none px-4 py-2 rounded cursor-pointer text-sm mr-2.5 transition-colors hover:bg-[#0d62c9]"
-            >
-              Randomize Ships
-            </button>
-            <button
-              onClick={submitBoard}
-              className="bg-[#28a745] text-white border-none px-4 py-2 rounded cursor-pointer text-sm transition-colors hover:bg-[#218838]"
-            >
-              Submit Board
-            </button>
-          </div>
-        </div>
+          <GameHeader
+            mode={mode}
+            onHam={() => {}}
+            yourTurn={yourTurn}
+            turnStartedAt={turnStartedAt}
+            gameCode={gameCode}
+            onTurnExpiry={onTurnExpiry}
+          />
 
-        {/* Game Board & Controls */}
-        <div className="bg-white rounded-lg shadow p-5">
-          <h2 className="text-[#1a73e8] mt-0 mb-4">Game Board</h2>
+          <SetupPanel
+            inventoryVisible={inventoryVisible}
+            setInventoryVisible={() => {}}
+            shipsInPosition={shipsInPosition}
+            onPlaceShip={onPlaceShip}
+            onShuffle={onShuffle}
+            onReady={onReady}
+            disableReadyButton={false}
+            mode={mode}
+          />
 
-          <div className="mb-5 pb-[15px] border-b border-[#eee]">
-            <h3 className="text-[#1a73e8] mt-0 mb-4">Your Board</h3>
-            <div className="grid grid-cols-10 gap-[2px] max-w-[300px] my-5">
-              {gameStateLocal.playerBoard.map((row, y) =>
-                row.map((cell, x) => (
-                  <div
-                    key={`player-${x}-${y}`}
-                    className={`aspect-square border border-[#ccc] bg-[#f0f0f0] cursor-pointer flex items-center justify-center text-xs transition-colors hover:bg-[#e0e0e0] ${
-                      cell > 0 ? "bg-[#007bff] text-white cell-ship-placed" : ""
-                    } ${
-                      cell === -2 ? "bg-[#dc3545] text-white cell-hit" : ""
-                    } ${
-                      cell === -1 ? "bg-[#6c757d] text-white cell-miss" : ""
-                    }`}
-                  >
-                    {cell > 0 && "S"}
-                    {cell === -2 && "H"}
-                    {cell === -1 && "M"}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <GameBoardContainer
+            placedShips={placedShips}
+            updateShipPosition={updateShipPosition}
+            flipShip={flipShip}
+            handleOverlap={handleOverlap}
+            mode={mode}
+            currentTurn={currentTurn}
+            opponentBoard={opponentBoard}
+            playerBoard={playerBoard}
+            handleShoot={makeShot}
+            generalMessage={generalMessage}
+            disableReadyButton={disableReadyButton}
+            inventoryVisible={inventoryVisible}
+            setMode={setMode}
+            onReady={onReady}
+            onFireShot={makeShot}
+          />
 
-          <div className="mb-5 pb-[15px] border-b border-[#eee]">
-            <h3 className="text-[#1a73e8] mt-0 mb-4">Enemy Board</h3>
-            <div className="grid grid-cols-10 gap-[2px] max-w-[300px] my-5">
-              {gameStateLocal.enemyBoard.map((row, y) =>
-                row.map((cell, x) => (
-                  <div
-                    key={`enemy-${x}-${y}`}
-                    onClick={() => makeShot(x, y)}
-                    className={`aspect-square border border-[#ccc] bg-[#f0f0f0] cursor-pointer flex items-center justify-center text-xs transition-colors hover:bg-[#e0e0e0] ${
-                      cell === 2 ? "bg-[#dc3545] text-white cell-hit" : ""
-                    } ${cell === 1 ? "bg-[#6c757d] text-white cell-miss" : ""}`}
-                  >
-                    {cell === 2 ? "H" : cell === 1 ? "M" : ""}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          <GameFooter
+            overlaps={overlaps}
+            infoShow={infoShow}
+            setUserDismissedInfo={setUserDismissedInfo}
+            generalMessage={generalMessage}
+            playerAddress={selfAddress}
+            opponentAddress={opponentAddress}
+            playerStatus={playerStatus}
+            opponentStatus={opponentStatus}
+            mode={mode}
+          />
+        </motion.div>
+      )}
 
-          <div className="mb-5">
-            <h3 className="text-[#1a73e8] mt-0 mb-4">Game Timers</h3>
-            <div className="bg-[#f8f9fa] p-2.5 rounded border border-[#dee2e6]">
-              <h4 className="m-0 mb-2.5 text-[#495057]">Turn Timer</h4>
-              <div
-                className={`text-lg font-bold p-2.5 rounded text-center ${
-                  gameStateLocal.turnStartedAt
-                    ? "bg-[#fff3cd] text-[#856404]"
-                    : "bg-[#f8f9fa]"
-                }`}
-              >
-                {turnTimeRemaining}s
-              </div>
-            </div>
-            <div className="bg-[#f8f9fa] p-2.5 rounded border border-[#dee2e6] mt-2.5">
-              <h4 className="m-0 mb-2.5 text-[#495057]">Game Timer</h4>
-              <div
-                className={`text-lg font-bold p-2.5 rounded text-center ${
-                  gameStateLocal.gameStartedAt
-                    ? "bg-[#fff3cd] text-[#856404]"
-                    : "bg-[#f8f9fa]"
-                }`}
-              >
-                {formatTime(gameTimeRemaining)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Game Information */}
-      <div className="bg-white rounded-lg shadow p-5">
-        <h2 className="text-[#1a73e8] mt-0 mb-4">Game Information</h2>
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2.5 my-[15px]">
-          <div className="bg-[#f8f9fa] p-2.5 rounded border border-[#dee2e6]">
-            <h4 className="m-0 mb-2.5 text-[#495057]">Your Stats</h4>
-            <div>Shots Fired: {gameStateLocal.statistics.yourShots}</div>
-            <div>Hits: {gameStateLocal.statistics.yourHits}</div>
-            <div>Ships Sunk: {gameStateLocal.statistics.yourSunk}</div>
-            <div>
-              Accuracy:{" "}
-              {gameStateLocal.statistics.yourShots > 0
-                ? Math.round(
-                    (gameStateLocal.statistics.yourHits /
-                      gameStateLocal.statistics.yourShots) *
-                      100
-                  )
-                : 0}
-              %
-            </div>
-          </div>
-          <div className="bg-[#f8f9fa] p-2.5 rounded border border-[#dee2e6]">
-            <h4 className="m-0 mb-2.5 text-[#495057]">Enemy Stats</h4>
-            <div>Shots Received: {gameStateLocal.statistics.enemyShots}</div>
-            <div>Hits Taken: {gameStateLocal.statistics.enemyHits}</div>
-            <div>Your Ships Sunk: {gameStateLocal.statistics.enemySunk}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Render game over screen when game is completed */}
-      {gameStateLocal.gameStatus === "COMPLETED" && handleGameOver({})}
+      <VictoryStatus
+        show={showVictory}
+        status={victoryStatus}
+        onPlayAgain={handlePlayAgain}
+        onHome={handlePlayAgain}
+      />
     </div>
   );
 };
