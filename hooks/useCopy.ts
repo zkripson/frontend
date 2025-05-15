@@ -5,8 +5,11 @@ const useCopy = (toastText = "Copied url") => {
   const [hasCopied, setHasCopied] = useState(false);
   const { showToast } = useAppActions();
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const handleCopy = (text: string, isInvite?: boolean) => {
+    const domain = window?.location?.origin;
+    const inviteLink = `${domain}/join-game?code=${text}`;
+
+    navigator.clipboard.writeText(isInvite ? inviteLink : text);
     setHasCopied(true);
 
     showToast(toastText, "info");

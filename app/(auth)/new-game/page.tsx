@@ -95,14 +95,11 @@ const NewGame = () => {
     },
   ];
 
-  const domain = window?.location?.origin;
-  const inviteLink = `${domain}/join-game?code=${inviteCreation?.code}`;
-
   const shareActions: Array<IKPButton> = [
     { title: "send invite", onClick: () => handleShareInvite() },
     {
       title: "copy code instead",
-      onClick: () => handleCopy(inviteLink),
+      onClick: () => handleCopy(inviteCreation?.code!, true),
     },
   ];
 

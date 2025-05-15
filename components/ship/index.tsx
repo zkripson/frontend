@@ -166,7 +166,7 @@ export default function KPShip({
           })} // optional CSS mask
         >
           <Image
-            src={`/images/${variant}.png`}
+            src={`/images/${variant?.toLowerCase()}.png`}
             alt={variant}
             width={visualWidth}
             height={visualHeight}
