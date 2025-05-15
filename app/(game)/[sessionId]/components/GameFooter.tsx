@@ -10,7 +10,7 @@ interface GameFooterProps {
   overlaps: { x: number; y: number }[];
   infoShow: boolean;
   setUserDismissedInfo: (value: boolean) => void;
-  generalMessageKey: GeneralMessageKey;
+  generalMessage: { key: GeneralMessageKey; id: number } | null;
   playerAddress: string;
   opponentAddress?: string;
   playerStatus: string;
@@ -22,7 +22,7 @@ export function GameFooter({
   overlaps,
   infoShow,
   setUserDismissedInfo,
-  generalMessageKey,
+  generalMessage,
   playerAddress,
   opponentAddress,
   playerStatus,
@@ -54,7 +54,10 @@ export function GameFooter({
             avatarUrl={pfp}
             isPlayer
           />
-          <General show={mode === "game"} messageKey={generalMessageKey} />
+          <General
+            messageKey={generalMessage?.key ?? null}
+            uniqueId={generalMessage?.id}
+          />
         </div>
 
         <Info

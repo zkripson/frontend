@@ -13,16 +13,42 @@ interface AudioContextValue {
 
 const AudioContext = createContext<AudioContextValue | null>(null);
 
-const sounds = {
+export const sounds = {
   bg: new Howl({
     src: ["/sounds/bg-music.mp3"],
     loop: true,
     volume: 0,
   }),
-  hit: new Howl({ src: ["/sounds/hit.wav"], volume: 1.0 }),
-  miss: new Howl({ src: ["/sounds/miss.wav"], volume: 0.8 }),
-  shot: new Howl({ src: ["/sounds/shot.wav"], volume: 0.9 }),
-  victory: new Howl({ src: ["/sounds/victory.mp3"], volume: 0.6 }),
+  hit: new Howl({ src: ["/sounds/hit.mp3"], volume: 1.0 }),
+  miss: new Howl({ src: ["/sounds/miss.mp3"], volume: 0.8 }),
+  place: new Howl({ src: ["/sounds/place.mp3"], volume: 0.1 }),
+  timer: new Howl({ src: ["/sounds/timer-ticks.mp3"], volume: 0.1 }),
+  // Voiceovers and additional sounds
+  miss_voiceover: new Howl({
+    src: ["/sounds/miss_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  game_start_voiceover: new Howl({
+    src: ["/sounds/game_start_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  another_hit_voiceover: new Howl({
+    src: ["/sounds/another_hit_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  sunk_voiceover: new Howl({
+    src: ["/sounds/sunk_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  hit_voiceover: new Howl({ src: ["/sounds/hit_voiceover.mp3"], volume: 0.7 }),
+  game_over_voiceover: new Howl({
+    src: ["/sounds/game_over_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  waiting_voiceover: new Howl({
+    src: ["/sounds/waiting_voiceover.mp3"],
+    volume: 0.7,
+  }),
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({

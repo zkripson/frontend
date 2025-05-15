@@ -14,7 +14,7 @@ interface GameBoardContainerProps {
   opponentBoard: Record<string, "hit" | "miss" | null>;
   currentTurn: { playerId: string; isMyTurn: boolean } | null;
   handleShoot: (x: number, y: number, isHit: boolean) => void;
-  generalMessageKey: GeneralMessageKey;
+  generalMessage: { key: GeneralMessageKey; id: number } | null;
   disableReadyButton: boolean;
   inventoryVisible: boolean;
   setMode: (mode: "setup" | "game") => void;
@@ -32,7 +32,7 @@ export function GameBoardContainer({
   opponentBoard,
   currentTurn,
   handleShoot,
-  generalMessageKey,
+  generalMessage,
   disableReadyButton,
   inventoryVisible,
   setMode,
@@ -119,7 +119,10 @@ export function GameBoardContainer({
       )}
       {/* always show feedback */}
       <div className="md:hidden mt-4">
-        <General show={mode === "game"} messageKey={generalMessageKey} />
+        <General
+          messageKey={generalMessage?.key ?? null}
+          uniqueId={generalMessage?.id}
+        />
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useScreenDetect } from "@/hooks/useScreenDetect";
+import { useAudio } from "@/providers/AudioProvider";
 
 const messages = {
   "game-start": "game start",
@@ -16,33 +17,65 @@ const messages = {
 export type GeneralMessageKey = keyof typeof messages;
 
 interface GeneralProps {
-  messageKey: GeneralMessageKey;
-  show: boolean;
+  messageKey: GeneralMessageKey | null;
+  uniqueId?: number;
 }
 
-export default function General({ messageKey, show }: GeneralProps) {
+export default function General({ messageKey, uniqueId }: GeneralProps) {
   // pull in your mobile-detect flags
   const { isXSmall, isSmall } = useScreenDetect();
   const isMobile = isXSmall || isSmall;
 
   // figure out which string to display
-  const msg = messages[messageKey];
+  const msg = messages[messageKey!];
   const isArray = Array.isArray(msg);
   const [hitIndex, setHitIndex] = useState(0);
   const prevKey = useRef<GeneralMessageKey>(messageKey);
+  const audio = useAudio();
+  const playedRef = useRef<{
+    key: GeneralMessageKey | null;
+    uniqueId?: number;
+  }>({ key: null, uniqueId: undefined });
 
+  const msgLength = msg && Array.isArray(msg) ? msg.length : 0;
   useEffect(() => {
-    if (messageKey === "hit" && prevKey.current === "hit") {
+    if (!messageKey) return;
+    if (
+      messageKey === "hit" &&
+      prevKey.current === "hit" &&
+      msg &&
+      Array.isArray(msg)
+    ) {
       setHitIndex((i) => (i + 1) % msg.length);
     }
     prevKey.current = messageKey;
-  }, [messageKey, msg.length]);
+  }, [messageKey, msg, msgLength, uniqueId]);
+
+  useEffect(() => {
+    if (!messageKey) return;
+    // Only play if messageKey or uniqueId changes and show is true
+    if (
+      playedRef.current.key !== messageKey ||
+      playedRef.current.uniqueId !== uniqueId
+    ) {
+      if (messageKey === "waiting") audio.play("waiting_voiceover");
+      else if (messageKey === "missed") audio.play("miss_voiceover");
+      else if (messageKey === "hit") audio.play("hit_voiceover");
+      else if (messageKey === "sunk") audio.play("sunk_voiceover");
+      else if (messageKey === "game-start") audio.play("game_start_voiceover");
+      playedRef.current = { key: messageKey, uniqueId };
+    }
+  }, [messageKey, uniqueId, audio]);
+
+  useEffect(() => {
+    // This effect will run on every uniqueId change, even if messageKey is the same
+  }, [uniqueId]);
 
   const displayText = isArray ? msg[hitIndex] : (msg as string);
 
   return (
     <AnimatePresence>
-      {show &&
+      {messageKey &&
         (isMobile ? (
           <motion.p
             key="general-mobile"
