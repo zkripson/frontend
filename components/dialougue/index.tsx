@@ -68,7 +68,7 @@ const KPDialougue = ({
       )}
 
       <div className="px-14 max-sm:px-6 w-full">
-        <div className="flex flex-col items-center text-center gap-10 max-sm:gap-4 w-full max-w-[426px] max-sm:max-w-[285px]">
+        <div className="flex flex-col text-center gap-10 max-sm:gap-4 w-full max-w-[426px] max-sm:max-w-[285px]">
           <div className="flex flex-col items-center gap-1 max-sm:gap-1.5">
             <h2 className="text-[62px] max-sm:text-[41px] max-sm:-mb-2 leading-[100%] font-bold text-primary-50 uppercase font-MachineStd max-sm:tracking-[0%]">
               {title}

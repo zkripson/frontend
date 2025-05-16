@@ -3,7 +3,8 @@ import { createPublicClient, http, formatUnits, erc20Abi } from "viem";
 import { useState, useCallback } from "react";
 import usePrivyLinkedAccounts from "./usePrivyLinkedAccounts";
 import useSystemFunctions from "./useSystemFunctions";
-import { setBalances } from "@/store/app";
+import { setBalances, setLoadingBalance } from "@/store/app";
+import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 
 const useBalance = () => {
   const { dispatch } = useSystemFunctions();
@@ -22,6 +23,7 @@ const useBalance = () => {
       }
 
       setIsLoading(true);
+      dispatch(setLoadingBalance(true));
       setError(null);
 
       try {
@@ -39,22 +41,11 @@ const useBalance = () => {
           args: [evmWallet.address as `0x${string}`],
         });
 
-        // Get token decimals
-        const decimals = await client.readContract({
-          address: tokenAddress,
-          abi: erc20Abi,
-          functionName: "decimals",
-        });
-
-        // Get token symbol (optional)
-        const symbol = await client.readContract({
-          address: tokenAddress,
-          abi: erc20Abi,
-          functionName: "symbol",
-        });
-
         // Format balance with correct decimals
-        const formattedBalance = formatUnits(balance, decimals);
+        const formattedBalance = formatUnits(
+          balance,
+          TOKEN_ADDRESSES.USDC ? 6 : 18
+        );
 
         // Store in tokenBalances map
         setTokenBalances((prev) => ({
@@ -65,25 +56,23 @@ const useBalance = () => {
         dispatch(
           setBalances({
             balance: formattedBalance,
-            decimals,
-            symbol,
+            decimals: tokenAddress === TOKEN_ADDRESSES.USDC ? 6 : 18,
+            symbol: tokenAddress === TOKEN_ADDRESSES.USDC ? "USDC" : "$SHIP",
             address: tokenAddress,
           })
         );
 
         return {
           balance: formattedBalance,
-          decimals,
-          symbol,
         };
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to fetch token balance";
         setError(errorMessage);
-        console.error("Error fetching token balance:", err);
         return null;
       } finally {
         setIsLoading(false);
+        dispatch(setLoadingBalance(false));
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
