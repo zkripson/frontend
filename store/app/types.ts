@@ -4,6 +4,7 @@ interface AppState {
   farcasterContext: FarcasterContext | undefined;
   toast: ToastState;
   balances: Balance[];
+  loadingBalance: boolean;
 }
 
 type FarcasterContext = {

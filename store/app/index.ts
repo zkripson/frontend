@@ -1,7 +1,6 @@
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { UsdcIcon } from "@/public/icons";
 
 const initialState: AppState = {
   isInGame: false,
@@ -26,6 +25,7 @@ const initialState: AppState = {
       symbol: "$SHIP",
     },
   ],
+  loadingBalance: false,
 };
 
 export const appReducer = createSlice({
@@ -34,6 +34,10 @@ export const appReducer = createSlice({
   reducers: {
     setIsInGame(state, action: PayloadAction<boolean>) {
       state.isInGame = action.payload;
+    },
+
+    setLoadingBalance(state, action: PayloadAction<boolean>) {
+      state.loadingBalance = action.payload;
     },
 
     setAppIsReady(state, action: PayloadAction<boolean>) {
@@ -68,6 +72,7 @@ export const {
   setFarcasterContext,
   setToast,
   setBalances,
+  setLoadingBalance,
 } = appReducer.actions;
 
 export default appReducer.reducer;

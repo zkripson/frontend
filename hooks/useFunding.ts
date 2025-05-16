@@ -1,26 +1,25 @@
-import { useFundWallet as useEVMFundWallet } from "@privy-io/react-auth";
+import { useFundWallet } from "@privy-io/react-auth";
 import { base } from "viem/chains";
 import useAppActions from "@/store/app/actions";
 import { formatEther } from "viem";
 import usePrivyLinkedAccounts from "./usePrivyLinkedAccounts";
+import useBalance from "./useBalance";
+import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
+import useSystemFunctions from "./useSystemFunctions";
+import { setLoadingBalance } from "@/store/app";
 
 const useFunding = () => {
+  const { checkTokenBalance } = useBalance();
   const { showToast } = useAppActions();
   const { evmWallet } = usePrivyLinkedAccounts();
-  const { fundWallet: fundEVMWallet } = useEVMFundWallet({
-    onUserExited({ balance, address }) {
-      const privyBalance = formatEther(balance!);
-      const serverBalance = 1;
+  const { appState, dispatch } = useSystemFunctions();
 
-      if (serverBalance === undefined) return; // update user balance
-
-      if (Number(privyBalance) > serverBalance) {
-        showToast(
-          "Deposit successful! It might take a few seconds to reflect on your balance.",
-          "success"
-        );
-        // update user balance
-      }
+  const { fundWallet: fundEVMWallet } = useFundWallet({
+    onUserExited({}) {
+      dispatch(setLoadingBalance(true));
+      setTimeout(() => {
+        checkTokenBalance(TOKEN_ADDRESSES.USDC);
+      }, 1500);
     },
   });
 

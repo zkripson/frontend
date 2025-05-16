@@ -34,7 +34,7 @@ const KPInput = ({
           disabled={disabled}
           {...register}
           className={classNames(
-            "absolute inset-0 w-full h-full bg-transparent outline-none px-4 text-primary-250 placeholder-primary-550 text-[18px] max-sm:text-[12px]",
+            "absolute inset-0 w-full h-full bg-transparent outline-none px-4 text-primary-250 placeholder-primary-550 text-[18px] max-sm:text-[12px] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none",
             className
           )}
           placeholder={placeholder}
