@@ -18,12 +18,16 @@ function isPrivyWallet<T extends "ethereum" | "solana">(
 const usePrivyLinkedAccounts = () => {
   const { user } = usePrivy();
 
-  const evmWallet = user?.linkedAccounts.find((account) =>
+  const embeddedEvmWallet = user?.linkedAccounts.find((account) =>
     isPrivyWallet(account, "ethereum")
   );
 
-  const solanaWallet = user?.linkedAccounts.find((account) =>
+  const embeddedSolanaWallet = user?.linkedAccounts.find((account) =>
     isPrivyWallet(account, "solana")
+  );
+
+  const evmWallet = user?.linkedAccounts.find(
+    (account) => account.type === "smart_wallet"
   );
 
   const linkedTwitter = user?.linkedAccounts?.find(
@@ -36,9 +40,10 @@ const usePrivyLinkedAccounts = () => {
 
   return {
     evmWallet,
-    solanaWallet,
+    embeddedEvmWallet,
     linkedTwitter,
     linkedFarcaster,
+    embeddedSolanaWallet,
   };
 };
 
