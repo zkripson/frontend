@@ -118,7 +118,10 @@ jest.mock("../components/VictoryStatus", () => ({
 
 describe("GameSession Component", () => {
   // Mock implementation setup
-  const mockMakeShot = jest.fn().mockImplementation(() => Promise.resolve());
+  const mockMakeShot = jest.fn().mockImplementation((shot, callback) => {
+    if (callback?.onSuccess) callback.onSuccess();
+    return Promise.resolve();
+  });
   const mockFetchGameSessionInformation = jest
     .fn()
     .mockImplementation(() => Promise.resolve());
@@ -550,12 +553,11 @@ describe("GameSession Component", () => {
       mockOnReady();
     });
 
-    // Check that submitBoardCommitment was called
+    // Check that submitBoardCommitment was called with board commitment only (no sessionId)
     expect(mockSubmitBoardCommitment).toHaveBeenCalled();
-    expect(mockSubmitBoardCommitment.mock.calls[0][0].address).toBe(
-      PLAYER_ADDRESS
-    );
-    expect(mockSubmitBoardCommitment.mock.calls[0][0].ships.length).toBe(5);
+    const boardCommitment = mockSubmitBoardCommitment.mock.calls[0][0];
+    expect(boardCommitment.address).toBe(PLAYER_ADDRESS);
+    expect(boardCommitment.ships.length).toBe(5);
   });
 
   it("can fire a shot during game phase", async () => {
@@ -575,7 +577,7 @@ describe("GameSession Component", () => {
       mockHandleShoot(3, 7);
     });
 
-    // Check that makeShot was called with correct coords
+    // Check that makeShot was called with the correct parameters
     expect(mockMakeShot).toHaveBeenCalledWith({
       x: 3,
       y: 7,
