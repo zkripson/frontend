@@ -1,6 +1,5 @@
 type InviteCreationBody = {
   creator: string;
-  sessionId: null | string;
 };
 
 type InviteCreationResponse = {

@@ -33,7 +33,7 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
   const { checkTokenBalance } = useBalance();
   const { appState } = useSystemFunctions();
   const { fundWallet } = useFunding();
-  const { transferTo } = useWithdrawal();
+  const { transferToken } = useWithdrawal();
   const { showToast } = useAppActions();
   const { balances, loadingBalance } = appState;
 
@@ -93,7 +93,13 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
         return showToast("Insufficient balance", "error");
       }
 
-      transferTo(data.toAddress! as `0x${string}`, data.amount);
+      const isUsdc = selectedToken?.address === TOKEN_ADDRESSES.USDC;
+
+      transferToken(
+        data.toAddress! as `0x${string}`,
+        data.amount,
+        isUsdc ? "USDC" : "SHIP"
+      );
     }
   };
 
