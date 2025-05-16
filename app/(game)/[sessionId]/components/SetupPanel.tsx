@@ -25,7 +25,7 @@ export function SetupPanel({
     <>
       <Inventory
         visible={inventoryVisible}
-        onToggle={setInventoryVisible}
+        onHide={setInventoryVisible}
         shipsInPosition={shipsInPosition}
         onPlaceShip={onPlaceShip}
         onShuffle={onShuffle}

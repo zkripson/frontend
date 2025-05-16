@@ -61,6 +61,9 @@ module.exports = {
         shake: "shake 0.4s ease-in-out",
         "pulse-opacity": "pulse-opacity 2s ease-in-out infinite",
       },
+      screens: {
+        bp1215: "1215px",
+      },
     },
   },
   plugins: [],

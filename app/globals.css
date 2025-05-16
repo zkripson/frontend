@@ -69,3 +69,16 @@ body {
   height: 100%;
   overflow: hidden;
 }
+
+/* First: global override */
+*,
+*::before,
+*::after {
+  cursor: url("/images/cursor.png") 0 0, auto !important;
+}
+
+/* Then: put text fields back to normal */
+input,
+textarea {
+  cursor: text !important;
+}

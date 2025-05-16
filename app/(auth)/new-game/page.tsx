@@ -63,9 +63,7 @@ const NewGame = () => {
   const onCreate = async () => {
     setPhase("create");
 
-    if (!inviteCreation || inviteCreation.expiresAt < Date.now()) {
-      createInvite();
-    }
+    createInvite();
   };
 
   const toggleJoin = () => setJoining(true);
@@ -241,7 +239,7 @@ const NewGame = () => {
             }}
           >
             {createLoading ? (
-              <KPSecondaryLoader size={16} />
+              <KPSecondaryLoader size={12} />
             ) : (
               <span
                 style={{
