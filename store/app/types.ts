@@ -3,6 +3,7 @@ interface AppState {
   appIsReady: boolean;
   farcasterContext: FarcasterContext | undefined;
   toast: ToastState;
+  balances: Balance[];
 }
 
 type FarcasterContext = {
@@ -22,4 +23,11 @@ type ToastState = {
   message: string;
   type: Toast;
   show: boolean;
+};
+
+type Balance = {
+  balance: string;
+  symbol: string;
+  decimals: number;
+  address: `0x${string}`;
 };
