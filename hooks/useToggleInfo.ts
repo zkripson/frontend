@@ -2,24 +2,24 @@
 
 import { useState, useEffect } from "react";
 
-export function useToggleInfo(intervalMs: number = 30000) {
-  const [infoShow, setInfoShow] = useState<boolean>(true);
+export function useToggleInfo() {
+  const [infoShow, setInfoShow] = useState<boolean>(false);
   const [userDismissedInfo, setUserDismissedInfo] = useState<boolean>(false);
 
   useEffect(() => {
-    // if user explicitly dismissed, hide permanently
     if (userDismissedInfo) {
       setInfoShow(false);
       return;
     }
-
-    // else toggle every intervalMs
-    const interval = setInterval(() => {
-      setInfoShow((prev) => !prev);
-    }, intervalMs);
-
-    return () => clearInterval(interval);
-  }, [userDismissedInfo, intervalMs]);
+    const showTimeout = setTimeout(() => {
+      setInfoShow(true);
+      const hideTimeout = setTimeout(() => {
+        setInfoShow(false);
+      }, 5000);
+      return () => clearTimeout(hideTimeout);
+    }, 5000);
+    return () => clearTimeout(showTimeout);
+  }, [userDismissedInfo]);
 
   return { infoShow, userDismissedInfo, setUserDismissedInfo };
 }

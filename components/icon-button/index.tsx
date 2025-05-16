@@ -1,5 +1,5 @@
 import { useScreenDetect } from "@/hooks/useScreenDetect";
-import { CloseIcon, ShareIcon, HamIcon } from "@/public/icons";
+import { CloseIcon, ShareIcon, HamIcon, MuteIcon } from "@/public/icons";
 import KPClickAnimation from "../click-animation";
 
 const iconSizes = {
@@ -12,6 +12,7 @@ const icons = ({ width, height }: { width: number; height: number }) => ({
   close: <CloseIcon width={width} height={height} />,
   share: <ShareIcon width={width} height={height} />,
   ham: <HamIcon width={width} height={height} />,
+  mute: <MuteIcon width={width} height={height} />,
 });
 
 interface KPIconButtonProps {

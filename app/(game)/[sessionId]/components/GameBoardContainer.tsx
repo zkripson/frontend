@@ -3,6 +3,7 @@
 import Board from "./board";
 import General, { GeneralMessageKey } from "./general";
 import { KPClickAnimation } from "@/components";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface GameBoardContainerProps {
   placedShips: ShipType[];
@@ -14,12 +15,17 @@ interface GameBoardContainerProps {
   opponentBoard: Record<string, "hit" | "miss" | null>;
   currentTurn: { playerId: string; isMyTurn: boolean } | null;
   handleShoot: (x: number, y: number, isHit: boolean) => void;
-  generalMessage: { key: GeneralMessageKey; id: number } | null;
+  generalMessage: {
+    key: GeneralMessageKey;
+    id: number;
+    shipName?: string;
+  } | null;
   disableReadyButton: boolean;
   inventoryVisible: boolean;
   setMode: (mode: "setup" | "game") => void;
   onReady: () => void;
   onFireShot: (x: number, y: number) => void;
+  opponentShips?: ShipType[];
 }
 
 export function GameBoardContainer({
@@ -38,6 +44,7 @@ export function GameBoardContainer({
   setMode,
   onReady,
   onFireShot,
+  opponentShips = [],
 }: GameBoardContainerProps) {
   // build cell list 0–99 → {x,y,key}
   const cells = Array.from({ length: 100 }).map((_, i) => {
@@ -77,7 +84,7 @@ export function GameBoardContainer({
           onShoot={handleShoot}
         />
 
-        <div className="lg:hidden w-full absolute top-[103%] left-0">
+        <div className="bp1215:hidden w-full absolute top-[103%] left-0">
           <KPClickAnimation
             disabled={disableReadyButton || inventoryVisible}
             className="flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]"
@@ -93,35 +100,44 @@ export function GameBoardContainer({
   }
 
   return (
-    <div className="w-full flex flex-col items-center">
-      {currentTurn?.isMyTurn ? (
-        <>
-          <Board
-            ships={[]}
-            mode={mode}
-            shots={opponentShots}
-            onShoot={(x, y) => {
-              const key = `${x}-${y}`;
-              if (opponentBoard[key] == null) onFireShot(x, y);
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <Board
-            ships={placedShips}
-            mode={mode}
-            shots={playerShots}
-            onShoot={() => {}}
-            showAllShipsInGame
-          />
-        </>
-      )}
+    <div className="w-full flex flex-col items-center relative">
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={currentTurn?.isMyTurn ? "my-turn" : "opponent-turn"}
+          initial={{ rotateY: 180, opacity: 0 }}
+          animate={{ rotateY: 0, opacity: 1 }}
+          exit={{ rotateY: -180, opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+          style={{ perspective: 1000 }}
+        >
+          {currentTurn?.isMyTurn ? (
+            <Board
+              ships={opponentShips}
+              mode={mode}
+              shots={opponentShots}
+              onShoot={(x, y) => {
+                const key = `${x}-${y}`;
+                if (opponentBoard[key] == null) onFireShot(x, y);
+              }}
+              showAllShipsInGame
+            />
+          ) : (
+            <Board
+              ships={placedShips}
+              mode={mode}
+              shots={playerShots}
+              onShoot={() => {}}
+              showAllShipsInGame
+            />
+          )}
+        </motion.div>
+      </AnimatePresence>
       {/* always show feedback */}
-      <div className="md:hidden mt-4">
+      <div className="md:hidden mt-4 top-[100%] absolute left-0 w-full flex items-center justify-center">
         <General
           messageKey={generalMessage?.key ?? null}
           uniqueId={generalMessage?.id}
+          shipName={generalMessage?.shipName}
         />
       </div>
     </div>

@@ -49,6 +49,50 @@ export const sounds = {
     src: ["/sounds/waiting_voiceover.mp3"],
     volume: 0.7,
   }),
+  sunk_carrier_voiceover: new Howl({
+    src: ["/sounds/sunk_carrier_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  sunk_battleship_voiceover: new Howl({
+    src: ["/sounds/sunk_battleship_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  sunk_cruiser_voiceover: new Howl({
+    src: ["/sounds/sunk_cruiser_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  sunk_submarine_voiceover: new Howl({
+    src: ["/sounds/sunk_submarine_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  sunk_destroyer_voiceover: new Howl({
+    src: ["/sounds/sunk_destroyer_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  opponent_sunk_voiceover: new Howl({
+    src: ["/sounds/opponent_sunk_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  opponent_sunk_carrier_voiceover: new Howl({
+    src: ["/sounds/opponent_sunk_carrier_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  opponent_sunk_battleship_voiceover: new Howl({
+    src: ["/sounds/opponent_sunk_battleship_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  opponent_sunk_cruiser_voiceover: new Howl({
+    src: ["/sounds/opponent_sunk_cruiser_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  opponent_sunk_submarine_voiceover: new Howl({
+    src: ["/sounds/opponent_sunk_submarine_voiceover.mp3"],
+    volume: 0.7,
+  }),
+  opponent_sunk_destroyer_voiceover: new Howl({
+    src: ["/sounds/opponent_sunk_destroyer_voiceover.mp3"],
+    volume: 0.7,
+  }),
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({

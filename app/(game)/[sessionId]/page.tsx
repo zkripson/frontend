@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 
 import useGameActions from "@/store/game/actions";
@@ -19,6 +19,7 @@ import GameFooter from "./components/GameFooter";
 import VictoryStatus from "./components/VictoryStatus";
 import { useToggleInfo } from "@/hooks/useToggleInfo";
 import { GeneralMessageKey } from "./components/general";
+import { useAudio } from "@/providers/AudioProvider";
 
 // Game state types
 interface GameState {
@@ -108,6 +109,7 @@ const GameSession = () => {
   const [generalMessage, setGeneralMessage] = useState<{
     key: GeneralMessageKey;
     id: number;
+    shipName?: string;
   } | null>(null);
 
   // Initialize game state
@@ -148,44 +150,18 @@ const GameSession = () => {
   const [turnTimeRemaining, setTurnTimeRemaining] = useState(15);
   const [gameTimeRemaining, setGameTimeRemaining] = useState(180);
 
-  // Audio refs
-  const hitSoundRef = useRef<HTMLAudioElement | null>(null);
-  const missSoundRef = useRef<HTMLAudioElement | null>(null);
-  const placementSoundRef = useRef<HTMLAudioElement | null>(null);
+  // Audio context is now provided by AudioProvider
 
-  useEffect(() => {
-    // Initialize audio elements
-    hitSoundRef.current = new Audio("/sounds/hit.mp3");
-    missSoundRef.current = new Audio("/sounds/miss.mp3");
-    placementSoundRef.current = new Audio("/sounds/place.mp3");
-
-    // Set volume
-    if (hitSoundRef.current) hitSoundRef.current.volume = 0.5;
-    if (missSoundRef.current) hitSoundRef.current.volume = 0.5;
-    if (placementSoundRef.current) hitSoundRef.current.volume = 0.5;
-
-    // Cleanup
-    return () => {
-      if (hitSoundRef.current) hitSoundRef.current = null;
-      if (missSoundRef.current) hitSoundRef.current = null;
-      if (placementSoundRef.current) hitSoundRef.current = null;
-    };
-  }, []);
-
-  // Play sound effects
-  const playSound = useCallback((type: "hit" | "miss" | "place") => {
-    const sound =
-      type === "hit"
-        ? hitSoundRef.current
-        : type === "miss"
-        ? missSoundRef.current
-        : placementSoundRef.current;
-
-    if (sound) {
-      sound.currentTime = 0;
-      sound.play().catch(console.error);
-    }
-  }, []);
+  // Play sound effects using AudioProvider
+  const audio = useAudio();
+  const playSound = useCallback(
+    (type: "hit" | "miss" | "place") => {
+      if (audio) {
+        audio.play(type);
+      }
+    },
+    [audio]
+  );
 
   // Game functions
   const makeShot = async (x: number, y: number) => {
@@ -422,9 +398,10 @@ const GameSession = () => {
         gameStatus: "ACTIVE",
         currentTurn: data.currentTurn,
         turnStartedAt: data.turnStartedAt,
-        gameStartedAt: data.turnStartedAt,
+        gameStartedAt: data.turnStartedAt, // Use this for game timer
       }));
-
+      setTurnTimeRemaining(15); // Reset turn timer
+      setGameTimeRemaining(180); // Reset game timer
       setGeneralMessage({ key: "game-start", id: Date.now() });
 
       // Timer updates are handled by effects
@@ -490,15 +467,15 @@ const GameSession = () => {
 
       // Set general message for shot events
       if (player === evmWallet?.address) {
-        if (sunk) {
-          setGeneralMessage({ key: "sunk", id: Date.now() });
-        } else if (isHit) {
+        if (isHit) {
           setGeneralMessage({ key: "hit", id: Date.now() });
+        } else {
+          setGeneralMessage({ key: "player-missed", id: Date.now() });
         }
-        // Do not set message for miss if player made the shot
       } else {
-        // Only show 'opponent missed' if opponent shot and missed
-        if (!isHit) {
+        if (isHit) {
+          setGeneralMessage({ key: "opponent-hit", id: Date.now() });
+        } else {
           setGeneralMessage({ key: "missed", id: Date.now() });
         }
       }
@@ -550,7 +527,11 @@ const GameSession = () => {
     const handleShipSunk = (data: any) => {
       // Only show 'sunk' message and update sunkEnemyShips if the player made the shot
       if (data.player === evmWallet?.address) {
-        setGeneralMessage({ key: "sunk", id: Date.now() });
+        setGeneralMessage({
+          key: "sunk",
+          id: Date.now(),
+          shipName: data.ship.name,
+        });
         setGameStateLocal((prev) => {
           // Avoid duplicates by ship id
           const alreadySunk = prev.sunkEnemyShips.some(
@@ -572,6 +553,11 @@ const GameSession = () => {
       }
       // Update hitMap for the sunk ship ONLY if the sunk ship belongs to the local player
       if (data.targetPlayer === evmWallet?.address) {
+        setGeneralMessage({
+          key: "opponent-sunk",
+          id: Date.now(),
+          shipName: data.ship.name,
+        });
         setGameStateLocal((prev) => ({
           ...prev,
           ships: prev.ships.map((ship) =>
@@ -782,7 +768,7 @@ const GameSession = () => {
 
   const disableReadyButton =
     Object.values(shipsInPosition).some((placed) => !placed) ||
-    gameStateLocal.gameStatus !== "CREATED";
+    gameStateLocal.players.length < 2;
 
   const selfAddress = evmWallet?.address ?? "";
   const opponentAddress =
@@ -811,7 +797,7 @@ const GameSession = () => {
     opponentAddress,
   });
 
-  const { infoShow, userDismissedInfo, setUserDismissedInfo } = useToggleInfo();
+  const { infoShow, setUserDismissedInfo } = useToggleInfo();
 
   const showVictory = gameStateLocal.gameStatus === "COMPLETED";
   const isDraw =
@@ -898,20 +884,6 @@ const GameSession = () => {
     return cells[0].y === cells[1].y ? "horizontal" : "vertical";
   }
 
-  const placedShips = gameStateLocal.ships
-    .filter((ship) => allowedVariants.includes(ship.name as Variant))
-    .map((ship) => {
-      const orientation = getOrientation(ship.cells);
-      const position = ship.cells[0];
-      return {
-        id: ship.id,
-        variant: ship.name as Variant,
-        orientation,
-        position,
-        hitMap: Array(ship.length).fill(false), // TODO: update with real hit data if available
-      };
-    });
-
   function boardArrayToRecord(
     board: number[][],
     isPlayer: boolean = false
@@ -952,6 +924,39 @@ const GameSession = () => {
         }
       : null;
 
+  // --- PLAYER SHIPS: update hitMap based on playerBoard ---
+  const placedShips = gameStateLocal.ships
+    .filter((ship) => allowedVariants.includes(ship.name as Variant))
+    .map((ship) => {
+      const orientation = getOrientation(ship.cells);
+      const position = ship.cells[0];
+      // Build hitMap from playerBoard
+      const hitMap = ship.cells.map((cell) => {
+        const val = gameStateLocal.playerBoard[cell.y][cell.x];
+        return val === -2; // -2 means hit
+      });
+      return {
+        id: ship.id,
+        variant: ship.name as Variant,
+        orientation,
+        position,
+        hitMap,
+      };
+    });
+
+  // --- OPPONENT SHIPS: show sunk enemy ships with all hitMap true ---
+  const opponentShips = gameStateLocal.sunkEnemyShips.map((ship) => {
+    const orientation = getOrientation(ship.cells);
+    const position = ship.cells[0];
+    return {
+      id: ship.id,
+      variant: ship.name as Variant,
+      orientation,
+      position,
+      hitMap: Array(ship.cells.length).fill(true),
+    };
+  });
+
   return (
     <div className="relative flex items-center justify-center flex-1">
       <LoadingOverlay loading={!loadingDone} loadingMessages={messages} />
@@ -972,21 +977,21 @@ const GameSession = () => {
 
           <GameHeader
             mode={mode}
-            onHam={() => {}}
             yourTurn={yourTurn}
             turnStartedAt={turnStartedAt}
             gameCode={gameCode}
             onTurnExpiry={onTurnExpiry}
+            gameTimeRemaining={gameTimeRemaining}
           />
 
           <SetupPanel
             inventoryVisible={inventoryVisible}
-            setInventoryVisible={() => {}}
+            setInventoryVisible={() => setInventoryVisible(false)}
             shipsInPosition={shipsInPosition}
             onPlaceShip={onPlaceShip}
             onShuffle={onShuffle}
             onReady={onReady}
-            disableReadyButton={false}
+            disableReadyButton={disableReadyButton}
             mode={mode}
           />
 
@@ -1006,6 +1011,8 @@ const GameSession = () => {
             setMode={setMode}
             onReady={onReady}
             onFireShot={makeShot}
+            // Pass opponentShips for visualizing sunk enemy ships
+            {...(mode === "game" && { opponentShips })}
           />
 
           <GameFooter

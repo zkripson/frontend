@@ -13,7 +13,7 @@ type InventoryProps = {
   onReady: () => void;
   disableReady: boolean;
   visible: boolean;
-  onToggle: () => void;
+  onHide: () => void;
   show?: boolean;
 };
 

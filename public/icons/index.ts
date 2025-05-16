@@ -18,6 +18,7 @@ import ShuffleIcon from "./shuffle-icon";
 import QuestionIcon from "./question-icon";
 import InfoCircleIcon from "./info-circle-icon";
 import ExclaimIcon from "./exclaim-icon";
+import MuteIcon from "./mute-icon";
 
 export {
   CloseIcon,
@@ -40,4 +41,5 @@ export {
   QuestionIcon,
   InfoCircleIcon,
   ExclaimIcon,
+  MuteIcon,
 };

@@ -56,8 +56,12 @@ const Board: React.FC<BoardProps> = ({
     cellSize = 48;
   } else if (isMedium) {
     cellSize = 40;
+  } else if (isSmall) {
+    cellSize = 32;
+  } else if (isXSmall) {
+    cellSize = 28;
   } else {
-    cellSize = 34;
+    cellSize = 32;
   }
 
   const [hoveredCell, setHoveredCell] = useState<{
@@ -192,6 +196,30 @@ const Board: React.FC<BoardProps> = ({
           const isOverlap = overlaps.some((o) => o.x === x && o.y === y);
           const shot = shots[key];
 
+          // Check if this cell is part of a sunk ship
+          let isSunkCell = false;
+          if (mode === "game" && ships.length > 0) {
+            for (const ship of ships) {
+              if (ship.hitMap.every(Boolean)) {
+                for (let i = 0; i < ship.hitMap.length; i++) {
+                  const sx =
+                    ship.orientation === "horizontal"
+                      ? ship.position.x + i
+                      : ship.position.x;
+                  const sy =
+                    ship.orientation === "vertical"
+                      ? ship.position.y + i
+                      : ship.position.y;
+                  if (sx === x && sy === y) {
+                    isSunkCell = true;
+                    break;
+                  }
+                }
+              }
+              if (isSunkCell) break;
+            }
+          }
+
           return (
             <div
               key={key}
@@ -211,7 +239,7 @@ const Board: React.FC<BoardProps> = ({
               )}
               style={{ width: cellSize, height: cellSize }}
             >
-              {mode === "game" && shot && (
+              {mode === "game" && shot && !isSunkCell && (
                 <div
                   className={classNames(
                     "absolute inset-0 flex items-center justify-center pointer-events-none",
@@ -223,8 +251,6 @@ const Board: React.FC<BoardProps> = ({
                   )}
                 >
                   {shot.type === "miss" ? (
-                    <div className="w-3/5 h-3/5 bg-primary-700 rounded-full opacity-80" />
-                  ) : shot.stage === "smoke" ? (
                     <Image
                       src="/images/smoke.gif"
                       alt="smoke"

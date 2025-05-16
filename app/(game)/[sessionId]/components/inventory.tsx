@@ -1,5 +1,5 @@
 "use client";
-import { JSX } from "react";
+import { JSX, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import classNames from "classnames";
@@ -65,7 +65,7 @@ const Inventory = ({
   onShuffle,
   onReady,
   disableReady,
-  onToggle,
+  onHide,
   visible,
   show,
 }: InventoryProps) => {
@@ -78,7 +78,14 @@ const Inventory = ({
 
   const disable = !allInPosition || disableReady;
 
-  const hiddenX = `calc(-100% + 25px)`;
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isBp1215 = window.innerWidth < 1215;
+    if (allInPosition && isBp1215 && show) {
+      onHide();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allInPosition, show]);
 
   return (
     <AnimatePresence initial={false}>
@@ -86,14 +93,11 @@ const Inventory = ({
         <motion.div
           exit={{ opacity: 0 }}
           animate={{
-            x: visible ? 0 : hiddenX,
+            left: visible ? 0 : "calc(-100vw + 90px)",
             scale: visible ? 1 : 0.95,
           }}
           transition={{ type: "spring", duration: 0.5 }}
-          className="fixed top-[20%] transform scale-90 sm:left-0 sm:translate-x-0 sm:scale-95 lg:scale-100 w-[90vw] max-w-[381px] h-[534px] z-20"
-          onClick={() => {
-            if (!visible) onToggle();
-          }}
+          className="fixed top-[20%] transform scale-90 bp1215:left-0 bp1215:translate-x-0 sm:scale-95 lg:scale-100 w-[90vw] max-w-[381px] h-[534px] z-20"
         >
           <div className="size-full bg-dialougue bg-cover bg-no-repeat bg-center px-[38px] pt-14 pb-[22px] flex flex-col items-stretch justify-between">
             <div className="flex flex-col items-stretch gap-4">
@@ -120,10 +124,12 @@ const Inventory = ({
                   return (
                     <div
                       key={variant}
-                      className="flex items-end justify-between gap-3 cursor-pointer"
+                      className="relative group flex items-end justify-between gap-3"
                       onClick={() => onPlaceShip(variant)}
                     >
-                      <div className="relative">
+                      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(121,85,39,0)_0%,#C34B4B_71.5%,rgba(118,82,36,0)_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-md z-0" />
+
+                      <div className="relative rounded-md z-10">
                         <Image
                           src={image}
                           alt={variant}
@@ -138,7 +144,6 @@ const Inventory = ({
                             }
                           )}
                         />
-
                         <div
                           className={classNames(
                             "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
@@ -152,6 +157,7 @@ const Inventory = ({
                         </div>
                       </div>
 
+                      {/* Variant label */}
                       <span className="text-primary-50 text-xs capitalize">
                         {variant}
                       </span>
@@ -186,7 +192,7 @@ const Inventory = ({
               whileTap={allInPosition ? { scale: 0.95 } : {}}
               disabled={disable}
               className={classNames(
-                "flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500",
+                "hidden bp1215:flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500",
                 {
                   "opacity-15 pointer-events-none": disable,
                 }
