@@ -31,6 +31,20 @@ jest.mock("next/navigation", () => ({
   useParams: () => ({ sessionId: "test-session-id" }),
 }));
 
+// Mock the AudioProvider and useAudio
+jest.mock("@/providers/AudioProvider", () => ({
+  useAudio: () => ({
+    play: jest.fn(),
+    stop: jest.fn(),
+    pause: jest.fn(),
+    isPlaying: jest.fn().mockReturnValue(false),
+    volume: 1,
+    setVolume: jest.fn(),
+    muted: false,
+    setMuted: jest.fn(),
+  }),
+}));
+
 // Mock framer-motion to prevent animation issues in tests
 jest.mock("framer-motion", () => ({
   motion: {
@@ -218,13 +232,7 @@ describe("GameSession Component", () => {
       setUserDismissedInfo: jest.fn(),
     });
 
-    // Mock audio
-    global.Audio = jest.fn().mockImplementation(() => ({
-      play: jest.fn().mockResolvedValue(undefined),
-      pause: jest.fn(),
-      currentTime: 0,
-      volume: 0,
-    }));
+    // Mock audio has been moved to the top level mock
 
     // Mock setInterval/clearInterval
     jest.useFakeTimers();

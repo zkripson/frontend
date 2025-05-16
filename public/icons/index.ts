@@ -19,6 +19,7 @@ import QuestionIcon from "./question-icon";
 import InfoCircleIcon from "./info-circle-icon";
 import ExclaimIcon from "./exclaim-icon";
 import MuteIcon from "./mute-icon";
+import UsdcIcon from "./usdc-icon";
 
 export {
   CloseIcon,
@@ -42,4 +43,5 @@ export {
   InfoCircleIcon,
   ExclaimIcon,
   MuteIcon,
+  UsdcIcon,
 };
