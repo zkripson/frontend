@@ -2,15 +2,26 @@
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import KPProfileBadge from "../profile-badge";
+import useBalance from "@/hooks/useBalance";
+import { useEffect } from "react";
+import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 
 const KPHeader = () => {
+  const { checkTokenBalance } = useBalance();
   const { pathname } = useSystemFunctions();
-  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
+  const { linkedFarcaster, linkedTwitter, evmWallet } =
+    usePrivyLinkedAccounts();
 
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
   const pfp =
     linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
   const showProfileBadge = pathname === "/new-game";
+
+  useEffect(() => {
+    checkTokenBalance(TOKEN_ADDRESSES.USDC);
+    checkTokenBalance(TOKEN_ADDRESSES.SHIP);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [evmWallet]);
 
   return (
     <div className="layout-header-container">

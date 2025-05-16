@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { KPHeader } from "@/components";
 import useScreenDimension from "@/hooks/useScreenDimension";
 
-export default function AuthLayout({
+export default function WalletLayout({
   children,
 }: {
   children: React.ReactNode;

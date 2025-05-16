@@ -31,6 +31,20 @@ jest.mock("next/navigation", () => ({
   useParams: () => ({ sessionId: "test-session-id" }),
 }));
 
+// Mock the AudioProvider and useAudio
+jest.mock("@/providers/AudioProvider", () => ({
+  useAudio: () => ({
+    play: jest.fn(),
+    stop: jest.fn(),
+    pause: jest.fn(),
+    isPlaying: jest.fn().mockReturnValue(false),
+    volume: 1,
+    setVolume: jest.fn(),
+    muted: false,
+    setMuted: jest.fn(),
+  }),
+}));
+
 // Mock framer-motion to prevent animation issues in tests
 jest.mock("framer-motion", () => ({
   motion: {
@@ -104,7 +118,10 @@ jest.mock("../components/VictoryStatus", () => ({
 
 describe("GameSession Component", () => {
   // Mock implementation setup
-  const mockMakeShot = jest.fn().mockImplementation(() => Promise.resolve());
+  const mockMakeShot = jest.fn().mockImplementation((shot, callback) => {
+    if (callback?.onSuccess) callback.onSuccess();
+    return Promise.resolve();
+  });
   const mockFetchGameSessionInformation = jest
     .fn()
     .mockImplementation(() => Promise.resolve());
@@ -218,13 +235,7 @@ describe("GameSession Component", () => {
       setUserDismissedInfo: jest.fn(),
     });
 
-    // Mock audio
-    global.Audio = jest.fn().mockImplementation(() => ({
-      play: jest.fn().mockResolvedValue(undefined),
-      pause: jest.fn(),
-      currentTime: 0,
-      volume: 0,
-    }));
+    // Mock audio has been moved to the top level mock
 
     // Mock setInterval/clearInterval
     jest.useFakeTimers();
@@ -542,12 +553,11 @@ describe("GameSession Component", () => {
       mockOnReady();
     });
 
-    // Check that submitBoardCommitment was called
+    // Check that submitBoardCommitment was called with board commitment only (no sessionId)
     expect(mockSubmitBoardCommitment).toHaveBeenCalled();
-    expect(mockSubmitBoardCommitment.mock.calls[0][0].address).toBe(
-      PLAYER_ADDRESS
-    );
-    expect(mockSubmitBoardCommitment.mock.calls[0][0].ships.length).toBe(5);
+    const boardCommitment = mockSubmitBoardCommitment.mock.calls[0][0];
+    expect(boardCommitment.address).toBe(PLAYER_ADDRESS);
+    expect(boardCommitment.ships.length).toBe(5);
   });
 
   it("can fire a shot during game phase", async () => {
@@ -567,7 +577,7 @@ describe("GameSession Component", () => {
       mockHandleShoot(3, 7);
     });
 
-    // Check that makeShot was called with correct coords
+    // Check that makeShot was called with the correct parameters
     expect(mockMakeShot).toHaveBeenCalledWith({
       x: 3,
       y: 7,

@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const ContentSecurityPolicy = `
   default-src 'self';
   
- img-src 'self' blob:
+ img-src 'self' data: blob:
     https://assets.smold.app 
     https://res.cloudinary.com
     https://i.imgur.com 
@@ -12,7 +12,8 @@ const ContentSecurityPolicy = `
     https://explorer-api.walletconnect.com
     https://apple.com/apple-pay
     https://google.com/pay
-    https://auth.privy.io/api/v1/analytics_events;
+    https://auth.privy.io/api/v1/analytics_events
+    https://www.gstatic.com/instantbuy/svg/transparent_square.svg;
   
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com;
   
@@ -37,7 +38,14 @@ const ContentSecurityPolicy = `
     https://google.com/pay
     https://auth.privy.io/api/v1/analytics_events
     wss://zk-battleship-backend.nj-345.workers.dev
-    https://api.web3modal.org;
+    https://api.web3modal.org
+    https://mainnet.base.org
+    https://www.google.com/pay
+    https://www.apple.com/apple-pay
+    https://pay.google.com/about/redirect
+    https://pay.google.com/gp/p/payment_method_manifest.json
+    https://pay.google.com/gp/p/web_manifest.json
+    https://www.gstatic.com/instantbuy/svg/transparent_square.svg;
 
   
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
@@ -92,6 +100,11 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value: ContentSecurityPolicy,
+          },
+          {
+            key: "Link",
+            value:
+              '<https://www.apple.com/apple-pay/>; rel="payment-method-manifest"',
           },
         ],
       },
