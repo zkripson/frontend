@@ -24,8 +24,7 @@ const useInviteActions = () => {
       dispatch(setLoadingInviteCreation(true));
 
       const creator = evmWallet.address;
-      const sessionId = null;
-      const body = { creator, sessionId };
+      const body = { creator };
       const response = await inviteAPI.createInvite(body);
 
       dispatch(setInviteCreation(response));

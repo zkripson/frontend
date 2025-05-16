@@ -1,7 +1,6 @@
 import { useFundWallet } from "@privy-io/react-auth";
 import { base } from "viem/chains";
 import useAppActions from "@/store/app/actions";
-import { formatEther } from "viem";
 import usePrivyLinkedAccounts from "./usePrivyLinkedAccounts";
 import useBalance from "./useBalance";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
@@ -29,11 +28,25 @@ const useFunding = () => {
     return fundEVMWallet(evmWallet?.address, {
       chain: base,
       amount,
+      asset: {
+        erc20: TOKEN_ADDRESSES.USDC,
+      },
+    });
+  };
+
+  const fundWithEth = (amount?: string) => {
+    if (!evmWallet?.address) return showToast("Something went wrong!", "error");
+
+    return fundEVMWallet(evmWallet?.address, {
+      chain: base,
+      amount,
+      // Funding with native ETH for gas fees
     });
   };
 
   return {
     fundWallet,
+    fundWithEth,
   };
 };
 
