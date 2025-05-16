@@ -11,7 +11,7 @@ const useFunding = () => {
   const { checkTokenBalance } = useBalance();
   const { showToast } = useAppActions();
   const { evmWallet } = usePrivyLinkedAccounts();
-  const { appState, dispatch } = useSystemFunctions();
+  const { dispatch } = useSystemFunctions();
 
   const { fundWallet: fundEVMWallet } = useFundWallet({
     onUserExited({}) {

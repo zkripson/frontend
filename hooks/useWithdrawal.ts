@@ -13,14 +13,24 @@ import {
 } from "viem";
 import useAppActions from "@/store/app/actions";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
+import useSystemFunctions from "./useSystemFunctions";
+import { setLoadingBalance } from "@/store/app";
+import useBalance from "./useBalance";
 
 type TokenType = keyof typeof TOKEN_ADDRESSES;
 
 const useWithdrawal = () => {
   const { showToast } = useAppActions();
+  const { dispatch } = useSystemFunctions();
+  const { checkTokenBalance } = useBalance();
+
   const { sendTransaction } = useSendTransaction({
     onSuccess: (result) => {
       showToast("Successfully withdrew to your wallet!", "success");
+      dispatch(setLoadingBalance(true));
+      setTimeout(() => {
+        checkTokenBalance(TOKEN_ADDRESSES.USDC);
+      }, 1500);
     },
   });
 
