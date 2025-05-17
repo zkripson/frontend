@@ -79,7 +79,8 @@ const StakeScreen: React.FC<StakeScreenProps> = ({
     balances?.find((token) => token.symbol === "USDC")?.balance || 0;
   const hasInsufficientBalance = Number(stake) > Number(usdcBalance);
 
-  const disableNextButton = loadingBalance || loading || !stake;
+  const disableNextButton =
+    loadingBalance || loading || !stake || hasInsufficientBalance;
 
   const handleMinus = () => {
     if (stake > 1) setValue("stake", stake - 1);
