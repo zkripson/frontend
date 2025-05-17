@@ -10,6 +10,7 @@ interface IKPInput {
   disabled?: boolean;
   className?: string;
   label?: string;
+  isUSDC?: boolean;
 }
 
 export type { IKPInput };

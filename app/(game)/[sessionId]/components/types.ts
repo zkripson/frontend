@@ -15,6 +15,7 @@ type InventoryProps = {
   visible: boolean;
   onHide: () => void;
   show?: boolean;
+  waitingForOpponent?: boolean;
 };
 
 interface PlacedShip {

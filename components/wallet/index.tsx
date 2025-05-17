@@ -226,7 +226,7 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
             <KPButton
               isMachine
               fullWidth={false}
-              title="-"
+              title="---"
               onClick={handleMinus}
               className="w-[55px] h-[52px]"
             />

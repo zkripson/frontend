@@ -20,7 +20,7 @@ const HowToPlay: React.FC = () => {
   const close = () => setIsOpen(false);
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block text-white">
       <KPClickAnimation
         className="bg-primary-750 border border-primary-800 rounded-full flex items-center justify-center size-8 lg:size-9 xl:size-11"
         onClick={toggleOpen}

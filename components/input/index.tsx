@@ -13,6 +13,7 @@ const KPInput = ({
   placeholder,
   register,
   type,
+  isUSDC,
 }: IKPInput) => {
   return (
     <div className="flex flex-col items-start w-full">
@@ -40,6 +41,12 @@ const KPInput = ({
           placeholder={placeholder}
           type={type}
         />
+
+        {isUSDC && (
+          <span className="text-[26px] max-sm:text-[20px] leading-none text-primary-550/90 font-MachineStd absolute right-3 top-1/2 -translate-y-1/3">
+            USDC
+          </span>
+        )}
       </div>
     </div>
   );

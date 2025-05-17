@@ -32,21 +32,16 @@ export function GameHeader({
   } = useSystemFunctions();
   const audio = useAudio();
 
-  // Mute toggle state synced with Howler
-  const [muted, setMuted] = useState(false);
+  // Mute toggle state
+  const [muted, setMuted] = useState(() => {
+    // Initialize with Howler's current state
+    return Howler.volume() === 0;
+  });
 
-  // On mount, check Howler's mute state using Howler.volume() as a proxy
+  // When muted state changes, ensure Howler's volume is set correctly
   useEffect(() => {
-    setMuted(Howler.volume() === 0);
-  }, []);
-
-  // Listen for mute changes from other sources (if any)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMuted(Howler.volume() === 0);
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
+    Howler.volume(muted ? 0 : 1);
+  }, [muted]);
 
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
   const pfp =
@@ -73,15 +68,17 @@ export function GameHeader({
     }
   };
 
-  // Mute handler: toggle all audio using AudioProvider
   const onMute = () => {
     if (audio) {
-      if (muted) {
-        audio.unmute();
-        setMuted(false);
-      } else {
+      const newMutedState = !muted;
+      setMuted(newMutedState);
+
+      if (newMutedState) {
         audio.mute();
-        setMuted(true);
+        Howler.volume(0);
+      } else {
+        audio.unmute();
+        Howler.volume(1);
       }
     }
   };
@@ -112,7 +109,7 @@ export function GameHeader({
           </div>
         </div>
         {gameCode && <KPIconButton icon="share" onClick={handleShareInvite} />}
-        <KPIconButton icon={"mute"} onClick={onMute} />
+        <KPIconButton icon={muted ? "unmute" : "mute"} onClick={onMute} />
       </div>
     </div>
   );

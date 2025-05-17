@@ -1,14 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import classNames from "classnames";
+import { motion, AnimatePresence } from "framer-motion";
+
 import {
   KPButton,
   KPClickAnimation,
   KPDialougue,
   KPInput,
   KPSecondaryLoader,
+  KPBackdrop,
 } from "@/components";
 import useBalance from "@/hooks/useBalance";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
@@ -16,13 +20,18 @@ import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { PlusIcon } from "@/public/icons";
 import useAppActions from "@/store/app/actions";
-import Image from "next/image";
+import useFunding from "@/hooks/useFunding";
 
 const schema = z.object({
   stake: z.number().min(1, "Stake is required"),
 });
 
+const depositSchema = z.object({
+  deposit: z.number().min(1, "Deposit amount is required"),
+});
+
 type StakeForm = z.infer<typeof schema>;
+type DepositForm = z.infer<typeof depositSchema>;
 
 interface StakeScreenProps {
   onBack: () => void;
@@ -37,12 +46,14 @@ const StakeScreen: React.FC<StakeScreenProps> = ({
 }) => {
   const { checkTokenBalance } = useBalance();
   const { evmWallet } = usePrivyLinkedAccounts();
-  const { navigate, appState } = useSystemFunctions();
+  const { appState } = useSystemFunctions();
   const { showToast } = useAppActions();
+  const { fundWallet } = useFunding();
   const { balances, loadingBalance } = appState;
+  const [depositDropdownOpen, setDepositDropdownOpen] = useState(false);
 
   const {
-    register,
+    register: registerStake,
     handleSubmit,
     setValue,
     watch,
@@ -53,7 +64,23 @@ const StakeScreen: React.FC<StakeScreenProps> = ({
     defaultValues: { stake: 1 },
   });
 
+  const {
+    register: registerDeposit,
+    handleSubmit: handleDepositSubmit,
+    formState: { errors: depositErrors },
+    reset: resetDeposit,
+  } = useForm<DepositForm>({
+    mode: "onSubmit",
+    resolver: zodResolver(depositSchema),
+  });
+
   const stake = watch("stake");
+  const usdcBalance =
+    balances?.find((token) => token.symbol === "USDC")?.balance || 0;
+  const hasInsufficientBalance = Number(stake) > Number(usdcBalance);
+
+  const disableNextButton =
+    loadingBalance || loading || !stake || hasInsufficientBalance;
 
   const handleMinus = () => {
     if (stake > 1) setValue("stake", stake - 1);
@@ -73,33 +100,44 @@ const StakeScreen: React.FC<StakeScreenProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errors.stake?.message]);
 
+  const handleDeposit = async (data: DepositForm) => {
+    try {
+      await fundWallet(data.deposit.toString());
+      setDepositDropdownOpen(false);
+      resetDeposit();
+    } catch (error) {
+      showToast("Failed to deposit", "error");
+    }
+  };
+
   return (
     <div className="w-full h-full flex items-center justify-center relative">
       <KPDialougue
         showBackButton
         onBack={onBack}
         primaryCta={{
-          title: loading ? "loading..." : "Next",
+          title: loadingBalance ? "loading..." : "Next",
           onClick: handleSubmit((data) => onSubmit(data.stake)),
           icon: "arrow",
           iconPosition: "right",
-          disabled: loading,
+          disabled: disableNextButton,
         }}
         className="pt-[88px]"
       >
         <div className="flex flex-col gap-6 w-full items-center">
           <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd mb-2">
-            CHOOSE STAKE AMOUNT:
+            ENTER STAKE AMOUNT:
           </h1>
           <div className="flex flex-col gap-3 w-full items-center">
             <div className="flex items-center justify-between gap-2 w-full">
               <KPInput
                 name="stake"
                 placeholder="Stake amount"
-                register={register("stake", { valueAsNumber: true })}
+                register={registerStake("stake", { valueAsNumber: true })}
                 error={!!errors.stake}
                 className="flex-1"
                 type="number"
+                isUSDC
               />
               <KPButton
                 isMachine
@@ -160,15 +198,59 @@ const StakeScreen: React.FC<StakeScreenProps> = ({
                   </div>
                 ))}
 
-                <KPClickAnimation
-                  className="flex items-center gap-2"
-                  onClick={() => navigate.push("/deposit")}
-                >
-                  <PlusIcon />
-                  <span className="text-[clamp(10px,5vw,12px)] text-primary-50 font-bold underline">
-                    Deposit
-                  </span>
-                </KPClickAnimation>
+                <div className="relative">
+                  <KPClickAnimation
+                    className="flex items-center gap-2"
+                    onClick={() => setDepositDropdownOpen(true)}
+                  >
+                    <PlusIcon />
+                    <span className="text-[clamp(10px,5vw,12px)] text-primary-50 font-bold underline">
+                      Deposit
+                    </span>
+                  </KPClickAnimation>
+
+                  <AnimatePresence>
+                    {depositDropdownOpen && (
+                      <>
+                        <KPBackdrop
+                          onClick={() => setDepositDropdownOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 8 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.22, ease: "easeInOut" }}
+                          className="absolute right-0 top-full mt-2 w-[200px] z-50"
+                        >
+                          <div className="bg-primary-450/25 backdrop-blur-sm rounded p-2 border border-primary-50 shadow-lg">
+                            <form
+                              onSubmit={handleDepositSubmit(handleDeposit)}
+                              className="flex flex-col gap-2"
+                            >
+                              <KPInput
+                                name="deposit"
+                                placeholder="Amount"
+                                register={registerDeposit("deposit", {
+                                  valueAsNumber: true,
+                                })}
+                                error={!!depositErrors.deposit}
+                                type="number"
+                                isUSDC
+                              />
+                              <KPButton
+                                isMachine
+                                title="Deposit"
+                                type="submit"
+                                small
+                                fullWidth
+                              />
+                            </form>
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
               </>
             )}
           </div>

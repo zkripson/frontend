@@ -13,6 +13,7 @@ const icons = ({ width, height }: { width: number; height: number }) => ({
   share: <ShareIcon width={width} height={height} />,
   ham: <HamIcon width={width} height={height} />,
   mute: <MuteIcon width={width} height={height} />,
+  unmute: <MuteIcon width={width} height={height} isMuted />,
 });
 
 interface KPIconButtonProps {
