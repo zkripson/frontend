@@ -5,13 +5,13 @@ type InviteAPI = {
   acceptInvite: (
     body: InviteAcceptanceBody
   ) => Promise<InviteAcceptanceResponse>;
-
   createBettingInvite: (
     body: BettingCreationBody
   ) => Promise<BettingCreationResponse>;
   acceptBettingInvite: (
     body: InviteAcceptanceBody
   ) => Promise<BettingAcceptanceResponse>;
+  getInvitation: (code: string) => Promise<GetInvitationResponse>;
 };
 
 const inviteAPI: InviteAPI = {
@@ -35,6 +35,11 @@ const inviteAPI: InviteAPI = {
 
   acceptBettingInvite: async (body: InviteAcceptanceBody) => {
     const response = await axiosInstance.post(`invites/accept-betting`, body);
+    return response?.data;
+  },
+
+  getInvitation: async (code: string) => {
+    const response = await axiosInstance.get(`invites/code/${code}`);
 
     return response?.data;
   },

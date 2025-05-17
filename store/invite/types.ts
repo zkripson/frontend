@@ -49,3 +49,20 @@ type BettingAcceptanceResponse = {
   platformFee: string;
   winnerPayout: string;
 };
+
+type GetInvitationResponse = {
+  id: string;
+  code: string;
+  creator: string;
+  createdAt: number;
+  expiresAt: number;
+  sessionId: string;
+  status: string;
+  acceptedBy: null | string;
+  acceptedAt: null | number;
+  isBettingGame: boolean;
+  isExpired: boolean;
+  gameId?: null | string;
+  stakeAmount?: string;
+  onChainInviteId?: string;
+};

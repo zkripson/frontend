@@ -10,6 +10,8 @@ import {
   setInviteCreation,
   setLoadingInviteAcceptance,
   setLoadingInviteCreation,
+  setInvitation,
+  setInvitationLoading,
 } from ".";
 import { CallbackProps } from "..";
 import useAppActions from "../app/actions";
@@ -145,11 +147,31 @@ const useInviteActions = () => {
     }
   };
 
+  const getInvitation = async (code: string, callback?: CallbackProps) => {
+    try {
+      if (!evmWallet) return;
+
+      dispatch(setInvitationLoading(true));
+
+      const response = await inviteAPI.getInvitation(code);
+
+      dispatch(setInvitation(response));
+
+      callback?.onSuccess?.(response);
+    } catch (err) {
+      console.error(err);
+      callback?.onError?.(err);
+    } finally {
+      dispatch(setInvitationLoading(false));
+    }
+  };
+
   return {
     createInvite,
     acceptInvite,
     createBettingInvite,
     acceptBettingInvite,
+    getInvitation,
   };
 };
 
