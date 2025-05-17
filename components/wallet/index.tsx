@@ -31,7 +31,7 @@ type AmountForm = z.infer<typeof schema>;
 const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
   const { evmWallet } = usePrivyLinkedAccounts();
   const { checkTokenBalance } = useBalance();
-  const { appState } = useSystemFunctions();
+  const { appState, navigate } = useSystemFunctions();
   const { fundWallet } = useFunding();
   const { transferToken } = useWithdrawal();
   const { showToast } = useAppActions();
@@ -128,7 +128,8 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
   return (
     <div className="w-full h-full flex items-center justify-center relative">
       <KPDialougue
-        showBackButton={true}
+        showBackButton
+        onBack={() => navigate.back()}
         primaryCta={{
           title: "NEXT",
           onClick: handleSubmit(onSubmit),
@@ -180,7 +181,7 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
               ))}
             </div>
 
-            <div className="bg-primary-1200 border border-primary-450 border-dashed rounded-2xl w-[70%] md:w-[65%] py-3 px-4 md:py-6 md:px-10 flex items-center justify-center gap-2 md:gap-7 md:gap-5 text-primary-50">
+            <div className="bg-primary-1200 border border-primary-450 border-dashed rounded-2xl w-[70%] md:w-[65%] py-3 px-4 md:py-6 md:px-10 flex items-center justify-center gap-2 md:gap-5 text-primary-50">
               <h5 className="text-[10px] md:text-xs font-medium text-nowrap">
                 Available Balance
               </h5>

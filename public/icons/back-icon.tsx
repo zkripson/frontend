@@ -5,6 +5,7 @@ const BackIcon = ({ height = 24, width = 33 }: IconProps) => (
     viewBox="0 0 33 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className="w-[28px] h-[20px] sm:w-[33px] sm:h-[24px]"
   >
     <path
       fillRule="evenodd"

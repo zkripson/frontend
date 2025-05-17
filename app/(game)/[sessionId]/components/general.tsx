@@ -70,16 +70,18 @@ function resolveMessageAndVoiceover(
           : `opponent_sunk_${shipName.toLowerCase()}_voiceover`;
       if (allowedVoiceovers.includes(key as any)) voiceoverKey = key;
     }
-    if (!voiceoverKey) {
-      voiceoverKey =
-        messageKey === "sunk" ? "sunk_voiceover" : "opponent_sunk_voiceover";
-    }
+    // Only return a voiceoverKey if a specific ship voiceover exists
     return { text, voiceoverKey };
   }
   if (Array.isArray(msg)) {
-    return { text: msg[0], voiceoverKey: messageKey + "_voiceover" };
+    // Convert hyphens to underscores for voiceover keys
+    const voiceoverKey = (messageKey + "_voiceover").replace(/-/g, "_");
+    return { text: msg[0], voiceoverKey };
   }
-  return { text: msg as string, voiceoverKey: messageKey + "_voiceover" };
+  // Convert hyphens to underscores for voiceover keys
+  const voiceoverKey = (messageKey + "_voiceover").replace(/-/g, "_");
+  // Patch: also allow these keys in allowedVoiceovers
+  return { text: msg as string, voiceoverKey };
 }
 
 interface GeneralProps {
@@ -94,8 +96,8 @@ export default function General({
   shipName,
 }: GeneralProps) {
   // pull in your mobile-detect flags
-  const { isXSmall, isSmall } = useScreenDetect();
-  const isMobile = isXSmall || isSmall;
+  const { isXSmall, isSmall, isMedium } = useScreenDetect();
+  const isMobile = isXSmall || isSmall || isMedium;
 
   // figure out which string to display
   const { text: displayText, voiceoverKey } = resolveMessageAndVoiceover(
@@ -154,6 +156,10 @@ export default function General({
         "another_hit_voiceover",
         "game_over_voiceover",
         "waiting_voiceover",
+        // Patch: add all other voiceover keys from AudioProvider
+        "missed_voiceover",
+        "player_missed_voiceover",
+        "opponent_hit_voiceover",
       ] as const;
       if (
         voiceoverKey &&
@@ -161,7 +167,18 @@ export default function General({
           voiceoverKey as (typeof allowedVoiceovers)[number]
         )
       ) {
-        audio.play(voiceoverKey as (typeof allowedVoiceovers)[number]);
+        try {
+          // Diagnostic logging for debugging audio playback
+          console.log("[General] Playing voiceover:", voiceoverKey);
+          audio.play(voiceoverKey as (typeof allowedVoiceovers)[number]);
+        } catch (err) {
+          console.error("[General] Error playing voiceover", voiceoverKey, err);
+        }
+      } else {
+        console.log(
+          "[General] Voiceover key not allowed or missing:",
+          voiceoverKey
+        );
       }
       playedRef.current = { key: messageKey, uniqueId };
     }

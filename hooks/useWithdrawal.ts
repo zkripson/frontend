@@ -1,7 +1,7 @@
 import { SendTransactionModalUIOptions } from "@privy-io/react-auth";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
-
 import { parseUnits, encodeFunctionData, type Address, erc20Abi } from "viem";
+
 import useAppActions from "@/store/app/actions";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import useSystemFunctions from "./useSystemFunctions";

@@ -1,5 +1,6 @@
 "use client";
 
+import useSystemFunctions from "@/hooks/useSystemFunctions";
 import Board from "./board";
 import General, { GeneralMessageKey } from "./general";
 import { KPClickAnimation } from "@/components";
@@ -46,6 +47,9 @@ export function GameBoardContainer({
   onFireShot,
   opponentShips = [],
 }: GameBoardContainerProps) {
+  const {
+    gameState: { loadingSubmitBoardCommitment },
+  } = useSystemFunctions();
   // build cell list 0–99 → {x,y,key}
   const cells = Array.from({ length: 100 }).map((_, i) => {
     const x = i % 10;
@@ -72,6 +76,26 @@ export function GameBoardContainer({
   }
 
   if (mode === "setup") {
+    const setupFeedbackArray = [
+      <KPClickAnimation
+        key="ready-btn"
+        disabled={disableReadyButton || inventoryVisible}
+        className="flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]"
+        onClick={onReady}
+        loading={loadingSubmitBoardCommitment}
+      >
+        <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
+          READY
+        </span>
+      </KPClickAnimation>,
+      <General
+        key="waiting-feedback"
+        messageKey={generalMessage?.key ?? null}
+        uniqueId={generalMessage?.id}
+        shipName={generalMessage?.shipName}
+      />,
+    ];
+
     return (
       <div className="relative">
         <Board
@@ -83,17 +107,19 @@ export function GameBoardContainer({
           shots={{}}
           onShoot={handleShoot}
         />
-
         <div className="bp1215:hidden w-full absolute top-[103%] left-0">
-          <KPClickAnimation
-            disabled={disableReadyButton || inventoryVisible}
-            className="flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]"
-            onClick={onReady}
-          >
-            <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
-              READY
-            </span>
-          </KPClickAnimation>
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={generalMessage ? "waiting-feedback" : "ready-btn"}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="w-full flex items-center justify-center"
+            >
+              {setupFeedbackArray[+Boolean(generalMessage)]}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     );
@@ -133,7 +159,7 @@ export function GameBoardContainer({
         </motion.div>
       </AnimatePresence>
       {/* always show feedback */}
-      <div className="md:hidden mt-4 top-[100%] absolute left-0 w-full flex items-center justify-center">
+      <div className="lg:hidden mt-4 top-[100%] absolute left-0 w-full flex items-center justify-center">
         <General
           messageKey={generalMessage?.key ?? null}
           uniqueId={generalMessage?.id}

@@ -41,12 +41,8 @@ export default function KPShip({
 
   useEffect(() => {
     if (sunk) {
-      const fireTimer = setTimeout(() => setShowFire(false), 4000);
-      const disTimer = setTimeout(() => setDisintegrated(true), 5000);
-      return () => {
-        clearTimeout(fireTimer);
-        clearTimeout(disTimer);
-      };
+      setShowFire(false);
+      setDisintegrated(true);
     }
   }, [sunk]);
 
