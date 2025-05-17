@@ -1,11 +1,11 @@
 import { useFundWallet } from "@privy-io/react-auth";
-import { base } from "viem/chains";
 import useAppActions from "@/store/app/actions";
+import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
+import { setLoadingBalance } from "@/store/app";
+import { defaultChain } from "@/providers/PrivyProvider";
 import usePrivyLinkedAccounts from "./usePrivyLinkedAccounts";
 import useBalance from "./useBalance";
-import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import useSystemFunctions from "./useSystemFunctions";
-import { setLoadingBalance } from "@/store/app";
 
 const useFunding = () => {
   const { checkTokenBalance } = useBalance();
@@ -26,14 +26,13 @@ const useFunding = () => {
     if (!evmWallet?.address) return showToast("Something went wrong!", "error");
 
     return fundEVMWallet(evmWallet?.address, {
-      chain: base,
+      chain: defaultChain,
       amount,
       asset: {
         erc20: TOKEN_ADDRESSES.USDC,
       },
     });
   };
-
 
   return {
     fundWallet,

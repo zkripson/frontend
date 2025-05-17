@@ -1,10 +1,10 @@
-import { base } from "viem/chains";
 import { createPublicClient, http, formatUnits, erc20Abi } from "viem";
 import { useState, useCallback } from "react";
 import usePrivyLinkedAccounts from "./usePrivyLinkedAccounts";
 import useSystemFunctions from "./useSystemFunctions";
 import { setBalances, setLoadingBalance } from "@/store/app";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
+import { defaultChain } from "@/providers/PrivyProvider";
 
 const useBalance = () => {
   const { dispatch } = useSystemFunctions();
@@ -29,7 +29,7 @@ const useBalance = () => {
       try {
         // Create a public client for Base
         const client = createPublicClient({
-          chain: base,
+          chain: defaultChain,
           transport: http(),
         });
 
