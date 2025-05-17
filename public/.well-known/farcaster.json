@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjkyMTczMiwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDNmRTQ5RUNBNTU3Y2YwZThkNWU5ZUE2ZDlEYzA3N2FhZjA0QjA2RTcifQ",
+    "payload": "eyJkb21haW4iOiJhcHAudXNlbGlxdWlkLnh5eiJ9",
+    "signature": "MHg5NGYzMzBmZGRkOGRkMDViODEzYTU4ZWY5YTNlNmU2YzA2NGM5ZDAzNDU4NGE1NGZmYjgyMDM5YzhjMzJmNTk3NDYzZjMzOTUzODhmYWRiN2I0ZTU0YzU4NTg1Mjc1ZjIxZGY3NjQ2MGU3M2NmMzYxMjFmNjQzM2Q2MThiMzgzZjFi"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Battleship",
+    "iconUrl": "https://app.bship.fun/icon.png",
+    "homeUrl": "https://app.bship.fun",
+    "imageUrl": "https://app.bship.fun/game-preview-bg.png",
+    "buttonTitle": "Play Now",
+    "splashImageUrl": "https://app.bship.fun/game-preview-bg.png",
+    "splashBackgroundColor": "#f7f7f7",
+    "webhookUrl": "https://api.neynar.com/f/app/e44264f1-77fb-40dc-9e13-4f102d8bc9ae/event"
+  }
+}
