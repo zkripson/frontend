@@ -28,13 +28,13 @@ const inviteAPI: InviteAPI = {
   },
 
   createBettingInvite: async (body: BettingCreationBody) => {
-    const response = await axiosInstance.post(`betting/create`, body);
+    const response = await axiosInstance.post(`invites/create-betting`, body);
 
     return response?.data;
   },
 
   acceptBettingInvite: async (body: InviteAcceptanceBody) => {
-    const response = await axiosInstance.post(`betting/accept`, body);
+    const response = await axiosInstance.post(`invites/accept-betting`, body);
 
     return response?.data;
   },
