@@ -3,16 +3,25 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 
 export interface InviteState {
   loadingInviteCreation: boolean;
-  inviteCreation?: InviteCreationResponse;
   loadingInviteAcceptance: boolean;
+
+  inviteCreation?: InviteCreationResponse;
   inviteAcceptance?: InviteAcceptanceResponse;
+  bettingCreation?: BettingCreationResponse;
+  bettingAcceptance?: BettingAcceptanceResponse;
+  invitation: GetInvitationResponse | null;
+  invitationLoading: boolean;
 }
 
 const initialState: InviteState = {
   loadingInviteCreation: false,
-  inviteCreation: undefined,
   loadingInviteAcceptance: false,
+  inviteCreation: undefined,
   inviteAcceptance: undefined,
+  bettingCreation: undefined,
+  bettingAcceptance: undefined,
+  invitation: null,
+  invitationLoading: false,
 };
 
 export const inviteReducer = createSlice({
@@ -23,19 +32,38 @@ export const inviteReducer = createSlice({
       state.loadingInviteCreation = action.payload;
     },
 
-    setInviteCreation(state, action: PayloadAction<InviteCreationResponse>) {
-      state.inviteCreation = action.payload;
-    },
-
     setLoadingInviteAcceptance(state, action: PayloadAction<boolean>) {
       state.loadingInviteAcceptance = action.payload;
+    },
+
+    setInviteCreation(state, action: PayloadAction<InviteCreationResponse>) {
+      state.inviteCreation = { ...action.payload };
     },
 
     setInviteAcceptance(
       state,
       action: PayloadAction<InviteAcceptanceResponse>
     ) {
-      state.inviteAcceptance = action.payload;
+      state.inviteAcceptance = { ...action.payload };
+    },
+
+    setBettingCreation(state, action: PayloadAction<BettingCreationResponse>) {
+      state.bettingCreation = { ...action.payload };
+    },
+
+    setBettingAcceptance(
+      state,
+      action: PayloadAction<BettingAcceptanceResponse>
+    ) {
+      state.bettingAcceptance = { ...action.payload };
+    },
+
+    setInvitation(state, action: PayloadAction<GetInvitationResponse | null>) {
+      state.invitation = action.payload;
+    },
+
+    setInvitationLoading(state, action: PayloadAction<boolean>) {
+      state.invitationLoading = action.payload;
     },
   },
 });
@@ -45,6 +73,10 @@ export const {
   setLoadingInviteAcceptance,
   setInviteCreation,
   setInviteAcceptance,
+  setBettingCreation,
+  setBettingAcceptance,
+  setInvitation,
+  setInvitationLoading,
 } = inviteReducer.actions;
 
 export default inviteReducer.reducer;

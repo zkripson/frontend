@@ -15,9 +15,14 @@ import KPShip from "./ship";
 import KPBackdrop from "./backdrop";
 import KPToastNotification from "./toast";
 import KPSecondaryLoader from "./loader/secondary";
+import KPGameDetails from "./game-details";
+import KPGameCodeInput from "./game-code-input";
+import KPEasyDeposit from "./easy-deposit";
+import KPBalances from "./balances";
 
 export {
   KPDialougue,
+  KPGameDetails,
   KPIconButton,
   KPClickAnimation,
   KPButton,
@@ -34,4 +39,7 @@ export {
   KPBackdrop,
   KPToastNotification,
   KPSecondaryLoader,
+  KPGameCodeInput,
+  KPEasyDeposit,
+  KPBalances,
 };
