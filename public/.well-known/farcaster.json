@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjE5NjMzOSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDgzQjk3QzRBM0QyREFEMkY1MTZmNjE1OUZDRkRhYjViNzNlMjI0YzcifQ",
+    "payload": "eyJkb21haW4iOiJhcHAuYnNoaXAuZnVuIn0",
+    "signature": "MHg3YTViZWEwZjRmOTA0NDE0ZWU2ZDhhZTYyYjA2MmZjOWZmMmI1NWQ1YzIxNzdjZDhmMzA5MWMxMWMyYTg4YmVmNDE0NDhiYTIzMmQ2MTQ5ZWZjNDRkYTVkNDg5MmU0YmZmZGY4MWRjZDUxZmE5YTZmMjIxZDAxYmEyYWFiODkxOTFj"
+  },
+  "frame": {
+    "version": "1",
+    "name": "Battleship",
+    "iconUrl": "https://app.bship.fun/game-logo.jpg",
+    "homeUrl": "https://app.bship.fun",
+    "imageUrl": "https://app.bship.fun/game-preview-bg.png",
+    "buttonTitle": "Play Now",
+    "splashImageUrl": "https://app.bship.fun/game-preview-bg.png",
+    "splashBackgroundColor": "#f7f7f7",
+    "webhookUrl": "https://app.bship.fun/api/webhook"
+  }
+}
