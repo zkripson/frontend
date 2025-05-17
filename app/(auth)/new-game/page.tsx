@@ -21,6 +21,8 @@ import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useCopy from "@/hooks/useCopy";
 import useAppActions from "@/store/app/actions";
 import { BackIcon } from "@/public/icons";
+import { useAudio } from "@/providers/AudioProvider";
+import StakeScreen from "./StakeScreen";
 
 const schema = z.object({
   code: z.string().min(4, "Code is required"),
@@ -41,8 +43,10 @@ const NewGame = () => {
   const { acceptInvite, createInvite } = useInviteActions();
   const { showToast } = useAppActions();
   const { handleCopy } = useCopy("Copied Invite Code");
-  const [phase, setPhase] = useState<"select" | "create">("select");
+  const audio = useAudio();
+  const [phase, setPhase] = useState<"select" | "stake" | "create">("select");
   const [isJoining, setJoining] = useState(false);
+  const [stakeAmount, setStakeAmount] = useState<number | null>(null);
 
   const {
     register,
@@ -61,8 +65,12 @@ const NewGame = () => {
     linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
 
   const onCreate = async () => {
-    setPhase("create");
+    setPhase("stake");
+  };
 
+  const handleStakeSubmit = (amount: number) => {
+    setStakeAmount(amount);
+    setPhase("create");
     createInvite();
   };
 
@@ -131,7 +139,9 @@ const NewGame = () => {
     }
   };
 
-  const screens: Partial<Record<NewGameStep, JSX.Element>> = {
+  const screens: Partial<Record<NewGameStep, JSX.Element>> & {
+    stake?: JSX.Element;
+  } = {
     select: (
       <KPDialougue
         title="welcome"
@@ -167,6 +177,7 @@ const NewGame = () => {
               <div
                 key={game.id}
                 onClick={() => {
+                  audio.play("place");
                   if (!game.status && game.action) {
                     game.action();
                   }
@@ -215,6 +226,13 @@ const NewGame = () => {
           </motion.div>
         </div>
       </KPDialougue>
+    ),
+    stake: (
+      <StakeScreen
+        onBack={() => setPhase("select")}
+        onSubmit={handleStakeSubmit}
+        loading={loadingInviteCreation}
+      />
     ),
     create: (
       <KPDialougue

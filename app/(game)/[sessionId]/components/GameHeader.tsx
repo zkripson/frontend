@@ -98,16 +98,19 @@ export function GameHeader({
         <HowToPlay />
       </div>
 
-      <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-4 lg:gap-6 h-full pointer-events-auto">
-        {mode === "game" && <Turn yourTurn={yourTurn} />}
-        {/* Turn timer display */}
-        {mode === "game" && gameTimeRemaining !== 0 && (
-          <KPTimer turnStartedAt={turnStartedAt} onExpire={onTurnExpiry} />
-        )}
-        {mode === "game" && (
-          <div className="w-[48px] h-0.5 lg:h-[48px] lg:w-0.5 bg-primary-50" />
-        )}
-        {mode === "game" && <KPTimer isGame />}
+      <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-2 lg:gap-6 h-full pointer-events-auto">
+        <div className="flex flex-col-reverse md:flex-row items-end md:items-center gap-2 lg:gap-3 pointer-events-auto">
+          {mode === "game" && <Turn yourTurn={yourTurn} />}
+          <div className="flex items-center gap-2 lg:gap-3 pointer-events-auto">
+            {mode === "game" && gameTimeRemaining !== 0 && (
+              <KPTimer turnStartedAt={turnStartedAt} onExpire={onTurnExpiry} />
+            )}
+            {mode === "game" && (
+              <div className="h-8 lg:h-10 w-0.5 bg-primary-50" />
+            )}
+            {mode === "game" && <KPTimer isGame />}
+          </div>
+        </div>
         {gameCode && <KPIconButton icon="share" onClick={handleShareInvite} />}
         <KPIconButton icon={"mute"} onClick={onMute} />
       </div>

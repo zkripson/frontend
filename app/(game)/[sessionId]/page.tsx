@@ -403,8 +403,6 @@ const GameSession = () => {
       setTurnTimeRemaining(15); // Reset turn timer
       setGameTimeRemaining(180); // Reset game timer
       setGeneralMessage({ key: "game-start", id: Date.now() });
-
-      // Timer updates are handled by effects
     };
 
     // Handler for shot fired event (handles all shot updates)

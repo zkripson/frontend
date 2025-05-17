@@ -20,6 +20,7 @@ import InfoCircleIcon from "./info-circle-icon";
 import ExclaimIcon from "./exclaim-icon";
 import MuteIcon from "./mute-icon";
 import RadioIcon from "./radio-icon";
+import PlusIcon from "./plus-icon";
 
 export {
   CloseIcon,
@@ -44,4 +45,5 @@ export {
   ExclaimIcon,
   MuteIcon,
   RadioIcon,
+  PlusIcon,
 };

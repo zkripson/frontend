@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 import { ArrowRightIcon, CopyIcon, RedoIcon, Homeicon } from "@/public/icons";
+import { useAudio } from "@/providers/AudioProvider";
 import KPLoader from "../loader";
 
 const icons = {
@@ -48,7 +49,10 @@ const KPButton = ({
   iconPosition = "left",
   multipleicons,
   hide,
+  small,
 }: IKPButton) => {
+  const audio = useAudio();
+
   const shadowColor = {
     primary: "#632918",
     secondary: "#5D656E",
@@ -68,14 +72,18 @@ const KPButton = ({
           "bg-primary-200 border-primary-300": variant === "primary",
           "bg-primary-250 border-primary-350": variant === "secondary",
           "bg-primary-150 border-primary-400": variant === "tertiary",
-          "h-[52px] max-sm:h-[34.76px]": isMachine,
+          "h-[52px] max-sm:h-[34.76px]": isMachine && !small,
+          "h-[38px]": isMachine && small,
           "opacity-0 pointer-events-none": hide,
         },
         className
       )}
       disabled={disabled || loading}
       type={type}
-      onClick={onClick}
+      onClick={() => {
+        audio.play("place");
+        if (onClick) onClick();
+      }}
       style={{
         boxShadow: innerShadow,
       }}
@@ -121,15 +129,15 @@ const KPButton = ({
             </div>
           )}
           <span
-            className={classNames(
-              "uppercase text-[26px] max-sm:text-[17.83px] leading-[100%] tracking-[2%]",
-              {
-                "text-white": variant === "primary" || variant === "secondary",
-                "text-primary-300": variant === "tertiary",
-                "font-MachineStd": isMachine,
-                "font-Inter": !isMachine,
-              }
-            )}
+            className={classNames("uppercase", {
+              "text-white": variant === "primary" || variant === "secondary",
+              "text-primary-300": variant === "tertiary",
+              "font-MachineStd": isMachine,
+              "font-Inter": !isMachine,
+              "text-[26px] max-sm:text-[17.83px] leading-[100%] tracking-[2%]":
+                !small,
+              "text-[20px] leading-[100%] -mt-1": small,
+            })}
           >
             {title}
           </span>

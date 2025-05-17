@@ -13,7 +13,8 @@ import {
   ShuffleIcon,
   SubmarineOutline,
 } from "@/public/icons";
-import { KPClickAnimation } from "@/components";
+import { KPClickAnimation, KPLoader } from "@/components";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 const ships: {
   variant: IKPShip["variant"];
@@ -69,6 +70,9 @@ const Inventory = ({
   visible,
   show,
 }: InventoryProps) => {
+  const {
+    gameState: { loadingSubmitBoardCommitment },
+  } = useSystemFunctions();
   const allInPosition = Object.values(shipsInPosition).every(Boolean);
   const anyInPosition = Object.values(shipsInPosition).some(Boolean);
 
@@ -93,7 +97,7 @@ const Inventory = ({
         <motion.div
           exit={{ opacity: 0 }}
           animate={{
-            left: visible ? 0 : "calc(-100vw + 90px)",
+            left: visible ? 0 : "-100vw",
             scale: visible ? 1 : 0.95,
           }}
           transition={{ type: "spring", duration: 0.5 }}
@@ -202,9 +206,15 @@ const Inventory = ({
                 boxShadow: "inset 0px 2px 0px 0px #632918",
               }}
             >
-              <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
-                ready
-              </span>
+              {loadingSubmitBoardCommitment ? (
+                <div className="top-0 left-0 w-full h-full flex items-center justify-center">
+                  <KPLoader />
+                </div>
+              ) : (
+                <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
+                  ready
+                </span>
+              )}
             </motion.button>
           </div>
         </motion.div>

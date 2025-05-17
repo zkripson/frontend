@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import classNames from "classnames";
+import { useAudio } from "@/providers/AudioProvider";
 
 const KPClickAnimation = ({
   children,
@@ -11,10 +12,12 @@ const KPClickAnimation = ({
   type = "button",
   title,
 }: IKPClickAnimation) => {
+  const audio = useAudio();
   const handleClick = (e: React.MouseEvent) => {
     if (stopPropagation) {
       e.stopPropagation();
     }
+    audio.play("place");
     onClick?.();
   };
   return (
