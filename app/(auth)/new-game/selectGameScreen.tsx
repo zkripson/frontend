@@ -1,28 +1,12 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import classNames from "classnames";
 
-import {
-  KPClickAnimation,
-  KPDialougue,
-  KPGameTypeCard,
-  KPInput,
-  KPProfileBadge,
-} from "@/components";
+import { KPDialougue, KPGameCodeInput, KPGameTypeCard } from "@/components";
 import useInviteActions from "@/store/invite/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
-import { BackIcon } from "@/public/icons";
 import { useAudio } from "@/providers/AudioProvider";
-
-const schema = z.object({
-  code: z.string().min(4, "Code is required"),
-});
-
-type NewGame = z.infer<typeof schema>;
+import useWithdrawal from "@/hooks/useWithdrawal";
 
 const SelectGameScreen = ({
   nextScreen,
@@ -32,31 +16,20 @@ const SelectGameScreen = ({
   phase: "select" | "stake" | "create";
 }) => {
   const {
-    inviteState: { loadingInviteAcceptance },
+    inviteState: { loadingInviteAcceptance, invitation, invitationLoading },
   } = useSystemFunctions();
-  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
-  const { acceptInvite, createInvite } = useInviteActions();
+  const { acceptBettingInvite } = useInviteActions();
+  const { approveTransfer } = useWithdrawal();
   const audio = useAudio();
 
   const [isJoining, setJoining] = useState(false);
+  const [canAccept, setCanAccept] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<NewGame>({
-    mode: "onSubmit",
-    resolver: zodResolver(schema),
-  });
+  const onSubmit = async () => {
+    await approveTransfer(Number(invitation?.stakeAmount));
 
-  const codeValue = watch("code");
-
-  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
-  const pfp =
-    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
-
-  const onSubmit = async () => await acceptInvite(codeValue);
+    await acceptBettingInvite(invitation?.code!);
+  };
 
   const gameTypes = [
     {
@@ -82,88 +55,68 @@ const SelectGameScreen = ({
       status: "coming soon",
     },
   ];
+
+  const selects = [
+    <div key="choose" className="flex flex-col gap-2 w-full overflow-hidden">
+      <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">
+        choose new game:
+      </h1>
+
+      {gameTypes.map((game) => (
+        <div
+          key={game.id}
+          onClick={() => {
+            audio.play("place");
+            if (!game.status && game.action) {
+              game.action();
+            }
+          }}
+        >
+          <KPGameTypeCard
+            {...game}
+            className={classNames({
+              "border border-primary-200 transition-all duration-500 rounded-[4px]":
+                phase === "create" && game.id === "create",
+            })}
+          />
+        </div>
+      ))}
+    </div>,
+
+    <KPGameCodeInput
+      onBack={() => setJoining(false)}
+      setCanAccept={setCanAccept}
+      key={"join"}
+    />,
+  ];
+
   return (
     <KPDialougue
       title="welcome"
       showCloseButton
       primaryCta={{
         title: "Next",
-        onClick: handleSubmit(onSubmit),
+        onClick: onSubmit,
         icon: "arrow",
         iconPosition: "right",
-        loading: loadingInviteAcceptance,
+        loading: loadingInviteAcceptance || invitationLoading,
+        disabled: !canAccept || loadingInviteAcceptance,
         hide: !isJoining,
       }}
       className="pt-[88px]"
     >
       <div className="flex flex-col items-center gap-16 max-sm:gap-7 self-stretch w-full">
-        <KPProfileBadge avatarUrl={pfp} username={username} />
-
-        <motion.div
-          className="flex flex-col gap-2 w-full overflow-hidden"
-          initial={{ height: "auto", opacity: 1 }}
-          animate={
-            isJoining
-              ? { height: 0, opacity: 0 }
-              : { height: "auto", opacity: 1 }
-          }
-          transition={{ duration: 0.4 }}
-        >
-          <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">
-            choose new game:
-          </h1>
-
-          {gameTypes.map((game) => (
-            <div
-              key={game.id}
-              onClick={() => {
-                audio.play("place");
-                if (!game.status && game.action) {
-                  game.action();
-                }
-              }}
-            >
-              <KPGameTypeCard
-                {...game}
-                className={classNames({
-                  "border border-primary-200 transition-all duration-500 rounded-[4px]":
-                    phase === "create" && game.id === "create",
-                })}
-              />
-            </div>
-          ))}
-        </motion.div>
-
-        <motion.div
-          className="flex flex-col gap-2 w-full overflow-hidden"
-          initial={{ height: 0, opacity: 0 }}
-          animate={
-            isJoining
-              ? { height: "auto", opacity: 1 }
-              : { height: 0, opacity: 0 }
-          }
-          transition={{ duration: 0.4 }}
-        >
-          <div className="relative w-full">
-            <div className="absolute h-full top-0 left-0">
-              <KPClickAnimation onClick={() => setJoining(false)}>
-                <BackIcon width={25} height={18} />
-              </KPClickAnimation>
-            </div>
-            <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd">
-              Join match:
-            </h1>
-          </div>
-
-          <KPInput
-            name="code"
-            placeholder="Enter invite code"
-            register={register("code")}
-            error={!!errors.code}
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={isJoining ? "join" : "create"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="w-full"
-            type="text"
-          />
-        </motion.div>
+          >
+            {selects[+isJoining]}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </KPDialougue>
   );

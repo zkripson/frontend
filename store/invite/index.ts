@@ -7,20 +7,21 @@ export interface InviteState {
 
   inviteCreation?: InviteCreationResponse;
   inviteAcceptance?: InviteAcceptanceResponse;
-
   bettingCreation?: BettingCreationResponse;
   bettingAcceptance?: BettingAcceptanceResponse;
+  invitation: GetInvitationResponse | null;
+  invitationLoading: boolean;
 }
 
 const initialState: InviteState = {
   loadingInviteCreation: false,
   loadingInviteAcceptance: false,
-
   inviteCreation: undefined,
   inviteAcceptance: undefined,
-
   bettingCreation: undefined,
   bettingAcceptance: undefined,
+  invitation: null,
+  invitationLoading: false,
 };
 
 export const inviteReducer = createSlice({
@@ -56,6 +57,14 @@ export const inviteReducer = createSlice({
     ) {
       state.bettingAcceptance = { ...action.payload };
     },
+
+    setInvitation(state, action: PayloadAction<GetInvitationResponse | null>) {
+      state.invitation = action.payload;
+    },
+
+    setInvitationLoading(state, action: PayloadAction<boolean>) {
+      state.invitationLoading = action.payload;
+    },
   },
 });
 
@@ -66,6 +75,8 @@ export const {
   setInviteAcceptance,
   setBettingCreation,
   setBettingAcceptance,
+  setInvitation,
+  setInvitationLoading,
 } = inviteReducer.actions;
 
 export default inviteReducer.reducer;

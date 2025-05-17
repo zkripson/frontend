@@ -1,17 +1,10 @@
 "use client";
 import { useState, JSX } from "react";
-import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 
 import StakeScreen from "./StakeScreen";
 import ShareInviteScreen from "./shareInviteScreen";
 import SelectGameScreen from "./selectGameScreen";
-
-const schema = z.object({
-  code: z.string().min(4, "Code is required"),
-});
-
-type NewGame = z.infer<typeof schema>;
 
 const NewGame = () => {
   const [phase, setPhase] = useState<"select" | "stake" | "create">("select");
