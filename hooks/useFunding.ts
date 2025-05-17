@@ -34,19 +34,9 @@ const useFunding = () => {
     });
   };
 
-  const fundWithEth = (amount?: string) => {
-    if (!evmWallet?.address) return showToast("Something went wrong!", "error");
-
-    return fundEVMWallet(evmWallet?.address, {
-      chain: base,
-      amount,
-      // Funding with native ETH for gas fees
-    });
-  };
 
   return {
     fundWallet,
-    fundWithEth,
   };
 };
 

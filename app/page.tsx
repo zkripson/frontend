@@ -11,6 +11,7 @@ export default function HomePage() {
     if (!ready) return;
 
     if (user) {
+      console.log(user);
       navigate.push("/new-game");
     } else {
       navigate.push("/login");

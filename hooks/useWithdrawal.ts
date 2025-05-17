@@ -1,21 +1,13 @@
-import {
-  SendTransactionModalUIOptions,
-  UnsignedTransactionRequest,
-  useSendTransaction,
-} from "@privy-io/react-auth";
-import { base } from "viem/chains";
-import {
-  parseUnits,
-  toHex,
-  encodeFunctionData,
-  type Address,
-  erc20Abi,
-} from "viem";
+import { SendTransactionModalUIOptions } from "@privy-io/react-auth";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
+import { parseUnits, encodeFunctionData, type Address, erc20Abi } from "viem";
+
 import useAppActions from "@/store/app/actions";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import useSystemFunctions from "./useSystemFunctions";
 import { setLoadingBalance } from "@/store/app";
 import useBalance from "./useBalance";
+import { base } from "viem/chains";
 
 type TokenType = keyof typeof TOKEN_ADDRESSES;
 
@@ -23,16 +15,7 @@ const useWithdrawal = () => {
   const { showToast } = useAppActions();
   const { dispatch } = useSystemFunctions();
   const { checkTokenBalance } = useBalance();
-
-  const { sendTransaction } = useSendTransaction({
-    onSuccess: (result) => {
-      showToast("Successfully withdrew to your wallet!", "success");
-      dispatch(setLoadingBalance(true));
-      setTimeout(() => {
-        checkTokenBalance(TOKEN_ADDRESSES.USDC);
-      }, 1500);
-    },
-  });
+  const { getClientForChain } = useSmartWallets();
 
   const transferToken = async (
     toAddress: Address,
@@ -40,6 +23,18 @@ const useWithdrawal = () => {
     tokenType: TokenType = "USDC"
   ) => {
     try {
+      const baseClient = await getClientForChain({
+        id: base.id,
+      });
+      if (!baseClient) {
+        return showToast("Something went wrong!", "error");
+      }
+
+      const uiOptions: SendTransactionModalUIOptions = {
+        description: `Withdraw Funds`,
+        buttonText: `Withdraw ${tokenType}`,
+      };
+
       // Get token address
       const tokenAddress = TOKEN_ADDRESSES[tokenType] as Address;
 
@@ -54,20 +49,23 @@ const useWithdrawal = () => {
         args: [toAddress, tokenAmount],
       });
 
-      const unsignedTx: UnsignedTransactionRequest = {
-        to: tokenAddress,
-        chainId: base.id,
-        data,
-        // Important: Do NOT include 'value' for ERC20 transfers
-        // Only include 'data' for the contract call
-        // Gas estimation will be handled by Privy
-      };
+      const hash = await baseClient.sendTransaction(
+        {
+          to: tokenAddress,
+          data,
+          // Important: Do NOT include 'value' for ERC20 transfers
+          // Only include 'data' for the contract call
+          // Gas estimation will be handled by Privy
+        },
+        { uiOptions }
+      );
 
-      const uiOptions: SendTransactionModalUIOptions = {
-        buttonText: `Withdraw ${tokenType}`,
-      };
+      showToast("Successfully withdrew to your wallet!", "success");
+      dispatch(setLoadingBalance(true));
+      setTimeout(() => {
+        checkTokenBalance(TOKEN_ADDRESSES.USDC);
+      }, 1500);
 
-      const { hash } = await sendTransaction(unsignedTx, { uiOptions });
       return hash;
     } catch (error) {
       console.error("Token transfer error:", error);
@@ -75,33 +73,8 @@ const useWithdrawal = () => {
     }
   };
 
-  const transferEth = async (toAddress: Address, amount: number) => {
-    try {
-      const weiBigInt = parseUnits(amount.toString(), 18);
-      const valueInHex = toHex(weiBigInt);
-
-      const unsignedTx: UnsignedTransactionRequest = {
-        to: toAddress,
-        chainId: base.id,
-        value: valueInHex,
-        // For ETH transfers, we include 'value' but no 'data'
-      };
-
-      const uiOptions: SendTransactionModalUIOptions = {
-        buttonText: "Withdraw ETH",
-      };
-
-      const { hash } = await sendTransaction(unsignedTx, { uiOptions });
-      return hash;
-    } catch (error) {
-      console.error("ETH transfer error:", error);
-      throw error;
-    }
-  };
-
   return {
     transferToken,
-    transferEth,
   };
 };
 
