@@ -80,7 +80,7 @@ const useInviteActions = () => {
   };
 
   const createBettingInvite = async (
-    stakeAmountUSDC: string,
+    stakeAmount: string,
     callback?: CallbackProps
   ) => {
     try {
@@ -89,7 +89,7 @@ const useInviteActions = () => {
       dispatch(setLoadingInviteCreation(true));
 
       const creator = evmWallet.address;
-      const body = { creator, stakeAmountUSDC, expirationHours: 24 };
+      const body = { creator, stakeAmount };
       const response = await inviteAPI.createBettingInvite(body);
 
       dispatch(setBettingCreation(response));

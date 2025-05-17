@@ -27,8 +27,7 @@ type InviteAcceptanceResponse = {
 
 type BettingCreationBody = {
   creator: string;
-  stakeAmountUSDC: string;
-  expirationHours: number;
+  stakeAmount: string;
 };
 
 type BettingCreationResponse = {
