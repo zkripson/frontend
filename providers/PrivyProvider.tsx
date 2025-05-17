@@ -1,10 +1,13 @@
 import { PropsWithChildren } from "react";
 import { PrivyClientConfig, PrivyProvider } from "@privy-io/react-auth";
 import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
-import { base } from "viem/chains";
+import { base, baseSepolia } from "viem/chains";
+
+export const isDevEnv = process.env.NEXT_PUBLIC_ENVIRONMENT === "development";
+export const defaultChain = isDevEnv ? baseSepolia : base;
 
 export const privyConfig: PrivyClientConfig = {
-  defaultChain: base,
+  defaultChain,
   loginMethods: ["farcaster", "twitter"],
   embeddedWallets: {
     ethereum: {

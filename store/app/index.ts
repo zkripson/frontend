@@ -25,7 +25,7 @@ const initialState: AppState = {
       symbol: "$SHIP",
     },
   ],
-  loadingBalance: false,
+  loadingBalance: true,
 };
 
 export const appReducer = createSlice({

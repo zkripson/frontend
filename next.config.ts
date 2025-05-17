@@ -46,7 +46,9 @@ const ContentSecurityPolicy = `
     https://pay.google.com/gp/p/payment_method_manifest.json
     https://pay.google.com/gp/p/web_manifest.json
     https://www.gstatic.com/instantbuy/svg/transparent_square.svg
-    https://api.pimlico.io/v2/8453/rpc;
+    https://api.pimlico.io/v2/8453/rpc
+    https://sepolia.base.org
+    https://api.pimlico.io/v2/84532/rpc;
 
   
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;

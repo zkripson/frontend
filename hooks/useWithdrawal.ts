@@ -7,7 +7,7 @@ import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import useSystemFunctions from "./useSystemFunctions";
 import { setLoadingBalance } from "@/store/app";
 import useBalance from "./useBalance";
-import { base } from "viem/chains";
+import { defaultChain } from "@/providers/PrivyProvider";
 
 type TokenType = keyof typeof TOKEN_ADDRESSES;
 
@@ -23,10 +23,10 @@ const useWithdrawal = () => {
     tokenType: TokenType = "USDC"
   ) => {
     try {
-      const baseClient = await getClientForChain({
-        id: base.id,
+      const client = await getClientForChain({
+        id: defaultChain.id,
       });
-      if (!baseClient) {
+      if (!client) {
         return showToast("Something went wrong!", "error");
       }
 
@@ -49,7 +49,7 @@ const useWithdrawal = () => {
         args: [toAddress, tokenAmount],
       });
 
-      const hash = await baseClient.sendTransaction(
+      const hash = await client.sendTransaction(
         {
           to: tokenAddress,
           data,
