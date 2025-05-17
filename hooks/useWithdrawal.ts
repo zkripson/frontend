@@ -73,8 +73,52 @@ const useWithdrawal = () => {
     }
   };
 
+  const approveTransfer = async (amount: number) => {
+    try {
+      const client = await getClientForChain({
+        id: defaultChain.id,
+      });
+
+      if (!client) {
+        return showToast("Something went wrong!", "error");
+      }
+
+      const uiOptions: SendTransactionModalUIOptions = {
+        description: `Approve USDC for betting`,
+        buttonText: `Approve ${amount} USDC`,
+      };
+
+      // Convert amount to proper decimals (USDC uses 6 decimals)
+      const tokenAmount = parseUnits(amount.toString(), 6);
+
+      // Encode the ERC20 approve function call
+      const data = encodeFunctionData({
+        abi: erc20Abi,
+        functionName: "approve",
+        args: [TOKEN_ADDRESSES.BETTING as Address, tokenAmount],
+      });
+
+      const hash = await client.sendTransaction(
+        {
+          to: TOKEN_ADDRESSES.USDC as Address,
+          data,
+        },
+        { uiOptions }
+      );
+
+      showToast("Successfully approved USDC for betting!", "success");
+
+      return hash;
+    } catch (error) {
+      console.error("Approval error:", error);
+      showToast("Failed to approve USDC", "error");
+      throw error;
+    }
+  };
+
   return {
     transferToken,
+    approveTransfer,
   };
 };
 
