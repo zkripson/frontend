@@ -69,6 +69,7 @@ const Inventory = ({
   onHide,
   visible,
   show,
+  waitingForOpponent,
 }: InventoryProps) => {
   const {
     gameState: { loadingSubmitBoardCommitment },
@@ -212,7 +213,7 @@ const Inventory = ({
                 </div>
               ) : (
                 <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
-                  ready
+                  {waitingForOpponent ? "Waiting for opponent" : "Ready"}
                 </span>
               )}
             </motion.button>

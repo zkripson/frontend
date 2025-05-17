@@ -27,6 +27,7 @@ interface GameBoardContainerProps {
   onReady: () => void;
   onFireShot: (x: number, y: number) => void;
   opponentShips?: ShipType[];
+  waitingForOpponent?: boolean;
 }
 
 export function GameBoardContainer({
@@ -46,6 +47,7 @@ export function GameBoardContainer({
   onReady,
   onFireShot,
   opponentShips = [],
+  waitingForOpponent,
 }: GameBoardContainerProps) {
   const {
     gameState: { loadingSubmitBoardCommitment },
@@ -85,7 +87,7 @@ export function GameBoardContainer({
         loading={loadingSubmitBoardCommitment}
       >
         <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
-          READY
+          {waitingForOpponent ? "Waiting for opponent" : "Ready"}
         </span>
       </KPClickAnimation>,
       <General

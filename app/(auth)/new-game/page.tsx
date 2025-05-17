@@ -264,7 +264,7 @@ const NewGame = () => {
                   fontSize: "clamp(21px, 3vw, 36px)",
                   lineHeight: 1,
                 }}
-                className="tracking-[8px] md:tracking-[12px] font-semibold"
+                className="tracking-[8px] md:tracking-[12px] font-semibold text-white"
               >
                 {inviteCreation.code}
               </span>

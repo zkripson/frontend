@@ -10,35 +10,32 @@ const titles = {
   draw: "It's a Draw!",
 } as const;
 
-const statsData = {
-  win: {
-    totalGamesPlayed: { title: "Total Games Played", value: 12 },
-    winRate: { title: "Win Rate", value: "60%" },
-    avgMoveSpeed: { title: "Avg. Move Speed", value: "3.4s" },
-    matchLength: { title: "Match Length", value: "2m 15s" },
-    longestMatch: { title: "Longest Match", value: "5m 02s" },
+interface PlayerStats {
+  address: string;
+  shotsCount: number;
+  hitsCount: number;
+  accuracy: number;
+  shipsSunk: number;
+  avgTurnTime: number;
+}
+
+const formatStats = (stats: PlayerStats) => [
+  { title: "Shots Fired", value: stats.shotsCount.toString() },
+  { title: "Hits", value: stats.hitsCount.toString() },
+  { title: "Accuracy", value: `${stats.accuracy}%` },
+  { title: "Ships Sunk", value: stats.shipsSunk.toString() },
+  {
+    title: "Avg. Turn Time",
+    value: `${(stats.avgTurnTime / 1000).toFixed(1)}s`,
   },
-  loss: {
-    totalGamesPlayed: { title: "Total Games Played", value: 8 },
-    winRate: { title: "Win Rate", value: "25%" },
-    avgMoveSpeed: { title: "Avg. Move Speed", value: "4.8s" },
-    matchLength: { title: "Match Length", value: "3m 40s" },
-    longestMatch: { title: "Longest Match", value: "6m 10s" },
-  },
-  draw: {
-    totalGamesPlayed: { title: "Total Games Played", value: 10 },
-    winRate: { title: "Win Rate", value: "50%" },
-    avgMoveSpeed: { title: "Avg. Move Speed", value: "4.0s" },
-    matchLength: { title: "Match Length", value: "3m 00s" },
-    longestMatch: { title: "Longest Match", value: "6m 00s" },
-  },
-} as const;
+];
 
 interface VictoryStatusProps {
   status?: "win" | "loss" | "draw";
   onPlayAgain?: () => void;
   onHome?: () => void;
   show?: boolean;
+  playerStats: PlayerStats;
 }
 
 const VictoryStatus = ({
@@ -46,6 +43,7 @@ const VictoryStatus = ({
   onPlayAgain,
   onHome,
   show,
+  playerStats,
 }: VictoryStatusProps) => {
   // safe‑guard: if status isn't exactly "win" or "loss", fallback to "win"
   if (status !== "win" && status !== "loss" && status !== "draw") {
@@ -53,8 +51,7 @@ const VictoryStatus = ({
     status = "win";
   }
 
-  // use fallback empty object so Object.entries never sees undefined
-  const stats = statsData[status] ?? {};
+  const stats = formatStats(playerStats);
 
   return (
     <AnimatePresence>
@@ -100,9 +97,9 @@ const VictoryStatus = ({
                 </h2>
 
                 <div className="flex flex-col gap-3 items-center justify-center">
-                  {Object.entries(stats).map(([key, { title, value }]) => (
+                  {stats.map(({ title, value }) => (
                     <div
-                      key={key}
+                      key={title}
                       className="flex items-center justify-center text-[12px] max-sm:text-[10.69px] leading-none text-primary-50"
                     >
                       <span>{title}:&nbsp;</span>

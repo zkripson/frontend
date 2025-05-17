@@ -75,6 +75,7 @@ const KPButton = ({
           "h-[52px] max-sm:h-[34.76px]": isMachine && !small,
           "h-[38px]": isMachine && small,
           "opacity-0 pointer-events-none": hide,
+          "opacity-50 pointer-events-none": disabled,
         },
         className
       )}

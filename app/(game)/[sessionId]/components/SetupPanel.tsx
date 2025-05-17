@@ -9,6 +9,7 @@ interface SetupPanelProps {
   onReady: () => void;
   disableReadyButton: boolean;
   mode: "setup" | "game";
+  waitingForOpponent?: boolean;
 }
 
 export function SetupPanel({
@@ -20,6 +21,7 @@ export function SetupPanel({
   onReady,
   disableReadyButton,
   mode,
+  waitingForOpponent,
 }: SetupPanelProps) {
   return (
     <>
@@ -32,6 +34,7 @@ export function SetupPanel({
         onReady={onReady}
         disableReady={disableReadyButton}
         show={mode === "setup"}
+        waitingForOpponent={waitingForOpponent}
       />
     </>
   );

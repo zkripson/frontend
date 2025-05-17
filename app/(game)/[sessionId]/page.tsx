@@ -21,6 +21,15 @@ import { useToggleInfo } from "@/hooks/useToggleInfo";
 import { GeneralMessageKey } from "./components/general";
 import { useAudio } from "@/providers/AudioProvider";
 
+// Helper function to calculate turn time
+const calculateAvgTurnTime = (
+  currentAvg: number,
+  totalShots: number,
+  newTurnTime: number
+) => {
+  return Math.round((currentAvg * totalShots + newTurnTime) / (totalShots + 1));
+};
+
 // Game state types
 interface GameState {
   sessionId: string | null;
@@ -32,15 +41,32 @@ interface GameState {
   playerBoard: number[][];
   enemyBoard: number[][];
   ships: Ship[];
-  statistics: {
-    yourShots: number;
-    yourHits: number;
-    yourSunk: number;
-    enemyShots: number;
-    enemyHits: number;
-    enemySunk: number;
-  };
   winner: string | null;
+  finalState?: {
+    shots: Array<{
+      player: string;
+      x: number;
+      y: number;
+      isHit: boolean;
+      timestamp: number;
+    }>;
+    sunkShips: Record<string, number>;
+    gameStartedAt: number;
+    gameEndedAt: number;
+    duration: number;
+    isBettingGame: boolean;
+  };
+  playerStats?: Record<
+    string,
+    {
+      address: string;
+      shotsCount: number;
+      hitsCount: number;
+      accuracy: number;
+      shipsSunk: number;
+      avgTurnTime: number;
+    }
+  >;
 }
 
 interface Ship {
@@ -135,16 +161,17 @@ const GameSession = () => {
       .fill(0)
       .map(() => Array(10).fill(0)),
     ships: [],
-    statistics: {
-      yourShots: 0,
-      yourHits: 0,
-      yourSunk: 0,
-      enemyShots: 0,
-      enemyHits: 0,
-      enemySunk: 0,
-    },
     winner: null,
     sunkEnemyShips: [],
+    finalState: {
+      shots: [],
+      sunkShips: {},
+      gameStartedAt: 0,
+      gameEndedAt: 0,
+      duration: 0,
+      isBettingGame: false,
+    },
+    playerStats: {},
   });
 
   const [turnTimeRemaining, setTurnTimeRemaining] = useState(15);
@@ -301,8 +328,9 @@ const GameSession = () => {
           playerBoard: prev.playerBoard,
           enemyBoard: prev.enemyBoard,
           ships: prev.ships,
-          statistics: prev.statistics,
           sunkEnemyShips: prev.sunkEnemyShips,
+          playerStats: prev.playerStats,
+          finalState: prev.finalState,
         };
         console.log("Updating game state:", { before: prev, after: newState });
         return newState;
@@ -340,11 +368,10 @@ const GameSession = () => {
         currentTurn: data.currentTurn || prev.currentTurn,
         gameStartedAt: data.gameStartedAt || prev.gameStartedAt,
         turnStartedAt: data.turnStartedAt || prev.turnStartedAt,
-        // Preserve these important properties if they exist in prev state
         playerBoard: prev.playerBoard,
         enemyBoard: prev.enemyBoard,
         ships: prev.ships,
-        statistics: prev.statistics,
+        statistics: prev.playerStats,
         sunkEnemyShips: prev.sunkEnemyShips,
       }));
 
@@ -380,8 +407,8 @@ const GameSession = () => {
         playerBoard: prev.playerBoard,
         enemyBoard: prev.enemyBoard,
         ships: prev.ships,
-        statistics: prev.statistics,
         sunkEnemyShips: prev.sunkEnemyShips,
+        playerStats: prev.playerStats,
       }));
 
       if (!data.allBoardsSubmitted && data.player === evmWallet?.address) {
@@ -422,17 +449,39 @@ const GameSession = () => {
           const opponentAddress =
             prev.players.find((p) => p !== evmWallet.address) || "";
 
+          // Update the player's stats in real-time
+          const currentStats = prev.playerStats?.[evmWallet.address] || {
+            address: evmWallet.address,
+            shotsCount: 0,
+            hitsCount: 0,
+            accuracy: 0,
+            shipsSunk: 0,
+            avgTurnTime: 0,
+          };
+
           return {
             ...prev,
             enemyBoard: newEnemyBoard,
             currentTurn: nextTurn,
             turnStartedAt: turnStartedAt,
-            statistics: {
-              ...prev.statistics,
-              yourShots: prev.statistics.yourShots + 1,
-              yourHits: prev.statistics.yourHits + (isHit ? 1 : 0),
-              yourSunk: sunkShips[evmWallet.address] || 0,
-              enemySunk: sunkShips[opponentAddress] || 0,
+            playerStats: {
+              ...prev.playerStats,
+              [evmWallet.address]: {
+                ...currentStats,
+                shotsCount: currentStats.shotsCount + 1,
+                hitsCount: currentStats.hitsCount + (isHit ? 1 : 0),
+                accuracy: Math.round(
+                  ((currentStats.hitsCount + (isHit ? 1 : 0)) /
+                    (currentStats.shotsCount + 1)) *
+                    100
+                ),
+                shipsSunk: sunkShips[evmWallet.address] || 0,
+                avgTurnTime: calculateAvgTurnTime(
+                  currentStats.avgTurnTime,
+                  currentStats.shotsCount,
+                  Math.floor((Date.now() - turnStartedAt) / 1000)
+                ),
+              },
             },
           };
         }
@@ -444,17 +493,39 @@ const GameSession = () => {
           const opponentAddress =
             prev.players.find((p) => p !== evmWallet.address) || "";
 
+          // Update opponent's stats in real-time
+          const opponentStats = prev.playerStats?.[opponentAddress] || {
+            address: opponentAddress,
+            shotsCount: 0,
+            hitsCount: 0,
+            accuracy: 0,
+            shipsSunk: 0,
+            avgTurnTime: 0,
+          };
+
           return {
             ...prev,
             playerBoard: newPlayerBoard,
             currentTurn: nextTurn,
             turnStartedAt: turnStartedAt,
-            statistics: {
-              ...prev.statistics,
-              enemyShots: prev.statistics.enemyShots + 1,
-              enemyHits: prev.statistics.enemyHits + (isHit ? 1 : 0),
-              yourSunk: sunkShips[evmWallet.address] || 0,
-              enemySunk: sunkShips[opponentAddress] || 0,
+            playerStats: {
+              ...prev.playerStats,
+              [opponentAddress]: {
+                ...opponentStats,
+                shotsCount: opponentStats.shotsCount + 1,
+                hitsCount: opponentStats.hitsCount + (isHit ? 1 : 0),
+                accuracy: Math.round(
+                  ((opponentStats.hitsCount + (isHit ? 1 : 0)) /
+                    (opponentStats.shotsCount + 1)) *
+                    100
+                ),
+                shipsSunk: sunkShips[opponentAddress] || 0,
+                avgTurnTime: calculateAvgTurnTime(
+                  opponentStats.avgTurnTime,
+                  opponentStats.shotsCount,
+                  Math.floor((Date.now() - turnStartedAt) / 1000)
+                ),
+              },
             },
           };
         }
@@ -500,25 +571,50 @@ const GameSession = () => {
     // Handler for game over event
     const handleGameOver = (data: any) => {
       console.log("Game over:", data);
-      const { winner, reason } = data;
+      const { winner, finalState } = data;
 
       // Stop all timers
       clearTimers();
 
-      setGameStateLocal((prev) => ({
-        ...prev,
-        gameStatus: "COMPLETED",
-        winner: winner || null,
-        statistics: {
-          ...prev.statistics,
-          // Update final statistics if they were sent
-          ...(data.statistics || {}),
-        },
-      }));
+      setGameStateLocal((prev) => {
+        // Calculate final stats for each player
+        const finalPlayerStats = { ...prev.playerStats };
 
-      // Play victory/defeat sound
-      // TODO: Add game over sound effects
-      // playSound(winner === evmWallet?.address ? "victory" : "defeat");
+        // For both players, finalize their stats
+        Object.keys(finalPlayerStats).forEach((address) => {
+          if (finalPlayerStats[address]) {
+            const totalTurnTime =
+              (finalState.gameEndedAt - finalState.gameStartedAt) / 1000;
+            const averageTurnTime = Math.round(
+              totalTurnTime / finalPlayerStats[address].shotsCount
+            );
+
+            finalPlayerStats[address] = {
+              ...finalPlayerStats[address],
+              shipsSunk: finalState.sunkShips[address] || 0,
+              // Calculate final accuracy
+              accuracy:
+                finalPlayerStats[address].shotsCount > 0
+                  ? Math.round(
+                      (finalPlayerStats[address].hitsCount /
+                        finalPlayerStats[address].shotsCount) *
+                        100
+                    )
+                  : 0,
+              // Calculate final average turn time
+              avgTurnTime: averageTurnTime || 0,
+            };
+          }
+        });
+
+        return {
+          ...prev,
+          gameStatus: "COMPLETED",
+          winner: winner || null,
+          finalState,
+          playerStats: finalPlayerStats,
+        };
+      });
     };
 
     // Handler for ship sunk event
@@ -991,6 +1087,7 @@ const GameSession = () => {
             onReady={onReady}
             disableReadyButton={disableReadyButton}
             mode={mode}
+            waitingForOpponent={gameStateLocal.players.length < 2}
           />
 
           <GameBoardContainer
@@ -1009,7 +1106,7 @@ const GameSession = () => {
             setMode={setMode}
             onReady={onReady}
             onFireShot={makeShot}
-            // Pass opponentShips for visualizing sunk enemy ships
+            waitingForOpponent={gameStateLocal.players.length < 2}
             {...(mode === "game" && { opponentShips })}
           />
 
@@ -1032,6 +1129,16 @@ const GameSession = () => {
         status={victoryStatus}
         onPlayAgain={handlePlayAgain}
         onHome={handlePlayAgain}
+        playerStats={
+          gameStateLocal.playerStats?.[evmWallet?.address || ""] || {
+            address: evmWallet?.address || "",
+            shotsCount: 0,
+            hitsCount: 0,
+            accuracy: 0,
+            shipsSunk: 0,
+            avgTurnTime: 0,
+          }
+        }
       />
     </div>
   );
