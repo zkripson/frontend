@@ -24,3 +24,29 @@ type InviteAcceptanceResponse = {
   acceptedBy: string;
   status: "WAITING" | "READY";
 };
+
+type BettingCreationBody = {
+  creator: string;
+  stakeAmountUSDC: string;
+  expirationHours: number;
+};
+
+type BettingCreationResponse = {
+  success: boolean;
+  inviteId: string;
+  onChainId: number;
+  code: string;
+  stakeAmountUSDC: string;
+  totalPool: string;
+  expiresAt: number;
+};
+
+type BettingAcceptanceResponse = {
+  success: boolean;
+  sessionId: string;
+  gameId: number;
+  gameContractAddress: string;
+  totalPool: string;
+  platformFee: string;
+  winnerPayout: string;
+};

@@ -21,6 +21,8 @@ import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { PlusIcon } from "@/public/icons";
 import useAppActions from "@/store/app/actions";
 import useFunding from "@/hooks/useFunding";
+import useInviteActions from "@/store/invite/actions";
+import useWithdrawal from "@/hooks/useWithdrawal";
 
 const schema = z.object({
   stake: z.number().min(1, "Stake is required"),
@@ -35,22 +37,23 @@ type DepositForm = z.infer<typeof depositSchema>;
 
 interface StakeScreenProps {
   onBack: () => void;
-  onSubmit: (amount: number) => void;
-  loading?: boolean;
+  nextScreen: () => void;
 }
 
-const StakeScreen: React.FC<StakeScreenProps> = ({
-  onBack,
-  onSubmit,
-  loading,
-}) => {
+const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
+  const { createBettingInvite } = useInviteActions();
   const { checkTokenBalance } = useBalance();
   const { evmWallet } = usePrivyLinkedAccounts();
-  const { appState } = useSystemFunctions();
+  const {
+    appState,
+    inviteState: { loadingInviteCreation },
+  } = useSystemFunctions();
   const { showToast } = useAppActions();
   const { fundWallet } = useFunding();
+  const { approveTransfer } = useWithdrawal();
   const { balances, loadingBalance } = appState;
   const [depositDropdownOpen, setDepositDropdownOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const {
     register: registerStake,
@@ -80,12 +83,38 @@ const StakeScreen: React.FC<StakeScreenProps> = ({
   const hasInsufficientBalance = Number(stake) > Number(usdcBalance);
 
   const disableNextButton =
-    loadingBalance || loading || !stake || hasInsufficientBalance;
+    loadingBalance || loadingInviteCreation || !stake || hasInsufficientBalance;
 
   const handleMinus = () => {
     if (stake > 1) setValue("stake", stake - 1);
   };
   const handlePlus = () => setValue("stake", Number(stake || 0) + 1);
+
+  const handleDeposit = async (data: DepositForm) => {
+    try {
+      await fundWallet(data.deposit.toString());
+      setDepositDropdownOpen(false);
+      resetDeposit();
+    } catch (error) {
+      showToast("Failed to deposit", "error");
+    }
+  };
+
+  const onSubmit = async (amount: number) => {
+    try {
+      setLoading(true);
+      await approveTransfer(amount);
+
+      setTimeout(() => {
+        nextScreen();
+        createBettingInvite(amount.toString());
+      }, 1500);
+    } catch (error) {
+      showToast("Failed to stake", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     checkTokenBalance(TOKEN_ADDRESSES.USDC);
@@ -100,16 +129,6 @@ const StakeScreen: React.FC<StakeScreenProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errors.stake?.message]);
 
-  const handleDeposit = async (data: DepositForm) => {
-    try {
-      await fundWallet(data.deposit.toString());
-      setDepositDropdownOpen(false);
-      resetDeposit();
-    } catch (error) {
-      showToast("Failed to deposit", "error");
-    }
-  };
-
   return (
     <div className="w-full h-full flex items-center justify-center relative">
       <KPDialougue
@@ -121,6 +140,7 @@ const StakeScreen: React.FC<StakeScreenProps> = ({
           icon: "arrow",
           iconPosition: "right",
           disabled: disableNextButton,
+          loading: loading,
         }}
         className="pt-[88px]"
       >
