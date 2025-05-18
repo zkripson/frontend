@@ -38,6 +38,11 @@ export const metadata: Metadata = {
   ],
   applicationName: "Battleship",
   themeColor: "#d9b478",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Battleship",
+  },
   openGraph: {
     title: "Battleship",
     description:
@@ -77,6 +82,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta
           name="fc:frame"
           content='{
