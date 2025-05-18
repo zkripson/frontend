@@ -8,7 +8,7 @@ import { defaultChain } from "@/providers/PrivyProvider";
 
 const useBalance = () => {
   const { dispatch } = useSystemFunctions();
-  const { evmWallet } = usePrivyLinkedAccounts();
+  const { activeWallet } = usePrivyLinkedAccounts();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tokenBalances, setTokenBalances] = useState<Record<string, string>>(
@@ -17,7 +17,7 @@ const useBalance = () => {
 
   const checkTokenBalance = useCallback(
     async (tokenAddress: `0x${string}`) => {
-      if (!evmWallet?.address) {
+      if (!activeWallet?.address) {
         setError("No wallet connected");
         return null;
       }
@@ -38,7 +38,7 @@ const useBalance = () => {
           address: tokenAddress,
           abi: erc20Abi,
           functionName: "balanceOf",
-          args: [evmWallet.address as `0x${string}`],
+          args: [activeWallet.address as `0x${string}`],
         });
 
         // Format balance with correct decimals
@@ -76,7 +76,7 @@ const useBalance = () => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [evmWallet?.address]
+    [activeWallet?.address]
   );
 
   return {

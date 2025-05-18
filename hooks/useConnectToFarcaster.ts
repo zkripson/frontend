@@ -6,6 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 
 import { setFarcasterContext } from "@/store/app";
 import useSystemFunctions from "./useSystemFunctions";
+import { useConnect } from "wagmi";
 
 const useConnectToFarcaster = () => {
   const { ready, authenticated } = usePrivy();

@@ -10,7 +10,7 @@ import useSystemFunctions from "./useSystemFunctions";
 const useFunding = () => {
   const { checkTokenBalance } = useBalance();
   const { showToast } = useAppActions();
-  const { evmWallet } = usePrivyLinkedAccounts();
+  const { activeWallet } = usePrivyLinkedAccounts();
   const { dispatch } = useSystemFunctions();
 
   const { fundWallet: fundEVMWallet } = useFundWallet({
@@ -23,9 +23,10 @@ const useFunding = () => {
   });
 
   const fundWallet = (amount?: string) => {
-    if (!evmWallet?.address) return showToast("Something went wrong!", "error");
+    if (!activeWallet?.address)
+      return showToast("Something went wrong!", "error");
 
-    return fundEVMWallet(evmWallet?.address, {
+    return fundEVMWallet(activeWallet?.address, {
       chain: defaultChain,
       amount,
       asset: {

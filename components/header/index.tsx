@@ -9,7 +9,7 @@ import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 const KPHeader = () => {
   const { checkTokenBalance } = useBalance();
   const { pathname } = useSystemFunctions();
-  const { linkedFarcaster, linkedTwitter, evmWallet } =
+  const { linkedFarcaster, linkedTwitter, activeWallet } =
     usePrivyLinkedAccounts();
 
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
@@ -21,7 +21,7 @@ const KPHeader = () => {
     checkTokenBalance(TOKEN_ADDRESSES.USDC);
     checkTokenBalance(TOKEN_ADDRESSES.SHIP);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [evmWallet]);
+  }, [activeWallet]);
 
   return (
     <div className="layout-header-container">
