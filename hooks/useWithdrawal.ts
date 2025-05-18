@@ -91,7 +91,7 @@ const useWithdrawal = () => {
       dispatch(setLoadingBalance(true));
       setTimeout(() => {
         checkTokenBalance(TOKEN_ADDRESSES.USDC);
-      }, 1500);
+      }, 2500);
 
       return hash;
     } catch (error) {

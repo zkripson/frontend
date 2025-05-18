@@ -54,10 +54,9 @@ const useConnectToFarcaster = () => {
 
         // We can also log this for debugging
         if (isInFrame) {
-          console.log("App loaded within Farcaster frame");
           setTimeout(() => {
             FrameSDK.actions.addFrame();
-          }, 10000);
+          }, 15000);
         }
       }
     };
