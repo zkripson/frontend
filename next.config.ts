@@ -48,7 +48,9 @@ const ContentSecurityPolicy = `
     https://www.gstatic.com/instantbuy/svg/transparent_square.svg
     https://api.pimlico.io/v2/8453/rpc
     https://sepolia.base.org
-    https://api.pimlico.io/v2/84532/rpc;
+    https://api.pimlico.io/v2/84532/rpc
+    https://auth.privy.io
+    https://auth.privy.io/api/v2/farcaster/init;
 
   
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
