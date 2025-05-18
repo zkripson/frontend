@@ -34,7 +34,7 @@ const KPGameCodeInput = ({
   setCode,
 }: IKPGameCodeInput) => {
   const {
-    inviteState: { invitation, invitationLoading },
+    inviteState: { invitation, invitationLoading, loadingInviteAcceptance },
     appState,
   } = useSystemFunctions();
   const { getInvitation } = useInviteActions();
@@ -117,6 +117,7 @@ const KPGameCodeInput = ({
         error={!!errors.code}
         className="w-full"
         type="text"
+        disabled={invitationLoading || loadingInviteAcceptance}
       />
 
       <AnimatePresence>
