@@ -20,7 +20,7 @@ export default function HomePage() {
 
   return (
     <div className="flex justify-center items-center h-screen bg-primary-250 w-full">
-      <div className="w-10 h-10 bg-primary-50 rounded-full animate-pulse ml-10" />
+      <div className="w-10 h-10 bg-primary-50 rounded-full animate-pulse ml-3" />
     </div>
   );
 }
