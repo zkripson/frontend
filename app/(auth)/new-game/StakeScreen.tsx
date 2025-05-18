@@ -18,8 +18,6 @@ import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useAppActions from "@/store/app/actions";
 import useInviteActions from "@/store/invite/actions";
 import useWithdrawal from "@/hooks/useWithdrawal";
-import { useAccount } from "wagmi";
-import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 
 const schema = z.object({
   stake: z.number().min(1, "Stake is required"),
@@ -36,15 +34,13 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
   const { createBettingInvite } = useInviteActions();
   const { checkTokenBalance } = useBalance();
   const { activeWallet } = usePrivyLinkedAccounts();
-  const { isConnected } = useAccount();
-  const { isFrameLoaded } = useConnectToFarcaster();
 
   const {
     appState,
     inviteState: { loadingInviteCreation },
   } = useSystemFunctions();
   const { showToast } = useAppActions();
-  const { approveTransfer, connectWallet } = useWithdrawal();
+  const { approveTransfer } = useWithdrawal();
   const { balances, loadingBalance } = appState;
 
   const {
@@ -74,10 +70,6 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
 
   const onSubmit = async (amount: number) => {
     try {
-      if (!isConnected && isFrameLoaded) {
-        return connectWallet();
-      }
-
       await approveTransfer(amount);
 
       setTimeout(() => {

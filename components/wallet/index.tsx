@@ -98,10 +98,6 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
         return showToast("Insufficient balance", "error");
       }
 
-      if (!isConnected && isFrameLoaded) {
-        return connectWallet();
-      }
-
       const isUsdc = selectedToken?.address === TOKEN_ADDRESSES.USDC;
 
       transferToken(

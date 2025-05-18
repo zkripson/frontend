@@ -1,7 +1,6 @@
 import { SendTransactionModalUIOptions } from "@privy-io/react-auth";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { parseUnits, encodeFunctionData, type Address, erc20Abi } from "viem";
-import { useAccount, useConnect, useWriteContract } from "wagmi";
 
 import useAppActions from "@/store/app/actions";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
@@ -10,6 +9,7 @@ import { setLoadingBalance } from "@/store/app";
 import useBalance from "./useBalance";
 import { defaultChain } from "@/providers/PrivyProvider";
 import useConnectToFarcaster from "./useConnectToFarcaster";
+import useWarpcastWallet from "./useWarpcastWallet";
 
 type TokenType = keyof typeof TOKEN_ADDRESSES;
 
@@ -19,9 +19,8 @@ const useWithdrawal = () => {
   const { checkTokenBalance } = useBalance();
   const { getClientForChain } = useSmartWallets();
   const { isFrameLoaded } = useConnectToFarcaster();
-  const { isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
-  const { writeContractAsync } = useWriteContract();
+  const { provider: warpcastProvider, address: warpcastAddress } =
+    useWarpcastWallet();
 
   const transferToken = async (
     toAddress: Address,
@@ -38,18 +37,23 @@ const useWithdrawal = () => {
 
       let hash;
 
-      if (isFrameLoaded) {
-        // For Farcaster Frame, use Wagmi
-
-        if (!isConnected) {
-          return connectWallet();
-        }
-
-        hash = await writeContractAsync({
-          address: tokenAddress,
+      if (isFrameLoaded && warpcastProvider && warpcastAddress) {
+        const data = encodeFunctionData({
           abi: erc20Abi,
           functionName: "transfer",
           args: [toAddress, tokenAmount],
+        });
+
+        hash = await warpcastProvider.request({
+          method: "eth_sendTransaction",
+          params: [
+            {
+              from: warpcastAddress,
+              to: tokenAddress,
+              data,
+              chainId: `0x${defaultChain.id.toString(16)}`,
+            },
+          ],
         });
       } else {
         const client = await getClientForChain({
@@ -103,16 +107,23 @@ const useWithdrawal = () => {
 
       let hash;
 
-      if (isFrameLoaded) {
-        if (!isConnected) {
-          return connectWallet();
-        }
-
-        hash = await writeContractAsync({
-          address: TOKEN_ADDRESSES.USDC as Address,
+      if (isFrameLoaded && warpcastProvider && warpcastAddress) {
+        const data = encodeFunctionData({
           abi: erc20Abi,
           functionName: "approve",
           args: [TOKEN_ADDRESSES.BETTING as Address, tokenAmount],
+        });
+
+        hash = await warpcastProvider.request({
+          method: "eth_sendTransaction",
+          params: [
+            {
+              from: warpcastAddress,
+              to: TOKEN_ADDRESSES.USDC as Address,
+              data,
+              chainId: `0x${defaultChain.id.toString(16)}`,
+            },
+          ],
         });
       } else {
         const client = await getClientForChain({
@@ -152,16 +163,9 @@ const useWithdrawal = () => {
     }
   };
 
-  const connectWallet = async () => {
-    if (!isConnected && connectors.length > 0) {
-      return connect({ connector: connectors[0] });
-    }
-  };
-
   return {
     transferToken,
     approveTransfer,
-    connectWallet,
   };
 };
 

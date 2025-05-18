@@ -82,7 +82,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
         <meta
           name="fc:frame"
           content='{
@@ -100,6 +103,7 @@ export default function RootLayout({
             }
           }'
         />
+        <meta property="fc:frame:wallet_action" content="use_warpcast" />
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
