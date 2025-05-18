@@ -24,3 +24,47 @@ type InviteAcceptanceResponse = {
   acceptedBy: string;
   status: "WAITING" | "READY";
 };
+
+type BettingCreationBody = {
+  creator: string;
+  stakeAmount: string;
+};
+
+type BettingCreationResponse = {
+  id: string;
+  code: string;
+  creator: string;
+  stakeAmount: string;
+  expiresAt: number;
+  isBettingGame: boolean;
+  onChainInviteId: number;
+  transactionHash: string;
+  inviteLink: string;
+  sessionId: string;
+};
+
+type BettingAcceptanceResponse = {
+  success: boolean;
+  sessionId: string;
+  gameId: number;
+  gameContractAddress: string;
+  totalPool: string;
+  platformFee: string;
+  winnerPayout: string;
+};
+
+type GetInvitationResponse = {
+  id: string;
+  creator: string;
+  createdAt: number;
+  expiresAt: number;
+  sessionId: string;
+  status: string;
+  acceptedBy: null | string;
+  acceptedAt: null | number;
+  isBettingGame: boolean;
+  isExpired: boolean;
+  gameId?: null | string;
+  stakeAmount?: string;
+  onChainInviteId?: string;
+};

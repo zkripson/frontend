@@ -1,6 +1,5 @@
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useAppActions from "@/store/app/actions";
-import useSystemFunctions from "@/hooks/useSystemFunctions";
 import { KPProfileBadge, KPTimer, KPIconButton } from "@/components";
 import HowToPlay from "./how-to-play";
 import Turn from "./turn";
@@ -27,9 +26,6 @@ export function GameHeader({
 }: GameHeaderProps) {
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
   const { showToast } = useAppActions();
-  const {
-    inviteState: { inviteCreation },
-  } = useSystemFunctions();
   const audio = useAudio();
 
   // Mute toggle state
@@ -46,8 +42,6 @@ export function GameHeader({
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
   const pfp =
     linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
-
-  const inviteCode = inviteCreation?.code;
 
   const handleShareInvite = () => {
     if (navigator.share) {
