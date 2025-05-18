@@ -31,13 +31,16 @@ type BettingCreationBody = {
 };
 
 type BettingCreationResponse = {
-  success: boolean;
-  inviteId: string;
-  onChainId: number;
+  id: string;
   code: string;
-  stakeAmountUSDC: string;
-  totalPool: string;
+  creator: string;
+  stakeAmount: string;
   expiresAt: number;
+  isBettingGame: boolean;
+  onChainInviteId: number;
+  transactionHash: string;
+  inviteLink: string;
+  sessionId: string;
 };
 
 type BettingAcceptanceResponse = {
@@ -52,7 +55,6 @@ type BettingAcceptanceResponse = {
 
 type GetInvitationResponse = {
   id: string;
-  code: string;
   creator: string;
   createdAt: number;
   expiresAt: number;

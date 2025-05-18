@@ -24,11 +24,14 @@ const SelectGameScreen = ({
 
   const [isJoining, setJoining] = useState(false);
   const [canAccept, setCanAccept] = useState(false);
+  const [code, setCode] = useState("");
 
   const onSubmit = async () => {
+    if (!code) return;
+
     await approveTransfer(Number(invitation?.stakeAmount));
 
-    await acceptBettingInvite(invitation?.code!);
+    await acceptBettingInvite(code);
   };
 
   const gameTypes = [
@@ -87,6 +90,7 @@ const SelectGameScreen = ({
       onBack={() => setJoining(false)}
       setCanAccept={setCanAccept}
       key={"join"}
+      setCode={setCode}
     />,
   ];
 

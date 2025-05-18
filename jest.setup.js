@@ -1,5 +1,65 @@
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
+
+// Add TextEncoder/TextDecoder to the global scope for viem
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
+// Mock problematic dependencies
+jest.mock('@privy-io/react-auth', () => ({
+  usePrivy: jest.fn(() => ({
+    ready: true,
+    authenticated: false,
+    user: {
+      id: 'mock-user-id',
+      linkedAccounts: [],
+    },
+    login: jest.fn(),
+    logout: jest.fn(),
+  })),
+  PrivyProvider: ({ children }) => children,
+  PrivyClientConfig: {},
+  isPrivyWallet: jest.fn(() => false),
+}));
+
+jest.mock('@privy-io/react-auth/smart-wallets', () => ({
+  SmartWalletsProvider: ({ children }) => children,
+  useSmartWallets: jest.fn(() => ({
+    client: null,
+    address: null,
+    isConnected: false,
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    getClientForChain: jest.fn().mockResolvedValue(null),
+  })),
+}));
+
+// Mock viem chains
+jest.mock('viem/chains', () => ({
+  base: {
+    id: 8453,
+    name: 'Base',
+    network: 'base',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: {
+      default: {
+        http: ['https://mainnet.base.org'],
+      },
+    },
+  },
+  baseSepolia: {
+    id: 84532,
+    name: 'Base Sepolia',
+    network: 'base-sepolia',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: {
+      default: {
+        http: ['https://sepolia.base.org'],
+      },
+    },
+  },
+}));
 
 // Add custom matchers
 expect.extend({
@@ -28,3 +88,16 @@ console.warn = function filterWarning(...args) {
   }
   originalWarn.apply(console, args);
 };
+
+// Mock Audio API
+global.Audio = jest.fn(() => ({
+  play: jest.fn().mockResolvedValue(undefined),
+  pause: jest.fn(),
+  load: jest.fn(),
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  volume: 1,
+  currentTime: 0,
+  duration: 0,
+  paused: true,
+}));

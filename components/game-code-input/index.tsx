@@ -28,7 +28,11 @@ const schema = z.object({
     .regex(/^[A-Z0-9]{3}-[A-Z0-9]{3}-[A-Z0-9]{2,3}$/, "Invalid code format"),
 });
 
-const KPGameCodeInput = ({ onBack, setCanAccept }: IKPGameCodeInput) => {
+const KPGameCodeInput = ({
+  onBack,
+  setCanAccept,
+  setCode,
+}: IKPGameCodeInput) => {
   const {
     inviteState: { invitation, invitationLoading },
     appState,
@@ -82,10 +86,11 @@ const KPGameCodeInput = ({ onBack, setCanAccept }: IKPGameCodeInput) => {
     const fetchInvite = async () => {
       if (!code || !schema.safeParse({ code }).success) return;
 
+      setCode?.(code);
       await getInvitation(code);
     };
 
-    const timer = setTimeout(fetchInvite, 500);
+    const timer = setTimeout(fetchInvite, 300);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);

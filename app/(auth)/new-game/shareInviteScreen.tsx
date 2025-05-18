@@ -5,7 +5,7 @@ import useAppActions from "@/store/app/actions";
 
 const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
   const { navigate, inviteState } = useSystemFunctions();
-  const { inviteCreation, loadingInviteCreation } = inviteState;
+  const { loadingInviteCreation, bettingCreation } = inviteState;
   const { showToast } = useAppActions();
   const { handleCopy } = useCopy("Copied Invite Code");
 
@@ -13,7 +13,7 @@ const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
     if (navigator.share) {
       const domain = window.location.origin;
 
-      const inviteLink = `${domain}/join-game?code=${inviteCreation?.code}`;
+      const inviteLink = `${domain}/join-game?code=${bettingCreation?.code}`;
 
       navigator
         .share({
@@ -29,19 +29,19 @@ const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
   };
 
   const next = () => {
-    if (!inviteCreation) return;
+    if (!bettingCreation) return;
 
-    navigate.push(`/${inviteCreation?.sessionId}`);
+    navigate.push(`/${bettingCreation?.sessionId}`);
   };
 
-  const createLoading = loadingInviteCreation || !inviteCreation?.code;
+  const createLoading = loadingInviteCreation || !bettingCreation?.code;
   const createPhaseActionText = createLoading ? "creating..." : "go to game";
 
   const shareActions: Array<IKPButton> = [
     { title: "send invite", onClick: () => handleShareInvite() },
     {
       title: "copy code instead",
-      onClick: () => handleCopy(inviteCreation?.code!, true),
+      onClick: () => handleCopy(bettingCreation?.code!, true),
     },
   ];
 
@@ -77,7 +77,7 @@ const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
               }}
               className="tracking-[8px] md:tracking-[12px] font-semibold text-white"
             >
-              {inviteCreation.code}
+              {bettingCreation.code}
             </span>
           )}
         </div>
@@ -89,7 +89,7 @@ const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
             onClick={onClick}
             isMachine
             fullWidth
-            disabled={!inviteCreation}
+            disabled={!bettingCreation}
           />
         ))}
       </div>
