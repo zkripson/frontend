@@ -16,6 +16,18 @@ function isPrivyWallet<T extends "ethereum" | "solana">(
   );
 }
 
+const isWalletWithAddress = (
+  account: LinkedAccountWithMetadata | undefined
+): account is LinkedAccountWithMetadata & { address: string } => {
+  return (
+    account?.type === "wallet" &&
+    !account?.delegated &&
+    account?.connectorType !== "embedded" &&
+    account?.walletClientType !== "privy" &&
+    "address" in (account || {})
+  );
+};
+
 const usePrivyLinkedAccounts = () => {
   const { user } = usePrivy();
   const { isFrameLoaded } = useConnectToFarcaster();
@@ -32,13 +44,7 @@ const usePrivyLinkedAccounts = () => {
     (account) => account.type === "smart_wallet"
   );
 
-  const farcasterWallet = user?.linkedAccounts.find(
-    (account) =>
-      account.type === "wallet" &&
-      !account.delegated &&
-      account.connectorType !== "embedded" &&
-      !account.walletClientType
-  );
+  const farcasterWallet = user?.linkedAccounts.find(isWalletWithAddress);
 
   const activeWallet = isFrameLoaded
     ? farcasterWallet
@@ -53,7 +59,7 @@ const usePrivyLinkedAccounts = () => {
   );
 
   return {
-    evmWallet: activeWallet,
+    activeWallet,
     embeddedEvmWallet,
     linkedTwitter,
     linkedFarcaster,

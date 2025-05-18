@@ -16,7 +16,7 @@ jest.mock("@/hooks/useSystemFunctions", () => () => ({
 }));
 
 jest.mock("@/hooks/usePrivyLinkedAccounts", () => () => ({
-  evmWallet: mockEvmWallet,
+  activeWallet: mockactiveWallet,
 }));
 
 jest.mock("../api", () => ({
@@ -52,7 +52,7 @@ jest.mock("../index", () => ({
 const mockDispatch = jest.fn();
 const mockNavigate = { push: jest.fn() };
 const mockShowToast = jest.fn();
-let mockEvmWallet = { address: "0x1234567890" };
+let mockactiveWallet = { address: "0x1234567890" };
 
 describe("useInviteActions", () => {
   // Mock response data
@@ -81,7 +81,7 @@ describe("useInviteActions", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockEvmWallet = { address: "0x1234567890" };
+    mockactiveWallet = { address: "0x1234567890" };
 
     // Setup API mock implementations
     (inviteAPI.createInvite as jest.Mock).mockResolvedValue(
@@ -107,7 +107,7 @@ describe("useInviteActions", () => {
 
       // Verify API was called correctly
       expect(inviteAPI.createInvite).toHaveBeenCalledWith({
-        creator: mockEvmWallet.address,
+        creator: mockactiveWallet.address,
       });
 
       // Verify redux actions
@@ -151,7 +151,7 @@ describe("useInviteActions", () => {
       // Verify API was called correctly
       expect(inviteAPI.acceptInvite).toHaveBeenCalledWith({
         code: inviteCode,
-        player: mockEvmWallet.address,
+        player: mockactiveWallet.address,
       });
 
       // Verify redux actions

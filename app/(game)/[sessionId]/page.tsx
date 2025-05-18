@@ -126,7 +126,7 @@ function getPlayerStatus({
 
 const GameSession = () => {
   const params = useParams();
-  const { evmWallet } = usePrivyLinkedAccounts();
+  const { activeWallet } = usePrivyLinkedAccounts();
   const { gameState, navigate } = useSystemFunctions();
   const gameActions = useGameActions();
   const [turnTimer, setTurnTimer] = useState<NodeJS.Timeout | null>(null);
@@ -200,8 +200,8 @@ const GameSession = () => {
 
     // Then check if it's the player's turn and cell hasn't been shot
     if (
-      !evmWallet?.address ||
-      gameStateLocal.currentTurn !== evmWallet.address
+      !activeWallet?.address ||
+      gameStateLocal.currentTurn !== activeWallet.address
     ) {
       console.error("Not your turn");
       return;
@@ -215,7 +215,7 @@ const GameSession = () => {
       await gameActions.makeShot({
         x,
         y,
-        address: evmWallet.address,
+        address: activeWallet.address,
       });
     } catch (error) {
       console.error("Error making shot:", error);
@@ -281,7 +281,7 @@ const GameSession = () => {
           if (prev === remaining) return prev;
 
           // Check for game timeout
-          if (remaining <= 0 && evmWallet?.address) {
+          if (remaining <= 0 && activeWallet?.address) {
             clearInterval(timer);
             gameActions.forfeitGame(ForfeitGameReason.TIMEOUT, {
               onSuccess: () => console.log("Game forfeited due to timeout"),
@@ -298,7 +298,7 @@ const GameSession = () => {
   }, [
     gameStateLocal.gameStartedAt,
     gameStateLocal.gameStatus,
-    evmWallet?.address,
+    activeWallet?.address,
     gameActions,
   ]);
 
@@ -411,7 +411,7 @@ const GameSession = () => {
         playerStats: prev.playerStats,
       }));
 
-      if (!data.allBoardsSubmitted && data.player === evmWallet?.address) {
+      if (!data.allBoardsSubmitted && data.player === activeWallet?.address) {
         setGeneralMessage({ key: "waiting", id: Date.now() });
       }
     };
@@ -438,20 +438,20 @@ const GameSession = () => {
       const { x, y, player, isHit, nextTurn, turnStartedAt, sunkShips, sunk } =
         data;
 
-      if (!evmWallet?.address) return;
+      if (!activeWallet?.address) return;
 
       setGameStateLocal((prev) => {
         // If I'm the shooter, update enemy board
-        if (player === evmWallet.address) {
+        if (player === activeWallet.address) {
           const newEnemyBoard = prev.enemyBoard.map((row) => [...row]);
           newEnemyBoard[y][x] = isHit ? 2 : 1; // 2 for hit, 1 for miss
 
           const opponentAddress =
-            prev.players.find((p) => p !== evmWallet.address) || "";
+            prev.players.find((p) => p !== activeWallet.address) || "";
 
           // Update the player's stats in real-time
-          const currentStats = prev.playerStats?.[evmWallet.address] || {
-            address: evmWallet.address,
+          const currentStats = prev.playerStats?.[activeWallet.address] || {
+            address: activeWallet.address,
             shotsCount: 0,
             hitsCount: 0,
             accuracy: 0,
@@ -466,7 +466,7 @@ const GameSession = () => {
             turnStartedAt: turnStartedAt,
             playerStats: {
               ...prev.playerStats,
-              [evmWallet.address]: {
+              [activeWallet.address]: {
                 ...currentStats,
                 shotsCount: currentStats.shotsCount + 1,
                 hitsCount: currentStats.hitsCount + (isHit ? 1 : 0),
@@ -475,7 +475,7 @@ const GameSession = () => {
                     (currentStats.shotsCount + 1)) *
                     100
                 ),
-                shipsSunk: sunkShips[evmWallet.address] || 0,
+                shipsSunk: sunkShips[activeWallet.address] || 0,
                 avgTurnTime: calculateAvgTurnTime(
                   currentStats.avgTurnTime,
                   currentStats.shotsCount,
@@ -491,7 +491,7 @@ const GameSession = () => {
           newPlayerBoard[y][x] = isHit ? -2 : -1; // -2 for hit, -1 for miss
 
           const opponentAddress =
-            prev.players.find((p) => p !== evmWallet.address) || "";
+            prev.players.find((p) => p !== activeWallet.address) || "";
 
           // Update opponent's stats in real-time
           const opponentStats = prev.playerStats?.[opponentAddress] || {
@@ -535,7 +535,7 @@ const GameSession = () => {
       playSound(isHit ? "hit" : "miss");
 
       // Set general message for shot events
-      if (player === evmWallet?.address) {
+      if (player === activeWallet?.address) {
         if (isHit) {
           setGeneralMessage({ key: "hit", id: Date.now() });
         } else {
@@ -620,7 +620,7 @@ const GameSession = () => {
     // Handler for ship sunk event
     const handleShipSunk = (data: any) => {
       // Only show 'sunk' message and update sunkEnemyShips if the player made the shot
-      if (data.player === evmWallet?.address) {
+      if (data.player === activeWallet?.address) {
         setGeneralMessage({
           key: "sunk",
           id: Date.now(),
@@ -646,7 +646,7 @@ const GameSession = () => {
         });
       }
       // Update hitMap for the sunk ship ONLY if the sunk ship belongs to the local player
-      if (data.targetPlayer === evmWallet?.address) {
+      if (data.targetPlayer === activeWallet?.address) {
         setGeneralMessage({
           key: "opponent-sunk",
           id: Date.now(),
@@ -719,7 +719,7 @@ const GameSession = () => {
   };
 
   const submitBoard = async () => {
-    if (!evmWallet?.address || gameStateLocal.ships.length === 0) return;
+    if (!activeWallet?.address || gameStateLocal.ships.length === 0) return;
     setGameStateLocal((prev) => ({
       ...prev,
       gameStatus: "SETUP",
@@ -728,7 +728,7 @@ const GameSession = () => {
     try {
       await gameActions.submitBoardCommitment(
         {
-          address: evmWallet.address,
+          address: activeWallet.address,
           boardCommitment: generateBoardCommitment(),
           ships: gameStateLocal.ships,
         },
@@ -755,7 +755,7 @@ const GameSession = () => {
 
   // New UI State for simplicity
   const mode = gameStateLocal.gameStatus === "ACTIVE" ? "game" : "setup";
-  const yourTurn = evmWallet?.address === gameStateLocal.currentTurn;
+  const yourTurn = activeWallet?.address === gameStateLocal.currentTurn;
   const turnStartedAt = gameStateLocal.turnStartedAt ?? undefined;
   const gameCode = gameStateLocal.sessionId ?? undefined;
   const onHam = () => {}; // Placeholder, implement as needed
@@ -864,7 +864,7 @@ const GameSession = () => {
     Object.values(shipsInPosition).some((placed) => !placed) ||
     gameStateLocal.players.length < 2;
 
-  const selfAddress = evmWallet?.address ?? "";
+  const selfAddress = activeWallet?.address ?? "";
   const opponentAddress =
     gameStateLocal.players.find((p) => p !== selfAddress) ?? "";
 
@@ -896,7 +896,7 @@ const GameSession = () => {
   const showVictory = gameStateLocal.gameStatus === "COMPLETED";
   const isDraw =
     gameStateLocal.gameStatus === "COMPLETED" && !gameStateLocal.winner;
-  const isWinner = gameStateLocal.winner === evmWallet?.address;
+  const isWinner = gameStateLocal.winner === activeWallet?.address;
   const victoryStatus = isDraw ? "draw" : isWinner ? "win" : "loss";
   const handlePlayAgain = () => navigate.push("/new-game");
 
@@ -1011,10 +1011,10 @@ const GameSession = () => {
   });
 
   const currentTurn =
-    gameStateLocal.currentTurn && evmWallet?.address
+    gameStateLocal.currentTurn && activeWallet?.address
       ? {
           playerId: gameStateLocal.currentTurn,
-          isMyTurn: gameStateLocal.currentTurn === evmWallet.address,
+          isMyTurn: gameStateLocal.currentTurn === activeWallet.address,
         }
       : null;
 
@@ -1130,8 +1130,8 @@ const GameSession = () => {
         onPlayAgain={handlePlayAgain}
         onHome={handlePlayAgain}
         playerStats={
-          gameStateLocal.playerStats?.[evmWallet?.address || ""] || {
-            address: evmWallet?.address || "",
+          gameStateLocal.playerStats?.[activeWallet?.address || ""] || {
+            address: activeWallet?.address || "",
             shotsCount: 0,
             hitsCount: 0,
             accuracy: 0,

@@ -94,7 +94,7 @@ export interface PongMessage extends WebSocketMessage {
  */
 export function useGameWebSocket(sessionId: string) {
   const { gameState } = useSystemFunctions();
-  const { evmWallet } = usePrivyLinkedAccounts();
+  const { activeWallet } = usePrivyLinkedAccounts();
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
@@ -102,9 +102,9 @@ export function useGameWebSocket(sessionId: string) {
 
   // Create or use existing WebSocket service
   useEffect(() => {
-    if (!sessionId || !evmWallet?.address) return;
+    if (!sessionId || !activeWallet?.address) return;
 
-    const playerAddress = evmWallet.address;
+    const playerAddress = activeWallet.address;
     const baseUrl = "https://zk-battleship-backend.nj-345.workers.dev";
 
     if (!wsServiceRef.current) {
@@ -139,7 +139,7 @@ export function useGameWebSocket(sessionId: string) {
         wsServiceRef.current = null;
       }
     };
-  }, [sessionId, evmWallet?.address]);
+  }, [sessionId, activeWallet?.address]);
 
   /**
    * Registers a handler for a specific message type

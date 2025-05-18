@@ -12,10 +12,12 @@
   },
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.37",
+    "@farcaster/frame-wagmi-connector": "^0.0.34",
     "@hookform/resolvers": "^5.0.1",
     "@privy-io/react-auth": "^2.11.1",
     "@privy-io/wagmi": "^1.0.3",
     "@reduxjs/toolkit": "^2.7.0",
+    "@tanstack/react-query": "^5.76.1",
     "axios": "^1.9.0",
     "classnames": "^2.5.1",
     "framer-motion": "^12.9.2",
@@ -26,7 +28,8 @@
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.1",
     "react-redux": "^9.2.0",
-    "viem": "^2.29.4",
+    "viem": "2.x",
+    "wagmi": "^2.15.3",
     "yup": "^1.6.1",
     "zod": "^3.24.3"
   },

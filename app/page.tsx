@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { useCreateWallet, usePrivy } from "@privy-io/react-auth";
+import { usePrivy } from "@privy-io/react-auth";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 export default function HomePage() {
@@ -10,7 +10,6 @@ export default function HomePage() {
   useEffect(() => {
     if (!ready) return;
 
-    console.log("user", user);
     if (user) {
       navigate.push("/new-game");
     } else {

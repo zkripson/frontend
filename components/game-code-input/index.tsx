@@ -39,7 +39,7 @@ const KPGameCodeInput = ({
   } = useSystemFunctions();
   const { getInvitation } = useInviteActions();
   const { checkTokenBalance } = useBalance();
-  const { evmWallet } = usePrivyLinkedAccounts();
+  const { activeWallet } = usePrivyLinkedAccounts();
   const { showToast } = useAppActions();
 
   const {
@@ -75,12 +75,12 @@ const KPGameCodeInput = ({
   }, [invitation, usdcBalance]);
 
   useEffect(() => {
-    if (evmWallet) {
+    if (activeWallet) {
       checkTokenBalance(TOKEN_ADDRESSES.USDC);
       checkTokenBalance(TOKEN_ADDRESSES.SHIP);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [evmWallet]);
+  }, [activeWallet]);
 
   useEffect(() => {
     const fetchInvite = async () => {

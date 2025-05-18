@@ -20,6 +20,8 @@ import useAddressValidator from "@/hooks/useAddressValidator";
 import useBalance from "@/hooks/useBalance";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
+import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
+import { useAccount } from "wagmi";
 
 const schema = z.object({
   amount: z.number().min(1, "Amount is required"),
@@ -29,12 +31,15 @@ const schema = z.object({
 type AmountForm = z.infer<typeof schema>;
 
 const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
-  const { evmWallet } = usePrivyLinkedAccounts();
+  const { activeWallet } = usePrivyLinkedAccounts();
   const { checkTokenBalance } = useBalance();
   const { appState, navigate } = useSystemFunctions();
   const { fundWallet } = useFunding();
-  const { transferToken } = useWithdrawal();
+  const { transferToken, connectWallet } = useWithdrawal();
   const { showToast } = useAppActions();
+  const { isFrameLoaded } = useConnectToFarcaster();
+  const { isConnected } = useAccount();
+
   const { balances, loadingBalance } = appState;
 
   const [selectedToken, setSelectedToken] = useState<Balance | null>(
@@ -93,6 +98,10 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
         return showToast("Insufficient balance", "error");
       }
 
+      if (!isConnected && isFrameLoaded) {
+        return connectWallet();
+      }
+
       const isUsdc = selectedToken?.address === TOKEN_ADDRESSES.USDC;
 
       transferToken(
@@ -123,7 +132,7 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
       //   checkTokenBalance(TOKEN_ADDRESSES.SHIP);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [evmWallet]);
+  }, [activeWallet]);
 
   return (
     <div className="w-full h-full flex items-center justify-center relative">

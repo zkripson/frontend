@@ -196,7 +196,7 @@ describe("GameSession Component", () => {
 
     // Mock Privy linked accounts
     (usePrivyLinkedAccounts as jest.Mock).mockReturnValue({
-      evmWallet: { address: PLAYER_ADDRESS },
+      activeWallet: { address: PLAYER_ADDRESS },
     });
 
     // Mock system functions

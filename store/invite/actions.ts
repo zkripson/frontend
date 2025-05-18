@@ -18,16 +18,16 @@ import useAppActions from "../app/actions";
 
 const useInviteActions = () => {
   const { dispatch, navigate } = useSystemFunctions();
-  const { evmWallet } = usePrivyLinkedAccounts();
+  const { activeWallet } = usePrivyLinkedAccounts();
   const { showToast } = useAppActions();
 
   const createInvite = async (callback?: CallbackProps) => {
     try {
-      if (!evmWallet) return;
+      if (!activeWallet) return;
 
       dispatch(setLoadingInviteCreation(true));
 
-      const creator = evmWallet.address;
+      const creator = activeWallet.address;
       const body = { creator };
       const response = await inviteAPI.createInvite(body);
 
@@ -44,11 +44,11 @@ const useInviteActions = () => {
 
   const acceptInvite = async (code: string, callback?: CallbackProps) => {
     try {
-      if (!evmWallet) return;
+      if (!activeWallet) return;
 
       dispatch(setLoadingInviteAcceptance(true));
 
-      const player = evmWallet.address;
+      const player = activeWallet.address;
       const body = { player, code };
       const response = await inviteAPI.acceptInvite(body);
 
@@ -86,11 +86,11 @@ const useInviteActions = () => {
     callback?: CallbackProps
   ) => {
     try {
-      if (!evmWallet) return;
+      if (!activeWallet) return;
 
       dispatch(setLoadingInviteCreation(true));
 
-      const creator = evmWallet.address;
+      const creator = activeWallet.address;
       const body = { creator, stakeAmount };
       const response = await inviteAPI.createBettingInvite(body);
 
@@ -110,11 +110,11 @@ const useInviteActions = () => {
     callback?: CallbackProps
   ) => {
     try {
-      if (!evmWallet) return;
+      if (!activeWallet) return;
 
       dispatch(setLoadingInviteAcceptance(true));
 
-      const player = evmWallet.address;
+      const player = activeWallet.address;
       const body = { player, code };
       const response = await inviteAPI.acceptBettingInvite(body);
 
@@ -149,7 +149,7 @@ const useInviteActions = () => {
 
   const getInvitation = async (code: string, callback?: CallbackProps) => {
     try {
-      if (!evmWallet) return;
+      if (!activeWallet) return;
 
       dispatch(setInvitationLoading(true));
 
