@@ -37,6 +37,7 @@ export const metadata: Metadata = {
     "Blockchain Gaming",
   ],
   applicationName: "Battleship",
+  themeColor: "#d9b478",
   openGraph: {
     title: "Battleship",
     description:

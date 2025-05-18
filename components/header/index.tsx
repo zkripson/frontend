@@ -27,7 +27,7 @@ const KPHeader = () => {
     <div className="layout-header-container">
       <header className="fixed top-0 left-0 w-full z-20 px-[5vw] py-[1vh] flex justify-between items-center bg-material">
         <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
-          BATTLE.FUN GAME
+          BATTLESHIP GAME
         </h1>
 
         {showProfileBadge && (
