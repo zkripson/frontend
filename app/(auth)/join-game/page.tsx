@@ -104,7 +104,7 @@ const JoinGameComponent = () => {
           icon: "arrow",
           iconPosition: "right",
           loading: loadingInviteAcceptance || invitationLoading,
-          disabled: loadingInviteAcceptance || canAccept,
+          disabled: loadingInviteAcceptance || !canAccept,
         }}
       >
         <div className="flex flex-col items-center gap-3 self-stretch w-full mt-5">
