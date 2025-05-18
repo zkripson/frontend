@@ -21,7 +21,7 @@ const KPHeader = () => {
     checkTokenBalance(TOKEN_ADDRESSES.USDC);
     checkTokenBalance(TOKEN_ADDRESSES.SHIP);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet]);
+  }, [activeWallet?.address]);
 
   return (
     <div className="layout-header-container">

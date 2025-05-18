@@ -85,7 +85,7 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
     checkTokenBalance(TOKEN_ADDRESSES.USDC);
     checkTokenBalance(TOKEN_ADDRESSES.SHIP);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet]);
+  }, [activeWallet?.address]);
 
   useEffect(() => {
     if (errors.stake?.message) {

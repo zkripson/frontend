@@ -5,13 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import StakeScreen from "./StakeScreen";
 import ShareInviteScreen from "./shareInviteScreen";
 import SelectGameScreen from "./selectGameScreen";
-import { useAccount } from "wagmi";
 
 const NewGame = () => {
-  const { isConnected, address } = useAccount();
   const [phase, setPhase] = useState<"select" | "stake" | "create">("select");
-
-  console.log(isConnected, address);
 
   const screens: Partial<Record<NewGameStep, JSX.Element>> & {
     stake?: JSX.Element;
