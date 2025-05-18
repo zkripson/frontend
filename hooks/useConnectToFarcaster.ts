@@ -6,7 +6,6 @@ import { usePrivy } from "@privy-io/react-auth";
 
 import { setFarcasterContext } from "@/store/app";
 import useSystemFunctions from "./useSystemFunctions";
-import { useConnect } from "wagmi";
 
 const useConnectToFarcaster = () => {
   const { ready, authenticated } = usePrivy();
@@ -54,10 +53,9 @@ const useConnectToFarcaster = () => {
 
         // We can also log this for debugging
         if (isInFrame) {
-          console.log("App loaded within Farcaster frame");
           setTimeout(() => {
             FrameSDK.actions.addFrame();
-          }, 10000);
+          }, 15000);
         }
       }
     };

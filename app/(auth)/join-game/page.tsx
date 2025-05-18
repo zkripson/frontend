@@ -17,8 +17,6 @@ import useSystemFunctions from "@/hooks/useSystemFunctions";
 import useBalance from "@/hooks/useBalance";
 import useAppActions from "@/store/app/actions";
 import useWithdrawal from "@/hooks/useWithdrawal";
-import { useAccount } from "wagmi";
-import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 
 const JoinGameComponent = () => {
   const { user, ready } = usePrivy();
@@ -27,9 +25,7 @@ const JoinGameComponent = () => {
   const { showToast } = useAppActions();
   const { checkTokenBalance } = useBalance();
   const { activeWallet } = usePrivyLinkedAccounts();
-  const { isConnected } = useAccount();
-  const { isFrameLoaded } = useConnectToFarcaster();
-  const { approveTransfer, connectWallet } = useWithdrawal();
+  const { approveTransfer } = useWithdrawal();
 
   const {
     inviteState: { loadingInviteAcceptance, invitation, invitationLoading },
@@ -43,10 +39,6 @@ const JoinGameComponent = () => {
 
   const handleAcceptInvite = async () => {
     if (!code || !invitation?.stakeAmount) return;
-
-    if (!isConnected && isFrameLoaded) {
-      return connectWallet();
-    }
 
     try {
       await approveTransfer(Number(invitation?.stakeAmount));
@@ -97,7 +89,7 @@ const JoinGameComponent = () => {
     checkTokenBalance(TOKEN_ADDRESSES.USDC);
     checkTokenBalance(TOKEN_ADDRESSES.SHIP);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet]);
+  }, [activeWallet?.address]);
 
   if (!ready) return;
 

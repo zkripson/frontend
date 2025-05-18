@@ -18,7 +18,7 @@ const useFunding = () => {
       dispatch(setLoadingBalance(true));
       setTimeout(() => {
         checkTokenBalance(TOKEN_ADDRESSES.USDC);
-      }, 1500);
+      }, 2000);
     },
   });
 

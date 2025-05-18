@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import Providers from "@/providers";
@@ -37,7 +37,6 @@ export const metadata: Metadata = {
     "Blockchain Gaming",
   ],
   applicationName: "Battleship",
-  themeColor: "#d9b478",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -74,6 +73,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#d9b478",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -82,7 +89,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta
           name="fc:frame"
           content='{
@@ -100,6 +106,7 @@ export default function RootLayout({
             }
           }'
         />
+        <meta property="fc:frame:wallet_action" content="use_warpcast" />
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
