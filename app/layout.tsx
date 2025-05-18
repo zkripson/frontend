@@ -107,6 +107,12 @@ export default function RootLayout({
           }'
         />
         <meta property="fc:frame:wallet_action" content="use_warpcast" />
+        <meta property="fc:frame:button:1" content="Play now" />
+        <meta property="fc:frame:button:1:action" content="post_redirect" />
+        <meta
+          property="fc:frame:post_url"
+          content="https://app.bship.fun/api/frame-handler"
+        />
       </head>
 
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
