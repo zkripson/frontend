@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePrivy } from "@privy-io/react-auth";
 
-import { KPButton, KPDialougue, KPFullscreenLoader } from "@/components";
+import { KPDialougue, KPFullscreenLoader } from "@/components";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 
@@ -62,7 +62,9 @@ const Social = () => {
                 variant: "primary",
                 isMachine: true,
                 fullWidth: true,
-                multipleicons: ["x", "farcaster"],
+                multipleicons: isFrameLoaded
+                  ? ["farcaster"]
+                  : ["x", "farcaster"],
               }}
             >
               <div className="w-full flex flex-col items-stretch mt-5 gap-1"></div>
