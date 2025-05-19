@@ -138,6 +138,9 @@ export function GameBoardContainer({
           transition={{ duration: 0.5, ease: "easeInOut" }}
           style={{ perspective: 1000 }}
         >
+          <p className="w-full text-center text-primary-50">
+            {currentTurn?.isMyTurn ? "Opponent's board" : "Your board"}
+          </p>
           {currentTurn?.isMyTurn ? (
             <Board
               ships={opponentShips}

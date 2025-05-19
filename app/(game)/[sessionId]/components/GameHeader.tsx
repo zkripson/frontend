@@ -101,7 +101,7 @@ export function GameHeader({
         {mode !== "game" && (
           <KPClickAnimation
             onClick={() => setInventoryVisible(!inventoryVisible)}
-            className="flex items-center justify-center gap-3 bg-primary-450/25 border border-primary-50 rounded-full h-[25px] px-2 capitalize"
+            className="flex bp1215:hidden items-center justify-center gap-3 bg-primary-450/25 border border-primary-50 rounded-full h-[25px] px-2 capitalize"
           >
             <span
               style={{
