@@ -30,11 +30,7 @@ const KPHeader = () => {
     <div className="layout-header-container">
       <header
         className={classNames(
-          "fixed top-0 left-0 w-full z-20 px-[5vw] flex justify-between items-center bg-material",
-          {
-            "py-[1vh]": showProfileBadge,
-            "py-[1.5vh]": !showProfileBadge,
-          }
+          "fixed top-0 left-0 w-full z-20 px-4 md:px-[5vw] flex justify-between items-center bg-material py-2"
         )}
       >
         <div className="flex items-center gap-2">
@@ -46,7 +42,7 @@ const KPHeader = () => {
             quality={100}
             className="lg:size-[59px] md:size-[50px] size-[45px]"
           />
-          <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
+          <h1 className="hidden md:inline-block font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
             BATTLESHIP GAME
           </h1>
         </div>
