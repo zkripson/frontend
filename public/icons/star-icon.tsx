@@ -1,12 +1,4 @@
-const StarIcon = ({
-  fill = "#ffffff",
-  width = "19",
-  height = "20",
-}: {
-  fill?: string;
-  width?: string;
-  height?: string;
-}) => (
+const StarIcon = ({ fill = "#ffffff", width = 19, height = 20 }: IconProps) => (
   <svg
     width={width}
     height={height}
