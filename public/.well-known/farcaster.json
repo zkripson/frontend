@@ -7,12 +7,12 @@
   "frame": {
     "version": "1",
     "name": "Battleship",
-    "iconUrl": "https://app.bship.fun/game-logo.jpg",
+    "iconUrl": "https://app.bship.fun/logo.png",
     "homeUrl": "https://app.bship.fun",
     "imageUrl": "https://app.bship.fun/game-preview-bg.png",
     "buttonTitle": "Play Now",
     "splashImageUrl": "https://app.bship.fun/game-preview-bg.png",
-    "splashBackgroundColor": "#f7f7f7",
+    "splashBackgroundColor": "#20262D",
     "webhookUrl": "https://app.bship.fun/api/webhook"
   }
 }
