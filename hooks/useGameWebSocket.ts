@@ -61,19 +61,76 @@ export interface ShotResultMessage extends WebSocketMessage {
   isHit: boolean;
 }
 
-export interface GameOverMessage extends WebSocketMessage {
-  type: "game_over";
-  status: string;
-  winner: string;
-  reason: "COMPLETED" | "FORFEIT" | "TIMEOUT";
-}
-
 export interface TurnTimeoutMessage extends WebSocketMessage {
   message: string;
   nextTurn: string;
   previousPlayer: string;
   turnStartedAt: number;
   type: "turn_timeout";
+}
+
+export interface GameOverMessage extends WebSocketMessage {
+  type: "game_over";
+  status: string;
+  winner: string;
+  reason: "COMPLETED" | "FORFEIT" | "TIMEOUT";
+  finalState: {
+    shots: Array<{ x: number; y: number; player: string }>;
+    sunkShips: Record<"string", number>;
+    gameStartedAt: number;
+    gameEndedAt: number;
+  };
+  pointsAwarded: Record<
+    string,
+    {
+      total: number;
+      breakdown: {
+        GAME_PLAYED: number;
+        GAME_WON: number;
+        WIN_STREAK: number;
+        SHOT_EFFICIENCY: number;
+        QUICK_GAME: number;
+      };
+    }
+  >;
+}
+
+export interface PointsAwardedMessage extends WebSocketMessage {
+  type: "points_awarded";
+  points: number;
+  category: string;
+  totalPoints: number;
+  player: string;
+}
+
+export type PointsSummary =
+  | "GAME_PLAYED"
+  | "GAME_WON"
+  | "GAME_LOST"
+  | "GAME_DRAW"
+  | "SHOT_EFFICIENCY"
+  | "QUICK_GAME"
+  | "WIN_STREAK"
+  | "DAILY_PLAYER"
+  | "REFERRAL_REWARD"
+  | "FIRST_HIT"
+  | "SHIP_SUNK_BONUS"
+  | "HIGH_ACCURACY"
+  | "WEEKLY_COMMITMENT";
+
+export interface PointsSummaryMessage extends WebSocketMessage {
+  type: "points_summary";
+  totalPoints: number;
+  breakdown: Record<PointsSummary, number>;
+  isWinner: boolean;
+}
+
+export interface DrawRematch extends WebSocketMessage {
+  type: "draw_rematch";
+}
+
+export interface RematchReady extends WebSocketMessage {
+  type: "rematch_ready";
 }
 
 export interface ErrorMessage extends WebSocketMessage {
@@ -93,7 +150,6 @@ export interface PongMessage extends WebSocketMessage {
  * @returns Object containing WebSocket state and event handler registration methods
  */
 export function useGameWebSocket(sessionId: string) {
-  const { gameState } = useSystemFunctions();
   const { activeWallet } = usePrivyLinkedAccounts();
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -199,6 +255,40 @@ export function useGameWebSocket(sessionId: string) {
         wsServiceRef.current.on("turn_timeout", handler as (data: any) => void);
       }
     },
+
+    points_awarded: (handler: (data: PointsAwardedMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on(
+          "points_awarded",
+          handler as (data: any) => void
+        );
+      }
+    },
+
+    points_summary: (handler: (data: PointsSummaryMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on(
+          "points_summary",
+          handler as (data: any) => void
+        );
+      }
+    },
+
+    draw_rematch: (handler: (data: DrawRematch) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on("draw_rematch", handler as (data: any) => void);
+      }
+    },
+
+    rematch_ready: (handler: (data: RematchReady) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on(
+          "rematch_ready",
+          handler as (data: any) => void
+        );
+      }
+    },
+
     error: (handler: (data: ErrorMessage) => void) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.on("error", handler as (data: any) => void);
@@ -216,64 +306,6 @@ export function useGameWebSocket(sessionId: string) {
     ) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.on(eventType, handler as (data: any) => void);
-      }
-    },
-    // Add off methods for each event type
-    remove_session_state: (handler: (data: SessionStateMessage) => void) => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.off(
-          "session_state",
-          handler as (data: any) => void
-        );
-      }
-    },
-    remove_player_joined: (handler: (data: PlayerJoinedMessage) => void) => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.off(
-          "player_joined",
-          handler as (data: any) => void
-        );
-      }
-    },
-    remove_board_submitted: (
-      handler: (data: BoardSubmittedMessage) => void
-    ) => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.off(
-          "board_submitted",
-          handler as (data: any) => void
-        );
-      }
-    },
-    remove_game_started: (handler: (data: GameStartedMessage) => void) => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.off(
-          "game_started",
-          handler as (data: any) => void
-        );
-      }
-    },
-    remove_shot_fired: (handler: (data: ShotFiredMessage) => void) => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.off("shot_fired", handler as (data: any) => void);
-      }
-    },
-    remove_shot_result: (handler: (data: ShotResultMessage) => void) => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.off("shot_result", handler as (data: any) => void);
-      }
-    },
-    remove_game_over: (handler: (data: GameOverMessage) => void) => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.off("game_over", handler as (data: any) => void);
-      }
-    },
-    remove_turn_timeout: (handler: (data: TurnTimeoutMessage) => void) => {
-      if (wsServiceRef.current) {
-        wsServiceRef.current.off(
-          "turn_timeout",
-          handler as (data: any) => void
-        );
       }
     },
   };
@@ -335,6 +367,38 @@ export function useGameWebSocket(sessionId: string) {
     game_over: (handler: (data: GameOverMessage) => void) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.off("game_over", handler as (data: any) => void);
+      }
+    },
+    points_awarded: (handler: (data: PointsAwardedMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on(
+          "points_awarded",
+          handler as (data: any) => void
+        );
+      }
+    },
+
+    points_summary: (handler: (data: PointsSummaryMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on(
+          "points_summary",
+          handler as (data: any) => void
+        );
+      }
+    },
+
+    draw_rematch: (handler: (data: TurnTimeoutMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on("draw_rematch", handler as (data: any) => void);
+      }
+    },
+
+    rematch_ready: (handler: (data: TurnTimeoutMessage) => void) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on(
+          "rematch_ready",
+          handler as (data: any) => void
+        );
       }
     },
     error: (handler: (data: ErrorMessage) => void) => {
