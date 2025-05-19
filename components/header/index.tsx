@@ -42,7 +42,7 @@ const KPHeader = () => {
             quality={100}
             className="lg:size-[59px] md:size-[50px] size-[45px]"
           />
-          <h1 className="hidden md:inline-block font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
+          <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
             BATTLESHIP GAME
           </h1>
         </div>

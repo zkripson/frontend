@@ -9,7 +9,7 @@
     "lint": "next lint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "postbuild": "node scripts/optimize-images.js"
+    "postbuild": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.37",

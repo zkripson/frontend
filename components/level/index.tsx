@@ -13,7 +13,7 @@ const KPLevel = () => {
     <div className="px-2 h-6 bg-primary-50 rounded-full flex items-center gap-1 border border-primary-300">
       <StarIcon />
       <span className="text-[12px] text-primary-300 font-medium -mb-0.5">
-        <span className="hidden md:inline-block">Level</span> 2
+        Level 2
       </span>
     </div>
   );

@@ -29,7 +29,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "jest.setup.js",
-    "scripts/optimize-images.js"
+    "scripts/optimize-images.mjs"
   ],
   "exclude": ["node_modules"]
 }
