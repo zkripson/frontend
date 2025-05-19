@@ -69,6 +69,18 @@ export interface TurnTimeoutMessage extends WebSocketMessage {
   type: "turn_timeout";
 }
 
+export type GameOverPointsSummary = Record<
+  string,
+  {
+    total: number;
+    breakdown: Array<{
+      category: PointsSummary;
+      points: number;
+      reason: string;
+    }>;
+  }
+>;
+
 export interface GameOverMessage extends WebSocketMessage {
   type: "game_over";
   status: string;
@@ -76,23 +88,12 @@ export interface GameOverMessage extends WebSocketMessage {
   reason: "COMPLETED" | "FORFEIT" | "TIMEOUT";
   finalState: {
     shots: Array<{ x: number; y: number; player: string }>;
-    sunkShips: Record<"string", number>;
+    sunkShips: Record<string, number>;
     gameStartedAt: number;
     gameEndedAt: number;
   };
-  pointsAwarded: Record<
-    string,
-    {
-      total: number;
-      breakdown: {
-        GAME_PLAYED: number;
-        GAME_WON: number;
-        WIN_STREAK: number;
-        SHOT_EFFICIENCY: number;
-        QUICK_GAME: number;
-      };
-    }
-  >;
+  pointsAwarded: Record<string, number>;
+  pointsSummary: GameOverPointsSummary;
 }
 
 export interface PointsAwardedMessage extends WebSocketMessage {
@@ -116,7 +117,11 @@ export type PointsSummary =
   | "FIRST_HIT"
   | "SHIP_SUNK_BONUS"
   | "HIGH_ACCURACY"
-  | "WEEKLY_COMMITMENT";
+  | "WEEKLY_COMMITMENT"
+  | "PARTICIPATION"
+  | "VICTORY"
+  | "FIRST_BLOOD"
+  | "SHIP_DESTROYER";
 
 export interface PointsSummaryMessage extends WebSocketMessage {
   type: "points_summary";

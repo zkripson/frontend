@@ -1,16 +1,15 @@
 const DropdownIcon: React.FC<IconProps> = ({ className }) => (
   <svg
-    className={className}
     width="24"
     height="24"
     viewBox="0 0 24 24"
     fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
+    xmlns="http://www.w3.org/2000/svg"
   >
-    <polyline points="6 9 12 15 18 9" />
+    <path
+      d="M12 15.4L6 9.4L7.4 8L12 12.6L16.6 8L18 9.4L12 15.4Z"
+      fill="#44190C"
+    />
   </svg>
 );
 

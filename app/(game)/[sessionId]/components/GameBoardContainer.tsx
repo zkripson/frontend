@@ -23,11 +23,11 @@ interface GameBoardContainerProps {
   } | null;
   disableReadyButton: boolean;
   inventoryVisible: boolean;
-  setMode: (mode: "setup" | "game") => void;
   onReady: () => void;
   onFireShot: (x: number, y: number) => void;
   opponentShips?: ShipType[];
   waitingForOpponent?: boolean;
+  yourTurn?: boolean;
 }
 
 export function GameBoardContainer({
@@ -43,21 +43,15 @@ export function GameBoardContainer({
   generalMessage,
   disableReadyButton,
   inventoryVisible,
-  setMode,
   onReady,
   onFireShot,
   opponentShips = [],
   waitingForOpponent,
+  yourTurn,
 }: GameBoardContainerProps) {
   const {
     gameState: { loadingSubmitBoardCommitment },
   } = useSystemFunctions();
-  // build cell list 0–99 → {x,y,key}
-  const cells = Array.from({ length: 100 }).map((_, i) => {
-    const x = i % 10;
-    const y = Math.floor(i / 10);
-    return { x, y, key: `${x}-${y}` };
-  });
 
   // Convert our board states into the shape Board expects for its `shots` prop
   const playerShots: Record<string, { type: "hit" | "miss"; stage?: "smoke" }> =
@@ -138,9 +132,6 @@ export function GameBoardContainer({
           transition={{ duration: 0.5, ease: "easeInOut" }}
           style={{ perspective: 1000 }}
         >
-          <p className="w-full text-center text-primary-50">
-            {currentTurn?.isMyTurn ? "Opponent's board" : "Your board"}
-          </p>
           {currentTurn?.isMyTurn ? (
             <Board
               ships={opponentShips}
@@ -151,6 +142,7 @@ export function GameBoardContainer({
                 if (opponentBoard[key] == null) onFireShot(x, y);
               }}
               showAllShipsInGame
+              yourTurn={yourTurn}
             />
           ) : (
             <Board
@@ -159,6 +151,7 @@ export function GameBoardContainer({
               shots={playerShots}
               onShoot={() => {}}
               showAllShipsInGame
+              yourTurn={yourTurn}
             />
           )}
         </motion.div>

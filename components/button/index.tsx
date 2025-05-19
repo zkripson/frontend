@@ -67,6 +67,7 @@ const KPButton = ({
       whileTap={{ scale: 0.95 }}
       className={classNames(
         `flex justify-center items-center border rounded-[4px] relative transition-opacity duration-500`,
+        className,
         {
           "w-full": fullWidth,
           "bg-primary-200 border-primary-300": variant === "primary",
@@ -76,8 +77,7 @@ const KPButton = ({
           "h-[38px]": isMachine && small,
           "opacity-0 pointer-events-none": hide,
           "opacity-50 pointer-events-none": disabled,
-        },
-        className
+        }
       )}
       disabled={disabled || loading}
       type={type}

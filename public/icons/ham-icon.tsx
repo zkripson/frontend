@@ -7,6 +7,7 @@ const HamIcon = ({ width = 28, height = 26 }: IconProps) => (
     viewBox="0 0 26 23"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
+    className="w-[28px] h-[26px] max-sm:w-[20px] max-sm:h-[20px]"
   >
     <path
       fillRule="evenodd"

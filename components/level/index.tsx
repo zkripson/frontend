@@ -1,6 +1,7 @@
 import { usePrivy } from "@privy-io/react-auth";
 
-import { StarIcon } from "@/public/icons";
+import { ArrowRightAltIcon, StarIcon } from "@/public/icons";
+import Link from "next/link";
 
 const KPLevel = () => {
   const { user, ready } = usePrivy();
@@ -10,12 +11,16 @@ const KPLevel = () => {
   }
 
   return (
-    <div className="px-2 h-6 bg-primary-50 rounded-full flex items-center gap-1 border border-primary-300">
-      <StarIcon />
+    <Link
+      href="/rewards"
+      className="px-2 h-6 bg-primary-50 rounded-full flex items-center gap-1 border border-primary-300"
+    >
+      <StarIcon fill="#44190C" width={14} height={14} />
       <span className="text-[12px] text-primary-300 font-medium -mb-0.5">
         Level 2
       </span>
-    </div>
+      <ArrowRightAltIcon size="16" />
+    </Link>
   );
 };
 

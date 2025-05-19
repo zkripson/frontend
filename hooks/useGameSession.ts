@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import useGameActions from "@/store/game/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import useGameWebSocket, {
@@ -13,6 +13,7 @@ import useGameWebSocket, {
   TurnTimeoutMessage,
   PointsAwardedMessage,
   PointsSummaryMessage,
+  GameOverPointsSummary,
 } from "@/hooks/useGameWebSocket";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
@@ -162,6 +163,9 @@ const useGameSession = (sessionId: string) => {
     },
     playerStats: {},
   });
+  const [gameOverPointsSummary, setGameOverPointsSummary] =
+    useState<GameOverPointsSummary>();
+
   const [turnTimeRemaining, setTurnTimeRemaining] = useState(15);
   const [gameTimeRemaining, setGameTimeRemaining] = useState(180);
   const audio = useAudio();
@@ -171,6 +175,47 @@ const useGameSession = (sessionId: string) => {
     },
     [audio]
   );
+
+  const [rematchReadyReceived, setRematchReadyReceived] = useState(false);
+  const [drawAudioDone, setDrawAudioDone] = useState(false);
+  const rematchResetTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Helper to trigger the actual rematch reset
+  const triggerRematchReset = useCallback(() => {
+    setGameStateLocal((prev) => ({
+      ...prev,
+      gameStatus: "SETUP",
+      winner: null,
+      finalState: undefined,
+      playerBoard: Array(10)
+        .fill(0)
+        .map(() => Array(10).fill(0)),
+      enemyBoard: Array(10)
+        .fill(0)
+        .map(() => Array(10).fill(0)),
+      ships: [],
+      sunkEnemyShips: [],
+      playerStats: {},
+      currentTurn: null,
+      turnStartedAt: null,
+      gameStartedAt: null,
+    }));
+
+    setInventoryVisible(true); // Reset inventory panel to visible
+    setOverlaps([]); // Reset overlaps to empty
+    setGeneralMessage(null); // Clear any general message
+    setTurnTimeRemaining(15); // Reset turn timer
+    setGameTimeRemaining(180); // Reset game timer
+    setRematchReadyReceived(false);
+    setDrawAudioDone(false);
+  }, []);
+
+  // Effect to check if both conditions are met
+  useEffect(() => {
+    if (rematchReadyReceived && drawAudioDone) {
+      triggerRematchReset();
+    }
+  }, [rematchReadyReceived, drawAudioDone, triggerRematchReset]);
 
   // --- Timers and Effects ---
   const [turnTimer, setTurnTimer] = useState<NodeJS.Timeout | null>(null);
@@ -481,7 +526,7 @@ const useGameSession = (sessionId: string) => {
     // Handler for turn timeout event
     const handleTurnTimeout = (data: TurnTimeoutMessage) => {
       console.log("Turn timeout:", data);
-      const { previousPlayer, nextTurn, turnStartedAt, message } = data;
+      const { nextTurn, turnStartedAt, message } = data;
 
       // Simply update the game state with the new turn info
       // The useEffect hook monitoring turnStartedAt will handle the timer update
@@ -580,6 +625,8 @@ const useGameSession = (sessionId: string) => {
           playerStats: finalPlayerStats,
         };
       });
+
+      setGameOverPointsSummary(data.pointsSummary);
     };
 
     // Handler for ship sunk event
@@ -632,7 +679,6 @@ const useGameSession = (sessionId: string) => {
     };
 
     const handleDrawRematch = (data: DrawRematch) => {
-      // Set victory status to draw and play draw audio
       setGameStateLocal((prev) => ({
         ...prev,
         gameStatus: "COMPLETED",
@@ -640,36 +686,17 @@ const useGameSession = (sessionId: string) => {
       }));
       setGeneralMessage({ key: "draw", id: Date.now() });
       if (audio) audio.play("game_draw_restart_voiceover");
-      // After 10 seconds, trigger rematch ready (simulate websocket event)
-      setTimeout(() => {
-        // Optionally, you could call handleRematchReady here if needed for local testing
-        // handleRematchReady({ type: "rematch_ready" });
-      }, 10000);
+      // After 12 seconds, set drawAudioDone to true
+      if (rematchResetTimeout.current)
+        clearTimeout(rematchResetTimeout.current);
+      rematchResetTimeout.current = setTimeout(() => {
+        setDrawAudioDone(true);
+      }, 12000);
     };
 
-    // Handler for rematch ready event
+    // --- Handler for rematch ready event ---
     const handleRematchReady = (data: RematchReady) => {
-      // Reset game state to pre-board-submission (setup mode)
-      setGameStateLocal((prev) => ({
-        ...prev,
-        gameStatus: "SETUP",
-        winner: null,
-        finalState: undefined,
-        playerBoard: Array(10)
-          .fill(0)
-          .map(() => Array(10).fill(0)),
-        enemyBoard: Array(10)
-          .fill(0)
-          .map(() => Array(10).fill(0)),
-        ships: [],
-        sunkEnemyShips: [],
-        playerStats: {},
-        currentTurn: null,
-        turnStartedAt: null,
-        gameStartedAt: null,
-      }));
-      setGeneralMessage({ key: "rematch-ready", id: Date.now() });
-      if (audio) audio.play("game_start_voiceover");
+      setRematchReadyReceived(true);
     };
 
     // Handler for errors
@@ -1016,11 +1043,6 @@ const useGameSession = (sessionId: string) => {
     [overlaps]
   );
 
-  const [modeState, setModeState] = useState<"setup" | "game">(
-    mode as "setup" | "game"
-  );
-  const setMode = (newMode: "setup" | "game") => setModeState(newMode);
-
   // --- Board/ShipType adapters ---
   const allowedVariants = [
     "Carrier",
@@ -1086,7 +1108,7 @@ const useGameSession = (sessionId: string) => {
       const position = ship.cells[0];
       // Build hitMap from playerBoard
       const hitMap = ship.cells.map((cell) => {
-        const val = gameStateLocal.playerBoard[cell.y][cell.x];
+        const val = gameStateLocal.playerBoard[cell.y]?.[cell.x];
         return val === -2; // -2 means hit
       });
       return {
@@ -1166,10 +1188,10 @@ const useGameSession = (sessionId: string) => {
     onTurnExpiry,
     currentTurn,
     connectionError,
-    setMode,
     // --- New State for Points Events ---
     pointsAwarded,
     pointsSummary,
+    gameOverPointsSummary,
   };
 };
 

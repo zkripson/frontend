@@ -9,9 +9,9 @@ const ArrowRightAltIcon = ({ size = "24" }: { size?: string }) => (
     <path
       d="M5 12H19M19 12L12 5M19 12L12 19"
       stroke="#44190C"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
   </svg>
 );

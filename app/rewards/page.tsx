@@ -1,5 +1,6 @@
 "use client";
 import { KPDialougue } from "@/components";
+import { KPProgressClaimButton } from "@/components";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import classNames from "classnames";
 import Image from "next/image";
@@ -48,7 +49,7 @@ const RewardsScreen = () => {
       onBack={() => navigate.back()}
       className="pt-[88px]"
     >
-      <div className="grid grid-cols-2 gap-8 w-full pt-5 lg:pt-10">
+      <div className="grid grid-cols-2 max-sm:gap-4 gap-8 w-full pt-5 lg:pt-10">
         {contents.map((item, index) => (
           <div
             key={index}
@@ -87,14 +88,19 @@ const RewardsScreen = () => {
         ))}
       </div>
 
-      <div className="mt-5 lg:mt-10 w-full border border-dashed rounded-xl border-primary-50 px-3 pt-2 pb-1 lg:px-5 lg:pt-4 lg:pb-3 flex justify-between items-center text-primary-50">
+      <div className="max-sm:mt-0 mt-5 lg:mt-10 w-full border border-dashed rounded-xl border-primary-50 px-3 pt-2 pb-1 lg:px-5 lg:pt-4 lg:pb-3 flex justify-between items-center text-primary-50">
         <div className="flex flex-col items-start lg:gap-1">
           <p className="text-xs md:text-base">Claimable Tokens</p>
           <p className="text-lg md:text-3xl text-nowrap font-MachineStd">
             3,203<span className="text-[10px] md:text-base"> $SHIP</span>
           </p>
         </div>
-        <div></div>
+
+        <KPProgressClaimButton
+          percentage={70}
+          status="locked"
+          onClaim={() => {}}
+        />
       </div>
     </KPDialougue>
   );

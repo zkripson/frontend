@@ -54,7 +54,7 @@ const GameSession = () => {
     onTurnExpiry,
     currentTurn,
     connectionError,
-    setMode,
+    gameOverPointsSummary,
   } = useGameSession(params.sessionId as string);
 
   return (
@@ -111,10 +111,10 @@ const GameSession = () => {
             generalMessage={generalMessage}
             disableReadyButton={disableReadyButton}
             inventoryVisible={inventoryVisible}
-            setMode={setMode}
             onReady={onReady}
             onFireShot={makeShot}
             waitingForOpponent={gameStateLocal.players.length < 2}
+            yourTurn={yourTurn}
             {...(mode === "game" && { opponentShips })}
           />
 
@@ -147,6 +147,7 @@ const GameSession = () => {
             avgTurnTime: 0,
           }
         }
+        gameOverPointsSummary={gameOverPointsSummary}
       />
     </div>
   );

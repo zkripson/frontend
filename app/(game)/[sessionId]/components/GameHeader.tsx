@@ -7,7 +7,6 @@ import {
   KPClickAnimation,
 } from "@/components";
 import HowToPlay from "./how-to-play";
-import Turn from "./turn";
 import { useAudio } from "@/providers/AudioProvider";
 import { useEffect, useState } from "react";
 import { Howler } from "howler";
@@ -121,7 +120,6 @@ export function GameHeader({
 
       <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-2 lg:gap-6 h-full pointer-events-auto">
         <div className="flex flex-col-reverse md:flex-row items-end md:items-center gap-2 lg:gap-3 pointer-events-auto">
-          {mode === "game" && <Turn yourTurn={yourTurn} />}
           <div className="flex items-center gap-2 lg:gap-3 pointer-events-auto">
             {mode === "game" && gameTimeRemaining !== 0 && (
               <KPTimer turnStartedAt={turnStartedAt} onExpire={onTurnExpiry} />

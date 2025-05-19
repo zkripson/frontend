@@ -21,13 +21,11 @@ import ExclaimIcon from "./exclaim-icon";
 import MuteIcon from "./mute-icon";
 import RadioIcon from "./radio-icon";
 import PlusIcon from "./plus-icon";
-import DropdownIcon from "./dropdown-icon";
-import ArrowIcon from "./arrow-icon";
-import StarIcon from "./star-icon";
 import ArrowRightAltIcon from "./arrow-right-alt";
 import DropdownIcon from "./dropdown-icon";
 import ArrowIcon from "./arrow-icon";
 import StarIcon from "./star-icon";
+import CheckAltIcon from "./check-alt-icon";
 
 export {
   CloseIcon,
@@ -57,7 +55,5 @@ export {
   ArrowIcon,
   StarIcon,
   ArrowRightAltIcon,
-  DropdownIcon,
-  ArrowIcon,
-  StarIcon,
+  CheckAltIcon,
 };

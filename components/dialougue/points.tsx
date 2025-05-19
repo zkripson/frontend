@@ -7,7 +7,7 @@ const Points = () => {
   return (
     <KPClickAnimation
       onClick={() => navigate.push("/rewards")}
-      className="rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer mt-5 md:mt-12 lg:mt-14"
+      className="rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer max-sm:mt-0 mt-5 md:mt-12 lg:mt-14"
     >
       <div className="flex items-center gap-6 lg:gap-8">
         <div className="flex items-center gap-2 lg:gap-3">
@@ -15,8 +15,8 @@ const Points = () => {
             <StarIcon />
           </div>
 
-          <div className="flex lg:hidden bg-iconButton bg-contain bg-no-repeat size-[22] items-center justify-center">
-            <StarIcon width="12" height="13" />
+          <div className="flex lg:hidden bg-iconButton bg-contain bg-no-repeat size-6 items-center justify-center">
+            <StarIcon width={12} height={13} />
           </div>
 
           <div className="flex flex-col justify-start items-start text-primary-300">
@@ -27,11 +27,11 @@ const Points = () => {
 
         <div className="rounded-[50px] px-3 h-6 lg:h-7 flex items-center justify-center gap-2 border border-primary-300">
           <div className="hidden lg:block">
-            <StarIcon fill="#44190C" width="14" height="14" />
+            <StarIcon fill="#44190C" width={14} height={14} />
           </div>
 
           <div className="block lg:hidden">
-            <StarIcon fill="#44190C" width="11" height="11" />
+            <StarIcon fill="#44190C" width={11} height={11} />
           </div>
 
           <p className="text-primary-300 font-medium text-[10px] lg:text-[13px]">

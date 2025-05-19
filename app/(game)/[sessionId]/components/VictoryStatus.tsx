@@ -2,7 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import classNames from "classnames";
-import { KPDialougue } from "@/components";
+import { KPDialougue, KPTokenProgressCard } from "@/components";
+import { GameOverPointsSummary } from "@/hooks/useGameWebSocket";
 
 const titles = {
   win: "You Win!",
@@ -36,6 +37,7 @@ interface VictoryStatusProps {
   onHome?: () => void;
   show?: boolean;
   playerStats: PlayerStats;
+  gameOverPointsSummary?: GameOverPointsSummary;
 }
 
 const VictoryStatus = ({
@@ -44,6 +46,7 @@ const VictoryStatus = ({
   onHome,
   show,
   playerStats,
+  gameOverPointsSummary,
 }: VictoryStatusProps) => {
   // safe‑guard: if status isn't exactly "win" or "loss", fallback to "win"
   if (status !== "win" && status !== "loss" && status !== "draw") {
@@ -63,7 +66,7 @@ const VictoryStatus = ({
           className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-[999999]"
         >
           <KPDialougue
-            showKripsonImage
+            // showKripsonImage
             primaryCta={{
               title: "Replay",
               icon: "replay",
@@ -108,6 +111,53 @@ const VictoryStatus = ({
                   ))}
                 </div>
               </div>
+
+              <KPTokenProgressCard earned={120} goal={1500} nextLevel={3} />
+              {/* Game Over Points Summary (only for win/loss, not draw) */}
+              {/* {gameOverPointsSummary &&
+                status !== "draw" &&
+                (() => {
+                  // GameOverPointsSummary is a Record<string, { total: number; breakdown: Array<{ category: string; points: number; reason: string }> }>
+                  // Use the player's address to get their summary
+                  const summary = gameOverPointsSummary["0x123..."];
+                  if (!summary) return null;
+                  const { total, breakdown } = summary;
+                  return (
+                    <div className="flex flex-col gap-1 items-center mt-2 p-2 rounded bg-primary-950/60 border border-primary-800 max-w-xs mx-auto">
+                      <h3 className="text-[16px] font-bold text-primary-50 mb-1">
+                        Points Summary
+                      </h3>
+                      <div className="flex items-center gap-2 text-[13px] text-primary-50">
+                        <span className="font-semibold text-primary-200">
+                          Total:
+                        </span>
+                        <span className="font-bold text-primary-50">
+                          {total}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center text-[11px] text-primary-50 mt-1">
+                        {breakdown.map((item, idx) => (
+                          <div
+                            key={item.category + idx}
+                            className="flex flex-col items-center min-w-[60px] px-1"
+                          >
+                            <span
+                              className="font-semibold capitalize text-primary-200 truncate max-w-[60px]"
+                              title={item.reason}
+                            >
+                              {item.category.replace(/_/g, " ").toLowerCase()}
+                            </span>
+                            <span className="font-bold text-primary-50">
+                              {item.points > 0
+                                ? `+${item.points}`
+                                : item.points}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()} */}
             </div>
           </KPDialougue>
         </motion.div>
