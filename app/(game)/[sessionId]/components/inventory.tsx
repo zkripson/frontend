@@ -140,7 +140,7 @@ const Inventory = ({
                           alt={variant}
                           width={width}
                           height={height}
-                          quality={100}
+                          quality={80}
                           className={classNames(
                             "object-cover transition-opacity duration-300",
                             {

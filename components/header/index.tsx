@@ -39,19 +39,21 @@ const KPHeader = () => {
           BATTLESHIP GAME
         </h1>
 
-        {showProfileBadge && (
-          <div className="shrink-0 w-fit">
-            <KPProfileBadge avatarUrl={pfp} username={username} />
-          </div>
-        )}
+        <div className="flex items-center gap-4 flex-row-reverse">
+          {showProfileBadge && (
+            <div className="shrink-0 w-fit">
+              <KPProfileBadge avatarUrl={pfp} username={username} />
+            </div>
+          )}
 
-        <a
-          href="https://metastablelabs.notion.site/How-to-Play-1f7716767cb480ae98d5f45877e033c6?pvs=4"
-          target="_blank"
-          className="ttext-[clamp(12px,5vw,14px)] text-primary-300 underline font-semibold"
-        >
-          How to play?
-        </a>
+          <a
+            href="https://metastablelabs.notion.site/How-to-Play-1f7716767cb480ae98d5f45877e033c6?pvs=4"
+            target="_blank"
+            className="ttext-[clamp(12px,5vw,14px)] text-primary-300 underline font-semibold"
+          >
+            How to play?
+          </a>
+        </div>
       </header>
     </div>
   );

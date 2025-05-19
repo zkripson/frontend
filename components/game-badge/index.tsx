@@ -29,7 +29,7 @@ const KPGameBadge = ({
                 "opacity-50": status === "joining...",
               }
             )}
-            quality={100}
+            quality={80}
           />
 
           <span

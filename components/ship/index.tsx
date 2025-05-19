@@ -201,7 +201,7 @@ export default function KPShip({
                     alt="hit"
                     width={cellSize * 0.85}
                     height={cellSize * 0.85}
-                    quality={100}
+                    quality={80}
                     className={
                       orientation === "vertical" ? "rotate-[-90deg]" : ""
                     }

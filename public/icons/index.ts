@@ -21,6 +21,7 @@ import ExclaimIcon from "./exclaim-icon";
 import MuteIcon from "./mute-icon";
 import RadioIcon from "./radio-icon";
 import PlusIcon from "./plus-icon";
+import DropdownIcon from "./dropdown-icon";
 
 export {
   CloseIcon,
@@ -46,4 +47,5 @@ export {
   MuteIcon,
   RadioIcon,
   PlusIcon,
+  DropdownIcon,
 };

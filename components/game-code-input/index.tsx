@@ -82,12 +82,31 @@ const KPGameCodeInput = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWallet?.address]);
 
+  const formatCodeWithHyphens = (raw: string) => {
+    // Remove all non-alphanumeric and uppercase
+    const cleaned = raw.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    // Format as XXX-XXX-XX or XXX-XXX-XXX
+    if (cleaned.length === 8) {
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(
+        6,
+        8
+      )}`;
+    } else if (cleaned.length === 9) {
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(
+        6,
+        9
+      )}`;
+    }
+    return cleaned;
+  };
+
   useEffect(() => {
     const fetchInvite = async () => {
       if (!code || !schema.safeParse({ code }).success) return;
-
-      setCode?.(code);
-      await getInvitation(code);
+      // Format code with hyphens before submitting
+      const formattedCode = formatCodeWithHyphens(code);
+      setCode?.(formattedCode);
+      await getInvitation(formattedCode);
     };
 
     const timer = setTimeout(fetchInvite, 300);
@@ -110,9 +129,10 @@ const KPGameCodeInput = ({
 
       <KPInput
         name="code"
-        placeholder="Enter invite code (e.g. NJ5-YNJ-5Y)"
+        placeholder="Enter invite code (e.g. NJ5YNJ5Y)"
         register={register("code", {
-          setValueAs: (value) => value?.toUpperCase(),
+          setValueAs: (value) =>
+            value?.replace(/[^A-Z0-9]/gi, "").toUpperCase(),
         })}
         error={!!errors.code}
         className="w-full"

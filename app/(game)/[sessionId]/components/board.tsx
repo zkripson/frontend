@@ -265,7 +265,7 @@ const Board: React.FC<BoardProps> = ({
                       alt="hit"
                       width={Math.floor(cellSize * 0.85)}
                       height={Math.floor(cellSize * 0.85)}
-                      quality={100}
+                      quality={80}
                       className="pointer-events-none block mx-auto my-auto object-contain"
                     />
                   )}

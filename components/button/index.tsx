@@ -15,7 +15,7 @@ const icons = {
       alt="farcaster"
       width={32}
       height={32}
-      quality={100}
+      quality={80}
       className="size-8 max-sm:size-[21.39px] object-cover rounded-md"
     />
   ),
@@ -25,7 +25,7 @@ const icons = {
       alt="farcaster"
       width={32}
       height={32}
-      quality={100}
+      quality={80}
       className="size-7 max-sm:size-[17.38px] object-cover rounded-md -mt-2"
     />
   ),
