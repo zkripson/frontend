@@ -23,6 +23,7 @@ import RadioIcon from "./radio-icon";
 import PlusIcon from "./plus-icon";
 import DropdownIcon from "./dropdown-icon";
 import ArrowIcon from "./arrow-icon";
+import StarIcon from "./star-icon";
 
 export {
   CloseIcon,
@@ -50,4 +51,5 @@ export {
   PlusIcon,
   DropdownIcon,
   ArrowIcon,
+  StarIcon,
 };

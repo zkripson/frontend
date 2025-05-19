@@ -6,6 +6,8 @@ import useBalance from "@/hooks/useBalance";
 import { useEffect } from "react";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import classNames from "classnames";
+import Image from "next/image";
+import KPLevel from "../level";
 
 const KPHeader = () => {
   const { checkTokenBalance } = useBalance();
@@ -35,16 +37,22 @@ const KPHeader = () => {
           }
         )}
       >
-        <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
-          BATTLESHIP GAME
-        </h1>
+        <div className="flex items-center gap-2">
+          <Image
+            src="/images/bship.png"
+            alt="Battleship Logo"
+            width={59}
+            height={59}
+            quality={100}
+            className="lg:size-[59px] md:size-[50px] size-[45px]"
+          />
+          <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
+            BATTLESHIP GAME
+          </h1>
+        </div>
 
-        <div className="flex items-center gap-4 flex-row-reverse">
-          {showProfileBadge && (
-            <div className="shrink-0 w-fit">
-              <KPProfileBadge avatarUrl={pfp} username={username} />
-            </div>
-          )}
+        <div className="flex items-center gap-4">
+          <KPLevel />
 
           <a
             href="https://metastablelabs.notion.site/How-to-Play-1f7716767cb480ae98d5f45877e033c6?pvs=4"
@@ -53,6 +61,12 @@ const KPHeader = () => {
           >
             Game rules
           </a>
+
+          {showProfileBadge && (
+            <div className="shrink-0 w-fit">
+              <KPProfileBadge avatarUrl={pfp} username={username} />
+            </div>
+          )}
         </div>
       </header>
     </div>
