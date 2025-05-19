@@ -51,7 +51,7 @@ const KPHeader = () => {
             target="_blank"
             className="ttext-[clamp(12px,5vw,14px)] text-primary-300 underline font-semibold"
           >
-            How to play?
+            Game rules
           </a>
         </div>
       </header>

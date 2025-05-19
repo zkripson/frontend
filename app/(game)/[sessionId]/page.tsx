@@ -82,6 +82,8 @@ const GameSession = () => {
             gameCode={gameCode}
             onTurnExpiry={onTurnExpiry}
             gameTimeRemaining={gameTimeRemaining}
+            inventoryVisible={inventoryVisible}
+            setInventoryVisible={setInventoryVisible}
           />
 
           <SetupPanel
