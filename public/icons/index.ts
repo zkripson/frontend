@@ -24,6 +24,7 @@ import PlusIcon from "./plus-icon";
 import DropdownIcon from "./dropdown-icon";
 import ArrowIcon from "./arrow-icon";
 import StarIcon from "./star-icon";
+import ArrowRightAltIcon from "./arrow-right-alt";
 
 export {
   CloseIcon,
@@ -52,4 +53,5 @@ export {
   DropdownIcon,
   ArrowIcon,
   StarIcon,
+  ArrowRightAltIcon,
 };
