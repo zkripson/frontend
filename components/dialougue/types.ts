@@ -13,4 +13,5 @@ interface KPDialougueProps {
   iconPosition?: "left" | "right";
   ctaText?: string;
   className?: string;
+  showPoints?: boolean;
 }

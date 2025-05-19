@@ -108,6 +108,7 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
           loading: loadingInviteCreation,
         }}
         className="pt-[88px]"
+        showPoints
       >
         <div className="flex flex-col gap-6 w-full items-center">
           <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd mb-2">

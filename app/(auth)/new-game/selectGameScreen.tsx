@@ -2,11 +2,23 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import classNames from "classnames";
 
-import { KPDialougue, KPGameCodeInput, KPGameTypeCard } from "@/components";
+import {
+  KPClickAnimation,
+  KPDialougue,
+  KPGameCodeInput,
+  KPGameTypeCard,
+} from "@/components";
 import useInviteActions from "@/store/invite/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import { useAudio } from "@/providers/AudioProvider";
 import useWithdrawal from "@/hooks/useWithdrawal";
+import {
+  ArrowRightAltIcon,
+  ArrowRightIcon,
+  CloseIcon,
+  StarIcon,
+} from "@/public/icons";
+import Points from "@/components/dialougue/points";
 
 const SelectGameScreen = ({
   nextScreen,
@@ -107,6 +119,7 @@ const SelectGameScreen = ({
         disabled: !canAccept || loadingInviteAcceptance,
         hide: !isJoining,
       }}
+      showPoints
       className="pt-[88px]"
     >
       <div className="flex flex-col items-center gap-16 max-sm:gap-7 self-stretch w-full">

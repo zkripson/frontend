@@ -1,4 +1,4 @@
-const ArrowRightIcon = ({ className }: IconProps) => (
+const ArrowRightIcon = ({ className, fill = "white" }: IconProps) => (
   <svg
     width="24"
     height="25"
@@ -9,7 +9,7 @@ const ArrowRightIcon = ({ className }: IconProps) => (
   >
     <path
       d="M14.4297 6.13617L20.4997 12.2062L14.4297 18.2762"
-      stroke="white"
+      stroke={fill}
       strokeWidth="1.5"
       strokeMiterlimit="10"
       strokeLinecap="round"
@@ -17,7 +17,7 @@ const ArrowRightIcon = ({ className }: IconProps) => (
     />
     <path
       d="M3.5 12.2062H20.33"
-      stroke="white"
+      stroke={fill}
       strokeWidth="1.5"
       strokeMiterlimit="10"
       strokeLinecap="round"
