@@ -3,33 +3,51 @@ import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
 
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-
-const authGroup = ["/login", "/", "/new-game"];
+import StakeOverview from "./stake-overview";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 
 const KPFullscreenLoader = ({
   title,
   loadingMessages,
+  showStakeOverview,
 }: IKPFullscreenLoader) => {
-  const { pathname } = useSystemFunctions();
+  const {
+    inviteState: { invitation, bettingCreation },
+  } = useSystemFunctions();
 
-  const isAuthLayout = authGroup.some((path) => {
-    if (path === "/") return pathname === "/";
-    return pathname.startsWith(path);
-  });
+  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
+  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const pfp =
+    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
 
   return (
     <div
       id="fullscreen-loader"
       className={classNames(
         "fixed inset-0 z-[9999] bg-primary-1100 bg-loadingBackground bg-cover bg-center p-6"
-        // {
-        //   "scale-[1.3333] sm:scale-[1.3333] md:scale-[1.25] lg:scale-[1.176] min-[1281px]:scale-100 [transform-origin:center] [will-change:transform]":
-        //     !isAuthLayout,
-        // }
       )}
     >
-      <div className="size-full relative flex flex-col items-center justify-center gap-8 max-sm:gap-4">
-        <div className="relative w-full max-w-[357px] max-sm:max-w-[277px] h-[60px] max-sm:max-h-[37px] bg-primary-450 border border-primary-300 px-3.5 py-2.5 max-sm:px-2 max-sm:py-1.5 overflow-hidden">
+      <div
+        className={classNames(
+          "size-full relative flex flex-col items-center justify-center gap-8 max-sm:gap-4",
+          {
+            "max-sm:justify-start": showStakeOverview,
+          }
+        )}
+      >
+        {showStakeOverview && (
+          <StakeOverview
+            amount={
+              Number(invitation?.stakeAmount) ||
+              Number(bettingCreation?.stakeAmount) ||
+              0
+            }
+            leftAvatarUrl={pfp!}
+            leftName={username}
+            className=""
+          />
+        )}
+        <div className="relative w-full max-w-[357px] max-sm:max-w-[277px] h-[60px] max-sm:max-h-[37px] bg-primary-450 border border-primary-300 px-3.5 py-2.5 max-sm:px-2 max-sm:py-1.5">
           <motion.div
             className="h-full bg-primary-200 border border-primary-300"
             initial={{ width: "0%" }}
@@ -46,7 +64,7 @@ const KPFullscreenLoader = ({
         </h1>
 
         {loadingMessages && loadingMessages.length > 0 && (
-          <div className="w-full max-w-md flex flex-col items-center justify-end overflow-hidden mt-4 absolute bottom-[8%] left-1/2 transform -translate-x-1/2 h-[120px]">
+          <div className="w-full max-w-md flex flex-col items-center justify-end mt-4 absolute bottom-[8%] left-1/2 transform -translate-x-1/2 h-[120px]">
             <AnimatePresence mode="popLayout" initial={false}>
               {loadingMessages.map((message, index) => {
                 const isLastMessage = index === loadingMessages.length - 1;
@@ -78,6 +96,8 @@ const KPFullscreenLoader = ({
             <div className="absolute bottom-0 left-0 w-full h-6 bg-gradient-to-t from-loadingBackground to-transparent pointer-events-none" />
           </div>
         )}
+
+        <div className="absolute top-[5vh] md:top-[15vh] left-0 w-full flex items-center justify-center"></div>
       </div>
     </div>
   );

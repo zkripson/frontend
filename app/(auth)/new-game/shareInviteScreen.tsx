@@ -41,7 +41,7 @@ const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
     { title: "send invite", onClick: () => handleShareInvite() },
     {
       title: "copy code instead",
-      onClick: () => handleCopy(bettingCreation?.code!, true),
+      onClick: () => handleCopy(bettingCreation?.code!),
     },
   ];
 

@@ -11,6 +11,7 @@ import useBalance from "@/hooks/useBalance";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import KPProfileBadge from "../profile-badge";
 import KPLevel from "../level";
+import KPGameRuleModal from "../game-rule-modal";
 
 const KPHeader = () => {
   const { checkTokenBalance } = useBalance();
@@ -56,13 +57,7 @@ const KPHeader = () => {
           <div className="flex items-center gap-4">
             {/* Desktop: show menu */}
             <div className="hidden md:flex items-center gap-4">
-              <a
-                href="https://metastablelabs.notion.site/How-to-Play-1f7716767cb480ae98d5f45877e033c6?pvs=4"
-                target="_blank"
-                className="text-[clamp(12px,5vw,14px)] text-primary-300 underline font-semibold"
-              >
-                Game rules
-              </a>
+              <KPGameRuleModal />
               <KPLevel />
               {showProfileBadge && (
                 <div className="shrink-0 w-fit">
@@ -89,15 +84,12 @@ const KPHeader = () => {
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                 className="absolute top-[133%] right-0 left-0 bg-material shadow-lg z-30 flex flex-col items-center justify-center gap-4 px-4 md:hidden rounded-md"
               >
-                <a
-                  href="https://metastablelabs.notion.site/How-to-Play-1f7716767cb480ae98d5f45877e033c6?pvs=4"
-                  target="_blank"
-                  className="text-[clamp(12px,5vw,14px)] text-primary-300 underline font-semibold mt-4"
-                  onClick={() => setMobileMenuOpen(false)}
+                <KPGameRuleModal />
+                <div
+                  className={classNames("w-fit", {
+                    " mb-4": !showProfileBadge,
+                  })}
                 >
-                  Game rules
-                </a>
-                <div className="w-full mb-4">
                   <KPLevel />
                 </div>
                 {showProfileBadge && (

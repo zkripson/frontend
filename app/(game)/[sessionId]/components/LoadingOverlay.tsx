@@ -24,6 +24,7 @@ export function LoadingOverlay({
           <KPFullscreenLoader
             title="loading new game..."
             loadingMessages={loadingMessages}
+            showStakeOverview
           />
         </motion.div>
       )}

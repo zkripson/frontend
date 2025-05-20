@@ -22,6 +22,7 @@ import KPBalances from "./balances";
 import KPLevel from "./level";
 import KPTokenProgressCard from "./token-progress-card";
 import KPProgressClaimButton from "./progress-claim-button";
+import KPGameRuleModal from "./game-rule-modal";
 
 export {
   KPDialougue,
@@ -48,4 +49,5 @@ export {
   KPLevel,
   KPTokenProgressCard,
   KPProgressClaimButton,
+  KPGameRuleModal,
 };
