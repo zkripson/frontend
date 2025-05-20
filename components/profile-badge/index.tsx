@@ -133,11 +133,6 @@ const KPProfileBadge = ({
               className="absolute left-0 top-full mt-2 w-full z-50"
             >
               <div className="bg-primary-450/25 backdrop-blur-sm rounded p-2 border border-primary-50 shadow-lg">
-                {/* Dropdown content goes here */}
-                <h1 className="text-[12px] leading-none text-white">
-                  Total Funds
-                </h1>
-
                 <div className="flex flex-col items-stretch gap-2 mt-3">
                   {balances.map(({ address, balance, symbol }) => (
                     <div

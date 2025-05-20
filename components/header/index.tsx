@@ -23,7 +23,7 @@ const KPHeader = () => {
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
   const pfp =
     linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
-  const showProfileBadge = pathname === "/new-game";
+  const showProfileBadge = pathname === "/new-game" || pathname === "/rewards";
 
   useEffect(() => {
     checkTokenBalance(TOKEN_ADDRESSES.USDC);
