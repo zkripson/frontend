@@ -3,17 +3,13 @@ import { useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import Image from "next/image";
-import { usePlayerActions } from "@/store/player/actions";
 
 export default function HomePage() {
   const { user, ready } = usePrivy();
   const { navigate } = useSystemFunctions();
-  const { getPlayerRewards } = usePlayerActions();
 
   useEffect(() => {
     if (!ready) return;
-
-    getPlayerRewards();
 
     if (user) {
       navigate.push("/new-game");
