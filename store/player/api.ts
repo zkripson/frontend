@@ -1,4 +1,4 @@
-import { axiosInstance } from '../../utils/axios';
+import { axiosInstance } from "../../utils/axios";
 import {
   CreateProfileRequest,
   CreateProfileResponse,
@@ -11,16 +11,19 @@ import {
   Leaderboard,
   WeeklyLeaderboard,
   PointsDistribution,
-  PointsStats
-} from './types';
+  PointsStats,
+} from "./types";
 
 export interface PlayerAPI {
   // Player profile endpoints
   createProfile: (data: CreateProfileRequest) => Promise<CreateProfileResponse>;
   getProfile: (address: string) => Promise<PlayerProfile>;
-  updateProfile: (address: string, data: UpdateProfileRequest) => Promise<UpdateProfileResponse>;
+  updateProfile: (
+    address: string,
+    data: UpdateProfileRequest
+  ) => Promise<UpdateProfileResponse>;
   getOngoingSessions: (address: string) => Promise<GetOngoingSessionsResponse>;
-  
+
   // Rewards and points endpoints
   getPlayerRewards: (address: string) => Promise<PlayerRewards>;
   getPlayerPoints: (address: string) => Promise<PlayerPointsResponse>;
@@ -33,53 +36,71 @@ export interface PlayerAPI {
 export const playerApi: PlayerAPI = {
   // Player profile endpoints
   createProfile: async (data: CreateProfileRequest) => {
-    const response = await axiosInstance.post<CreateProfileResponse>('/api/players/create-profile', data);
+    const response = await axiosInstance.post<CreateProfileResponse>(
+      "players/create-profile",
+      data
+    );
     return response.data;
   },
 
   getProfile: async (address: string) => {
-    const response = await axiosInstance.get<PlayerProfile>(`/api/players/${address}`);
+    const response = await axiosInstance.get<PlayerProfile>(
+      `players/${address}`
+    );
     return response.data;
   },
 
   updateProfile: async (address: string, data: UpdateProfileRequest) => {
-    const response = await axiosInstance.put<UpdateProfileResponse>(`/api/players/${address}/profile`, data);
+    const response = await axiosInstance.put<UpdateProfileResponse>(
+      `players/${address}/profile`,
+      data
+    );
     return response.data;
   },
 
   getOngoingSessions: async (address: string) => {
-    const response = await axiosInstance.get<GetOngoingSessionsResponse>(`/api/players/${address}/ongoing-sessions`);
+    const response = await axiosInstance.get<GetOngoingSessionsResponse>(
+      `players/${address}/ongoing-sessions`
+    );
     return response.data;
   },
 
   // Rewards and points endpoints
   getPlayerRewards: async (address: string) => {
-    const response = await axiosInstance.get<PlayerRewards>(`/api/players/${address}/rewards`);
+    const response = await axiosInstance.get<PlayerRewards>(
+      `players/${address}/rewards`
+    );
     return response.data;
   },
 
   getPlayerPoints: async (address: string) => {
-    const response = await axiosInstance.get<PlayerPointsResponse>(`/api/points/player/${address}`);
+    const response = await axiosInstance.get<PlayerPointsResponse>(
+      `points/player/${address}`
+    );
     return response.data;
   },
 
   getLeaderboard: async () => {
-    const response = await axiosInstance.get<Leaderboard>('/api/points/leaderboard');
+    const response = await axiosInstance.get<Leaderboard>("points/leaderboard");
     return response.data;
   },
 
   getWeeklyLeaderboard: async () => {
-    const response = await axiosInstance.get<WeeklyLeaderboard>('/api/points/leaderboard/weekly');
+    const response = await axiosInstance.get<WeeklyLeaderboard>(
+      "points/leaderboard/weekly"
+    );
     return response.data;
   },
 
   getPointsDistribution: async () => {
-    const response = await axiosInstance.get<PointsDistribution>('/api/points/distribution');
+    const response = await axiosInstance.get<PointsDistribution>(
+      "points/distribution"
+    );
     return response.data;
   },
 
   getPointsStats: async () => {
-    const response = await axiosInstance.get<PointsStats>('/api/points/stats');
+    const response = await axiosInstance.get<PointsStats>("points/stats");
     return response.data;
-  }
+  },
 };

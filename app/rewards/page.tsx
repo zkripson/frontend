@@ -5,12 +5,69 @@ import useSystemFunctions from "@/hooks/useSystemFunctions";
 import classNames from "classnames";
 import Image from "next/image";
 
+// Function to calculate time remaining from a date string in format "YYYY-MM-DD"
+const calculateTimeRemaining = (dateString?: string) => {
+  if (!dateString) return { days: 0, hours: 0, minutes: 0 };
+
+  const targetDate = new Date(dateString);
+  const now = new Date();
+
+  // Calculate the difference in milliseconds
+  const diffMs = targetDate.getTime() - now.getTime();
+
+  // Convert to days, hours, minutes
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  return {
+    days: days < 0 ? 0 : days,
+    hours: hours < 0 ? 0 : hours,
+    minutes: minutes < 0 ? 0 : minutes,
+  };
+};
+
+const calculatePercentageTimeLeft = (nextClaimDate?: string) => {
+  if (!nextClaimDate) return 50;
+
+  const targetDate = new Date(nextClaimDate);
+  const now = new Date();
+
+  // Total time remaining in milliseconds
+  const timeRemainingMs = targetDate.getTime() - now.getTime();
+
+  // Assuming a 7-day period between distribution windows
+  const totalDistributionPeriodMs = 7 * 24 * 60 * 60 * 1000;
+
+  // Calculate percentage of time remaining (0-100)
+  // 0% means no time left (claim ready)
+  // 100% means full time remaining
+  let percentage = Math.floor(
+    (timeRemainingMs / totalDistributionPeriodMs) * 100
+  );
+
+  // Clamp between 0-100
+  percentage = Math.max(0, Math.min(100, percentage));
+
+  return percentage;
+};
+
 const RewardsScreen = () => {
-  const { navigate } = useSystemFunctions();
+  const {
+    navigate,
+    playerState: { playerRewards: data },
+  } = useSystemFunctions();
+
+  // Get time remaining from next claim date
+  const nextClaimDate = data?.claimStatus?.nextClaimDate;
+  const timeRemaining = calculateTimeRemaining(nextClaimDate);
+  const claimablePoints = Number(data?.claimablePoints || 0).toLocaleString();
+  const status = data?.claimStatus?.canClaim;
+  const percentageTimeLeftToClaim = calculatePercentageTimeLeft(nextClaimDate);
 
   const contents = [
     {
-      title: "5",
+      title: data?.streak?.currentDays?.toLocaleString() || "0",
       description: "Daily Streak",
       isStreak: true,
     },
@@ -20,27 +77,35 @@ const RewardsScreen = () => {
     },
     {
       title: "Total Weekly Points",
-      description: "345,689",
+      description: Number(data?.weeklyPoints || 0)?.toLocaleString() || "0",
     },
     {
       title: "Next Distribution",
-      description: (
+      description: !nextClaimDate ? (
+        "-"
+      ) : (
         <p className="text-lg md:text-3xl text-nowrap">
-          02<span className="text-[10px] md:text-base">DAYS</span> 04
-          <span className="text-[10px] md:text-base">HRS</span> 32
+          {String(timeRemaining.days).padStart(2, "0")}
+          <span className="text-[10px] md:text-base">DAYS</span>{" "}
+          {String(timeRemaining.hours).padStart(2, "0")}
+          <span className="text-[10px] md:text-base">HRS</span>{" "}
+          {String(timeRemaining.minutes).padStart(2, "0")}
           <span className="text-[10px] md:text-base">MINS</span>
         </p>
       ),
     },
     {
-      title: "Referral Points",
-      description: "345,698",
+      title: "Referral Rebbons",
+      description:
+        Number(data?.referralPoints?.earned || 0)?.toLocaleString() || "0",
     },
     {
       title: "Total Referrals",
       description: "6",
     },
   ];
+
+  console.log(percentageTimeLeftToClaim);
 
   return (
     <KPDialougue
@@ -92,13 +157,14 @@ const RewardsScreen = () => {
         <div className="flex flex-col items-start lg:gap-1">
           <p className="text-xs md:text-base">Claimable Tokens</p>
           <p className="text-lg md:text-3xl text-nowrap font-MachineStd">
-            3,203<span className="text-[10px] md:text-base"> $SHIP</span>
+            {claimablePoints}
+            <span className="text-[10px] md:text-base"> $SHIP</span>
           </p>
         </div>
 
         <KPProgressClaimButton
-          percentage={70}
-          status="locked"
+          percentage={percentageTimeLeftToClaim}
+          status={status ? "claimable" : "locked"}
           onClaim={() => {}}
         />
       </div>

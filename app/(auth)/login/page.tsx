@@ -7,20 +7,34 @@ import { usePrivy } from "@privy-io/react-auth";
 import { KPDialougue, KPFullscreenLoader } from "@/components";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
+import { usePlayerActions } from "@/store/player/actions";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 
 const Social = () => {
   const { user, ready, login } = usePrivy();
   const { loginToFarcasterFrame, isFrameLoaded } = useConnectToFarcaster();
   const { navigate } = useSystemFunctions();
+  const { createProfile } = usePlayerActions();
+  const { linkedFarcaster, linkedTwitter, activeWallet } =
+    usePrivyLinkedAccounts();
 
   const [stage, setStage] = useState<"connect" | "setup">("connect");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (isFrameLoaded) {
-      return loginToFarcasterFrame();
-    }
+    try {
+      setLoading(true);
+      if (isFrameLoaded) {
+        await loginToFarcasterFrame();
+        return;
+      }
 
-    return login();
+      return login();
+    } catch (e) {
+      //
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -38,6 +52,29 @@ const Social = () => {
       setStage("setup");
     }
   }, [ready, user]);
+
+  useEffect(() => {
+    if (activeWallet && (linkedFarcaster || linkedTwitter)) {
+      const avatar =
+        linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || "";
+      const username =
+        linkedFarcaster?.username || linkedTwitter?.username || "";
+
+      createProfile({
+        address: activeWallet.address,
+        avatar,
+        username,
+        preferences: {
+          animationsEnabled: true,
+          autoSubmitOnHit: true,
+          notifications: true,
+          soundEnabled: true,
+          theme: "dark",
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWallet, linkedFarcaster, linkedTwitter]);
 
   return (
     <div className="w-full h-full flex items-center justify-center relative">
@@ -65,6 +102,7 @@ const Social = () => {
                 multipleicons: isFrameLoaded
                   ? ["farcaster"]
                   : ["x", "farcaster"],
+                loading: loading,
               }}
             >
               <div className="w-full flex flex-col items-stretch mt-5 gap-1"></div>

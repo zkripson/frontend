@@ -1,6 +1,6 @@
-import { useDispatch } from 'react-redux';
-import { playerApi } from './api';
-import { 
+import { useDispatch } from "react-redux";
+import { playerApi } from "./api";
+import {
   setCreateProfileLoading,
   setGetProfileLoading,
   setUpdateProfileLoading,
@@ -18,88 +18,87 @@ import {
   setLeaderboard,
   setWeeklyLeaderboard,
   setPointsDistribution,
-  setPointsStats
-} from './index';
-import { useSystemFunctions } from '../../hooks/useSystemFunctions';
-import { usePrivyLinkedAccounts } from '../../hooks/usePrivyLinkedAccounts';
-import { 
-  CreateProfileRequest, 
-  PlayerProfile, 
-  UpdateProfileRequest 
-} from './types';
-
-interface CallbackProps {
-  onSuccess?: (...args: any[]) => void;
-  onError?: (error: Error) => void;
-}
+  setPointsStats,
+} from "./index";
+import { CreateProfileRequest, UpdateProfileRequest } from "./types";
+import useAppActions from "../app/actions";
+import { CallbackProps } from "..";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 
 export const usePlayerActions = () => {
   const dispatch = useDispatch();
-  const { handleError } = useSystemFunctions();
-  const { address } = usePrivyLinkedAccounts();
+  const { activeWallet } = usePrivyLinkedAccounts();
 
   // Profile actions
-  const createProfile = async (data: CreateProfileRequest, callbacks?: CallbackProps) => {
+  const createProfile = async (
+    data: CreateProfileRequest,
+    callbacks?: CallbackProps
+  ) => {
     try {
       dispatch(setCreateProfileLoading(true));
       const response = await playerApi.createProfile(data);
       dispatch(setPlayerProfile(response.profile));
       callbacks?.onSuccess?.(response);
+
+      getPlayerRewards();
       return response;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      console.log(err);
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setCreateProfileLoading(false));
     }
   };
 
-  const getProfile = async (playerAddress: string = address, callbacks?: CallbackProps) => {
+  const getProfile = async (callbacks?: CallbackProps) => {
     try {
+      if (!activeWallet?.address) return;
+
       dispatch(setGetProfileLoading(true));
-      const profile = await playerApi.getProfile(playerAddress);
+      const profile = await playerApi.getProfile(activeWallet.address);
       dispatch(setPlayerProfile(profile));
       callbacks?.onSuccess?.(profile);
       return profile;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setGetProfileLoading(false));
     }
   };
 
-  const updateProfile = async (data: UpdateProfileRequest, playerAddress: string = address, callbacks?: CallbackProps) => {
+  const updateProfile = async (
+    data: UpdateProfileRequest,
+    callbacks?: CallbackProps
+  ) => {
     try {
+      if (!activeWallet?.address) return;
+
       dispatch(setUpdateProfileLoading(true));
-      const response = await playerApi.updateProfile(playerAddress, data);
+      const response = await playerApi.updateProfile(
+        activeWallet.address,
+        data
+      );
       dispatch(setPlayerProfile(response.profile));
       callbacks?.onSuccess?.(response);
       return response;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setUpdateProfileLoading(false));
     }
   };
 
-  const getOngoingSessions = async (playerAddress: string = address, callbacks?: CallbackProps) => {
+  const getOngoingSessions = async (callbacks?: CallbackProps) => {
     try {
+      if (!activeWallet?.address) return;
+
       dispatch(setGetOngoingSessionsLoading(true));
-      const response = await playerApi.getOngoingSessions(playerAddress);
+      const response = await playerApi.getOngoingSessions(activeWallet.address);
       dispatch(setOngoingSessions(response.ongoingSessions));
       callbacks?.onSuccess?.(response);
       return response;
     } catch (err) {
       const error = err as Error;
-      handleError(error);
       callbacks?.onError?.(error);
       throw error;
     } finally {
@@ -108,35 +107,33 @@ export const usePlayerActions = () => {
   };
 
   // Rewards and points actions
-  const getPlayerRewards = async (playerAddress: string = address, callbacks?: CallbackProps) => {
+  const getPlayerRewards = async (callbacks?: CallbackProps) => {
     try {
+      if (!activeWallet?.address) return;
+
       dispatch(setGetPlayerRewardsLoading(true));
-      const rewards = await playerApi.getPlayerRewards(playerAddress);
+      const rewards = await playerApi.getPlayerRewards(activeWallet.address);
       dispatch(setPlayerRewards(rewards));
       callbacks?.onSuccess?.(rewards);
       return rewards;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setGetPlayerRewardsLoading(false));
     }
   };
 
-  const getPlayerPoints = async (playerAddress: string = address, callbacks?: CallbackProps) => {
+  const getPlayerPoints = async (callbacks?: CallbackProps) => {
     try {
+      if (!activeWallet?.address) return;
+
       dispatch(setGetPlayerPointsLoading(true));
-      const points = await playerApi.getPlayerPoints(playerAddress);
+      const points = await playerApi.getPlayerPoints(activeWallet.address);
       dispatch(setPlayerPoints(points));
       callbacks?.onSuccess?.(points);
       return points;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setGetPlayerPointsLoading(false));
     }
@@ -150,10 +147,7 @@ export const usePlayerActions = () => {
       callbacks?.onSuccess?.(leaderboard);
       return leaderboard;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setGetLeaderboardLoading(false));
     }
@@ -167,10 +161,7 @@ export const usePlayerActions = () => {
       callbacks?.onSuccess?.(weeklyLeaderboard);
       return weeklyLeaderboard;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setGetWeeklyLeaderboardLoading(false));
     }
@@ -184,10 +175,7 @@ export const usePlayerActions = () => {
       callbacks?.onSuccess?.(distribution);
       return distribution;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setGetPointsDistributionLoading(false));
     }
@@ -201,10 +189,7 @@ export const usePlayerActions = () => {
       callbacks?.onSuccess?.(stats);
       return stats;
     } catch (err) {
-      const error = err as Error;
-      handleError(error);
-      callbacks?.onError?.(error);
-      throw error;
+      callbacks?.onError?.(err);
     } finally {
       dispatch(setGetPointsStatsLoading(false));
     }
@@ -216,7 +201,7 @@ export const usePlayerActions = () => {
     getProfile,
     updateProfile,
     getOngoingSessions,
-    
+
     // Rewards and points actions
     getPlayerRewards,
     getPlayerPoints,
