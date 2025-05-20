@@ -32,6 +32,7 @@ interface BoardProps {
   shots: Record<string, { type: "hit" | "miss"; stage?: "smoke" }>;
   onShoot: (x: number, y: number, isHit: boolean) => void;
   showAllShipsInGame?: boolean;
+  yourTurn?: boolean;
 }
 
 const Board: React.FC<BoardProps> = ({
@@ -43,6 +44,7 @@ const Board: React.FC<BoardProps> = ({
   onShoot,
   shots,
   showAllShipsInGame,
+  yourTurn,
 }) => {
   const { isXSmall, isSmall, isMedium, isLarge, isXLarge, is2XLarge } =
     useScreenDetect();
@@ -69,7 +71,6 @@ const Board: React.FC<BoardProps> = ({
     y: number;
   } | null>(null);
   const [overlaps, setOverlaps] = useState<{ x: number; y: number }[]>([]);
-  const prevOverlapsRef = useRef<{ x: number; y: number }[]>([]);
   const cellsRef = useRef<HTMLDivElement>(null);
   const shipsRef = useRef<ShipType[]>(ships);
   shipsRef.current = ships;
@@ -265,7 +266,7 @@ const Board: React.FC<BoardProps> = ({
                       alt="hit"
                       width={Math.floor(cellSize * 0.85)}
                       height={Math.floor(cellSize * 0.85)}
-                      quality={100}
+                      quality={80}
                       className="pointer-events-none block mx-auto my-auto object-contain"
                     />
                   )}
@@ -303,6 +304,14 @@ const Board: React.FC<BoardProps> = ({
             gridSize={GRID_SIZE}
           />
         ))}
+      </div>
+
+      <div className="w-full h-full absolute top-0 left-0 pointer-events-none flex items-center justify-center">
+        {mode === "game" && !yourTurn && (
+          <span className="text-[clamp(18px, 2vw, 24px)] leading-none text-primary-50 whitespace-nowrap text-[24px] font-MachineStd">
+            {yourTurn ? "YOUR TURN" : "⏳ OPPONENT's TURN"}
+          </span>
+        )}
       </div>
     </div>
   );

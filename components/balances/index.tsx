@@ -40,7 +40,7 @@ const KPBalances = ({ isSmall }: { isSmall?: boolean }) => {
                 alt="usdt"
                 width={18}
                 height={18}
-                quality={100}
+                quality={80}
                 className={classNames(
                   "object-cover",
                   isSmall ? "size-[14px]" : "size-[18px]"

@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
+import Image from "next/image";
 
 export default function HomePage() {
   const { user, ready } = usePrivy();
@@ -19,8 +20,12 @@ export default function HomePage() {
   }, [user, ready]);
 
   return (
-    <div className="flex justify-center items-center h-screen bg-primary-250 w-full">
-      <div className="w-10 h-10 bg-primary-50 rounded-full animate-pulse ml-3" />
+    <div className="flex flex-col justify-center items-center h-screen bg-primary-250 gap-4">
+      <Image src="/logo.png" alt="logo" width={112} height={112} priority />
+
+      <h1 className="text-3xl md:text-[42px] leading-none text-primary-50 uppercase font-MachineStd animate-bounce">
+        BATTLESHIP
+      </h1>
     </div>
   );
 }

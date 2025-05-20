@@ -9,6 +9,7 @@ import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import KPBackdrop from "@/components/backdrop";
 import KPButton from "../button";
+import { DropdownIcon } from "@/public/icons";
 
 const KPProfileBadge = ({
   username,
@@ -79,7 +80,7 @@ const KPProfileBadge = ({
             width={300}
             height={300}
             className="size-5 lg:size-8 rounded-full object-cover"
-            quality={100}
+            quality={80}
           />
           <span
             className={classNames("text-[9px] lg:text-[14px] leading-none", {
@@ -101,7 +102,7 @@ const KPProfileBadge = ({
             alt={linkedFarcaster ? "Farcaster" : "Twitter"}
             width={200}
             height={200}
-            quality={100}
+            quality={80}
             className={classNames(
               "size-5 lg:size-7 object-cover rounded-full",
               {
@@ -110,6 +111,9 @@ const KPProfileBadge = ({
             )}
           />
         </div>
+        {variant === "primary" && (
+          <DropdownIcon className="size-4 md:size-5 lg:size-6 text-black" />
+        )}
       </div>
 
       {/* Dropdown for primary variant */}

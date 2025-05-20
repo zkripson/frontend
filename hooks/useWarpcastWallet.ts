@@ -40,7 +40,7 @@ const useWarpcastWallet = () => {
           } catch (accountError) {
             // Fall back to eth_accounts
             try {
-              const accounts = await ethProvider.request({
+              const accounts = await ethProvider?.request({
                 method: "eth_accounts",
               });
 

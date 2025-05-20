@@ -137,6 +137,21 @@ export const sounds = {
     typeof window !== "undefined"
       ? new Howl({ src: ["/sounds/waiting_voiceover.mp3"], volume: 0.7 })
       : undefined,
+  game_draw_restart_voiceover:
+    typeof window !== "undefined"
+      ? new Howl({
+          src: ["/sounds/game_draw_restart_voiceover.mp3"],
+          volume: 0.7,
+        })
+      : undefined,
+  you_lost_voiceover:
+    typeof window !== "undefined"
+      ? new Howl({ src: ["/sounds/you_lost_voiceover.mp3"], volume: 0.7 })
+      : undefined,
+  you_won_voiceover:
+    typeof window !== "undefined"
+      ? new Howl({ src: ["/sounds/you_won_voiceover.mp3"], volume: 0.7 })
+      : undefined,
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({

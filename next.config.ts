@@ -95,6 +95,8 @@ const nextConfig: NextConfig = {
         hostname: "abs.twimg.com",
       },
     ],
+
+    formats: ["image/avif", "image/webp"],
   },
   headers: async () => {
     return [

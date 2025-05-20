@@ -1,11 +1,16 @@
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useAppActions from "@/store/app/actions";
-import { KPProfileBadge, KPTimer, KPIconButton } from "@/components";
+import {
+  KPProfileBadge,
+  KPTimer,
+  KPIconButton,
+  KPClickAnimation,
+} from "@/components";
 import HowToPlay from "./how-to-play";
-import Turn from "./turn";
 import { useAudio } from "@/providers/AudioProvider";
 import { useEffect, useState } from "react";
 import { Howler } from "howler";
+import { ArrowIcon } from "@/public/icons";
 
 interface GameHeaderProps {
   mode: "setup" | "game";
@@ -14,6 +19,8 @@ interface GameHeaderProps {
   gameCode?: string;
   onTurnExpiry?: () => void;
   gameTimeRemaining?: number;
+  inventoryVisible: boolean;
+  setInventoryVisible: (boolean: boolean) => void;
 }
 
 export function GameHeader({
@@ -23,6 +30,8 @@ export function GameHeader({
   gameCode,
   onTurnExpiry,
   gameTimeRemaining,
+  inventoryVisible,
+  setInventoryVisible,
 }: GameHeaderProps) {
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
   const { showToast } = useAppActions();
@@ -87,11 +96,30 @@ export function GameHeader({
           balance={37.56}
         />
         <HowToPlay />
+
+        {mode !== "game" && (
+          <KPClickAnimation
+            onClick={() => setInventoryVisible(!inventoryVisible)}
+            className="flex bp1215:hidden items-center justify-center gap-3 bg-primary-450/25 border border-primary-50 rounded-full h-[25px] px-2 capitalize"
+          >
+            <span
+              style={{
+                display: "inline-block",
+                transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+                transform: inventoryVisible ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+            >
+              <ArrowIcon />
+            </span>
+            <span className="text-[12px] leading-none text-primary-50">
+              {inventoryVisible ? "hide" : "show"} inventory
+            </span>
+          </KPClickAnimation>
+        )}
       </div>
 
       <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-2 lg:gap-6 h-full pointer-events-auto">
         <div className="flex flex-col-reverse md:flex-row items-end md:items-center gap-2 lg:gap-3 pointer-events-auto">
-          {mode === "game" && <Turn yourTurn={yourTurn} />}
           <div className="flex items-center gap-2 lg:gap-3 pointer-events-auto">
             {mode === "game" && gameTimeRemaining !== 0 && (
               <KPTimer turnStartedAt={turnStartedAt} onExpire={onTurnExpiry} />

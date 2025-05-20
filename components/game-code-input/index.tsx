@@ -82,15 +82,45 @@ const KPGameCodeInput = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWallet?.address]);
 
+  const formatCodeWithHyphens = (raw: string) => {
+    // Remove all non-alphanumeric and uppercase
+    const cleaned = raw.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    // Format as XXX-XXX-XX or XXX-XXX-XXX
+    if (cleaned.length === 8) {
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(
+        6,
+        8
+      )}`;
+    } else if (cleaned.length === 9) {
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(
+        6,
+        9
+      )}`;
+    }
+    return cleaned;
+  };
+
   useEffect(() => {
-    const fetchInvite = async () => {
-      if (!code || !schema.safeParse({ code }).success) return;
+    const timer = setTimeout(async () => {
+      if (!code) return;
 
-      setCode?.(code);
-      await getInvitation(code);
-    };
+      // 1) Clean + uppercase
+      const cleaned = code.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+      // 2) Inject hyphens
+      const formatted = formatCodeWithHyphens(cleaned);
 
-    const timer = setTimeout(fetchInvite, 300);
+      // 3) Only proceed if the *formatted* string matches your schema
+      const parseResult = schema.safeParse({ code: formatted });
+      if (!parseResult.success) {
+        // you could clear out stale invitation here if you like
+        return;
+      }
+
+      // 4) push it up and fetch
+      setCode?.(formatted);
+      await getInvitation(formatted);
+    }, 300);
+
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
@@ -110,9 +140,10 @@ const KPGameCodeInput = ({
 
       <KPInput
         name="code"
-        placeholder="Enter invite code (e.g. NJ5-YNJ-5Y)"
+        placeholder="Enter invite code (e.g. NJ5YNJ5Y)"
         register={register("code", {
-          setValueAs: (value) => value?.toUpperCase(),
+          setValueAs: (value) =>
+            value?.replace(/[^A-Z0-9]/gi, "").toUpperCase(),
         })}
         error={!!errors.code}
         className="w-full"

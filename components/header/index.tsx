@@ -1,16 +1,24 @@
 "use client";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import classNames from "classnames";
+
+import KPIconButton from "../icon-button";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-import KPProfileBadge from "../profile-badge";
 import useBalance from "@/hooks/useBalance";
-import { useEffect } from "react";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
+import KPProfileBadge from "../profile-badge";
+import KPLevel from "../level";
 
 const KPHeader = () => {
   const { checkTokenBalance } = useBalance();
   const { pathname } = useSystemFunctions();
   const { linkedFarcaster, linkedTwitter, activeWallet } =
     usePrivyLinkedAccounts();
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
   const pfp =
@@ -25,16 +33,82 @@ const KPHeader = () => {
 
   return (
     <div className="layout-header-container">
-      <header className="fixed top-0 left-0 w-full z-20 px-[5vw] py-[1vh] flex justify-between items-center bg-material">
-        <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
-          BATTLESHIP GAME
-        </h1>
-
-        {showProfileBadge && (
-          <div className="shrink-0 w-fit">
-            <KPProfileBadge avatarUrl={pfp} username={username} />
-          </div>
+      <header
+        className={classNames(
+          "fixed top-0 left-0 w-full z-20 px-4 md:px-[5vw] bg-material py-2"
         )}
+      >
+        <div className="flex justify-between items-center w-full h-full relative">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/images/bship.png"
+              alt="Battleship Logo"
+              width={59}
+              height={59}
+              quality={100}
+              className="lg:size-[59px] md:size-[50px] size-[45px]"
+            />
+            <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
+              BATTLESHIP GAME
+            </h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            {/* Desktop: show menu */}
+            <div className="hidden md:flex items-center gap-4">
+              <a
+                href="https://metastablelabs.notion.site/How-to-Play-1f7716767cb480ae98d5f45877e033c6?pvs=4"
+                target="_blank"
+                className="text-[clamp(12px,5vw,14px)] text-primary-300 underline font-semibold"
+              >
+                Game rules
+              </a>
+              <KPLevel />
+              {showProfileBadge && (
+                <div className="shrink-0 w-fit">
+                  <KPProfileBadge avatarUrl={pfp} username={username} />
+                </div>
+              )}
+            </div>
+            {/* Mobile: show hamburger */}
+            <div className="md:hidden">
+              <KPIconButton
+                icon="ham"
+                onClick={() => setMobileMenuOpen((v) => !v)}
+                aria-label="Open menu"
+              />
+            </div>
+          </div>
+
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "fit-content", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                className="absolute top-[133%] right-0 left-0 bg-material shadow-lg z-30 flex flex-col items-center justify-center gap-4 px-4 md:hidden rounded-md"
+              >
+                <a
+                  href="https://metastablelabs.notion.site/How-to-Play-1f7716767cb480ae98d5f45877e033c6?pvs=4"
+                  target="_blank"
+                  className="text-[clamp(12px,5vw,14px)] text-primary-300 underline font-semibold mt-4"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Game rules
+                </a>
+                <div className="w-full mb-4">
+                  <KPLevel />
+                </div>
+                {showProfileBadge && (
+                  <div className="shrink-0 w-fit mb-4">
+                    <KPProfileBadge avatarUrl={pfp} username={username} />
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </header>
     </div>
   );

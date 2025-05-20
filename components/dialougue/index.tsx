@@ -6,6 +6,7 @@ import { BackIcon, CheckIcon } from "@/public/icons";
 import KPIconButton from "../icon-button";
 import KPClickAnimation from "../click-animation";
 import KPButton from "../button";
+import Points from "./points";
 
 const KPDialougue = ({
   children,
@@ -20,6 +21,7 @@ const KPDialougue = ({
   subtitle,
   ctaText,
   className,
+  showPoints,
 }: KPDialougueProps) => {
   return (
     <div
@@ -68,7 +70,7 @@ const KPDialougue = ({
           width={500}
           height={500}
           className="w-[426px] h-[212px] max-sm:w-[285px] max-sm:h-[142px] [@media(max-width:389px)]:w-[85%] rounded-lg mb-9 max-sm:mb-5"
-          quality={100}
+          quality={80}
           priority
         />
       )}
@@ -95,6 +97,7 @@ const KPDialougue = ({
           </div>
 
           {children}
+          {showPoints && <Points />}
         </div>
       </div>
 

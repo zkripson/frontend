@@ -15,7 +15,7 @@ const icons = {
       alt="farcaster"
       width={32}
       height={32}
-      quality={100}
+      quality={80}
       className="size-8 max-sm:size-[21.39px] object-cover rounded-md"
     />
   ),
@@ -25,7 +25,7 @@ const icons = {
       alt="farcaster"
       width={32}
       height={32}
-      quality={100}
+      quality={80}
       className="size-7 max-sm:size-[17.38px] object-cover rounded-md -mt-2"
     />
   ),
@@ -67,6 +67,7 @@ const KPButton = ({
       whileTap={{ scale: 0.95 }}
       className={classNames(
         `flex justify-center items-center border rounded-[4px] relative transition-opacity duration-500`,
+        className,
         {
           "w-full": fullWidth,
           "bg-primary-200 border-primary-300": variant === "primary",
@@ -76,8 +77,7 @@ const KPButton = ({
           "h-[38px]": isMachine && small,
           "opacity-0 pointer-events-none": hide,
           "opacity-50 pointer-events-none": disabled,
-        },
-        className
+        }
       )}
       disabled={disabled || loading}
       type={type}

@@ -44,10 +44,7 @@ const KPIconButton: React.FC<KPIconButtonProps> = ({
       onClick={onClick}
       title={icon.charAt(0).toUpperCase() + icon.slice(1)}
     >
-      <div
-        onClick={onClick}
-        className="bg-iconButton bg-contain bg-no-repeat size-12 lg:size-14 xl:size-16 flex items-center justify-center"
-      >
+      <div className="bg-iconButton bg-contain bg-no-repeat size-10 md:size-12 lg:size-14 xl:size-16 flex items-center justify-center">
         {icons(size)[icon]}
       </div>
     </KPClickAnimation>

@@ -19,6 +19,9 @@ import KPGameDetails from "./game-details";
 import KPGameCodeInput from "./game-code-input";
 import KPEasyDeposit from "./easy-deposit";
 import KPBalances from "./balances";
+import KPLevel from "./level";
+import KPTokenProgressCard from "./token-progress-card";
+import KPProgressClaimButton from "./progress-claim-button";
 
 export {
   KPDialougue,
@@ -42,4 +45,7 @@ export {
   KPGameCodeInput,
   KPEasyDeposit,
   KPBalances,
+  KPLevel,
+  KPTokenProgressCard,
+  KPProgressClaimButton,
 };
