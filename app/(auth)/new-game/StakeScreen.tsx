@@ -69,6 +69,12 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
 
   const onSubmit = async (amount: number) => {
     try {
+      if (hasInsufficientBalance) {
+        return showToast(
+          "Insufficient balance! Please fund your wallet",
+          "error"
+        );
+      }
       await approveTransfer(amount);
 
       setTimeout(() => {
@@ -107,7 +113,6 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
           loading: loadingInviteCreation,
         }}
         className="pt-[88px]"
-        showPoints
       >
         <div className="flex flex-col gap-6 w-full items-center">
           <h1 className="text-[26px] max-sm:text-[20px] leading-none text-primary-50 font-MachineStd mb-2">
