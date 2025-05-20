@@ -2,7 +2,11 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import classNames from "classnames";
-import { KPDialougue, KPTokenProgressCard } from "@/components";
+import {
+  KPDialougue,
+  KPSecondaryLoader,
+  KPTokenProgressCard,
+} from "@/components";
 import { GameOverPointsSummary } from "@/hooks/useGameWebSocket";
 
 const titles = {
@@ -38,6 +42,7 @@ interface VictoryStatusProps {
   show?: boolean;
   playerStats: PlayerStats;
   gameOverPointsSummary?: GameOverPointsSummary;
+  gameOverProcessing: boolean;
 }
 
 const VictoryStatus = ({
@@ -47,6 +52,7 @@ const VictoryStatus = ({
   show,
   playerStats,
   gameOverPointsSummary,
+  gameOverProcessing,
 }: VictoryStatusProps) => {
   // safe‑guard: if status isn't exactly "win" or "loss", fallback to "win"
   if (status !== "win" && status !== "loss" && status !== "draw") {
@@ -56,65 +62,42 @@ const VictoryStatus = ({
 
   const stats = formatStats(playerStats);
 
-  return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-[999999]"
-        >
-          <KPDialougue
-            // showKripsonImage
-            primaryCta={{
-              title: "Replay",
-              icon: "replay",
-              onClick: onPlayAgain,
-              iconPosition: "right",
-            }}
-            secondaryCta={{
-              title: "Back Home",
-              icon: "home",
-              variant: "tertiary",
-              onClick: onHome,
-            }}
-          >
-            <div className="flex flex-col gap-6 max-sm:gap-3">
-              <h1
-                className={classNames(
-                  "text-[62px] max-sm:text-[45px] leading-none font-MachineStd text-center",
-                  {
-                    "text-primary-1050": status === "win",
-                    "text-primary-1000": status === "loss",
-                    "text-primary-250/80": status === "draw",
-                  }
-                )}
-              >
-                {titles[status]}
-              </h1>
+  const items = [
+    <div key="main" className="flex flex-col gap-6 max-sm:gap-3">
+      <h1
+        className={classNames(
+          "text-[62px] max-sm:text-[45px] leading-none font-MachineStd text-center",
+          {
+            "text-primary-1050": status === "win",
+            "text-primary-1000": status === "loss",
+            "text-primary-250/80": status === "draw",
+          }
+        )}
+      >
+        {titles[status]}
+      </h1>
 
-              <div className="flex flex-col gap-2">
-                <h2 className="text-[32px] max-sm:text-[20px] leading-none font-MachineStd text-primary-50">
-                  stats
-                </h2>
+      <div className="flex flex-col gap-2">
+        <h2 className="text-[32px] max-sm:text-[20px] leading-none font-MachineStd text-primary-50">
+          stats
+        </h2>
 
-                <div className="flex flex-col gap-3 items-center justify-center">
-                  {stats.map(({ title, value }) => (
-                    <div
-                      key={title}
-                      className="flex items-center justify-center text-[12px] max-sm:text-[10.69px] leading-none text-primary-50"
-                    >
-                      <span>{title}:&nbsp;</span>
-                      <span className="font-bold">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <div className="flex flex-col gap-3 items-center justify-center">
+          {stats.map(({ title, value }) => (
+            <div
+              key={title}
+              className="flex items-center justify-center text-[12px] max-sm:text-[10.69px] leading-none text-primary-50"
+            >
+              <span>{title}:&nbsp;</span>
+              <span className="font-bold">{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
 
-              <KPTokenProgressCard earned={120} goal={1500} nextLevel={3} />
-              {/* Game Over Points Summary (only for win/loss, not draw) */}
-              {/* {gameOverPointsSummary &&
+      <KPTokenProgressCard earned={120} goal={1500} nextLevel={3} />
+      {/* Game Over Points Summary (only for win/loss, not draw) */}
+      {/* {gameOverPointsSummary &&
                 status !== "draw" &&
                 (() => {
                   // GameOverPointsSummary is a Record<string, { total: number; breakdown: Array<{ category: string; points: number; reason: string }> }>
@@ -158,7 +141,56 @@ const VictoryStatus = ({
                     </div>
                   );
                 })()} */}
-            </div>
+    </div>,
+    // Loading the game over
+    <div
+      key="loading"
+      className="flex flex-col gap-2 items-center justify-center"
+    >
+      <KPSecondaryLoader />
+
+      <span className="text-[clamp(12px,5vw,20px)] text-primary-300">
+        Processing Game Result...
+      </span>
+    </div>,
+  ];
+
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-[999999]"
+        >
+          <KPDialougue
+            // showKripsonImage
+            primaryCta={{
+              title: "Replay",
+              icon: "replay",
+              onClick: onPlayAgain,
+              iconPosition: "right",
+            }}
+            secondaryCta={{
+              title: "Back Home",
+              icon: "home",
+              variant: "tertiary",
+              onClick: onHome,
+            }}
+          >
+            <AnimatePresence>
+              <motion.div
+                key={gameOverProcessing ? "loading" : "main"}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center"
+              >
+                {items[+gameOverProcessing]}
+              </motion.div>
+            </AnimatePresence>
           </KPDialougue>
         </motion.div>
       )}

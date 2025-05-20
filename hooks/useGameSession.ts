@@ -14,6 +14,7 @@ import useGameWebSocket, {
   PointsAwardedMessage,
   PointsSummaryMessage,
   GameOverPointsSummary,
+  GameOverProcessingMessage,
 } from "@/hooks/useGameWebSocket";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
@@ -180,6 +181,8 @@ const useGameSession = (sessionId: string) => {
   const [drawAudioDone, setDrawAudioDone] = useState(false);
   const rematchResetTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  const [gameOverProcessing, setGameOverProcessing] = useState(false);
+
   // Helper to trigger the actual rematch reset
   const triggerRematchReset = useCallback(() => {
     setGameStateLocal((prev) => ({
@@ -266,12 +269,12 @@ const useGameSession = (sessionId: string) => {
         );
         setGameTimeRemaining((prev) => {
           if (prev === remaining) return prev;
-          if (remaining <= 0 && activeWallet?.address) {
-            clearInterval(timer);
-            gameActions.forfeitGame(ForfeitGameReason.TIMEOUT, {
-              onSuccess: () => console.log("Game forfeited due to timeout"),
-            });
-          }
+          // if (remaining <= 0 && activeWallet?.address) {
+          //   clearInterval(timer);
+          //   gameActions.forfeitGame(ForfeitGameReason.TIMEOUT, {
+          //     onSuccess: () => console.log("Game forfeited due to timeout"),
+          //   });
+          // }
           return remaining;
         });
       }, 1000);
@@ -540,6 +543,16 @@ const useGameSession = (sessionId: string) => {
       console.log("Turn changed due to timeout:", message);
     };
 
+    const handleGameOverProcessing = (data: GameOverProcessingMessage) => {
+      console.log("Game over processing:", data);
+      setGameOverProcessing(true);
+      setGameStateLocal((prev) => ({
+        ...prev,
+        gameStatus: "COMPLETED",
+        winner: data.winner,
+      }));
+    };
+
     // Handler for game over event
     const handleGameOver = (data: GameOverMessage) => {
       console.log("Game over:", data);
@@ -627,6 +640,8 @@ const useGameSession = (sessionId: string) => {
       });
 
       setGameOverPointsSummary(data.pointsSummary);
+
+      setGameOverProcessing(false);
     };
 
     // Handler for ship sunk event
@@ -723,6 +738,7 @@ const useGameSession = (sessionId: string) => {
     on.shot_fired(handleShotFired);
     on.turn_timeout(handleTurnTimeout);
     on.game_end_completed(handleGameOver);
+    on.game_end_processing(handleGameOverProcessing);
     on.draw_rematch(handleDrawRematch);
     on.rematch_ready(handleRematchReady);
     on.message("ship_sunk", handleShipSunk);
@@ -737,9 +753,10 @@ const useGameSession = (sessionId: string) => {
       off.board_submitted(handleBoardSubmitted);
       off.game_started(handleGameStarted);
       off.shot_fired(handleShotFired);
+      off.game_end_processing(handleGameOverProcessing);
       off.game_end_completed(handleGameOver);
-      on.draw_rematch(handleDrawRematch);
-      on.rematch_ready(handleRematchReady);
+      off.draw_rematch(handleDrawRematch);
+      off.rematch_ready(handleRematchReady);
       off.error(handleError);
       off.turn_timeout(handleTurnTimeout);
       off.message("ship_sunk", handleShipSunk);
@@ -1192,6 +1209,7 @@ const useGameSession = (sessionId: string) => {
     pointsAwarded,
     pointsSummary,
     gameOverPointsSummary,
+    gameOverProcessing,
   };
 };
 

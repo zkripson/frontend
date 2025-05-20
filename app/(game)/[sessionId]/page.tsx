@@ -55,6 +55,7 @@ const GameSession = () => {
     currentTurn,
     connectionError,
     gameOverPointsSummary,
+    gameOverProcessing,
   } = useGameSession(params.sessionId as string);
 
   return (
@@ -133,7 +134,8 @@ const GameSession = () => {
       )}
 
       <VictoryStatus
-        show={showVictory}
+        gameOverProcessing={gameOverProcessing}
+        show={showVictory || gameOverProcessing}
         status={victoryStatus}
         onPlayAgain={handlePlayAgain}
         onHome={handlePlayAgain}
