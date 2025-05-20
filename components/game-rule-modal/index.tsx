@@ -158,7 +158,7 @@ const KPGameRuleModal: React.FC = () => {
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">
                     How to Earn Points
                   </h3>
-                  <h4 className="font-medium mt-2">Game Participation</h4>
+                  <h4 className="font-semibold mt-2">Game Participation</h4>
                   <ul className="list-disc list-inside ml-4 space-y-1 text-sm sm:text-base">
                     <li>Playing Games: 50 points per completed game</li>
                     <li>Victory Bonus: +150 points for a win (200 total)</li>
@@ -169,20 +169,22 @@ const KPGameRuleModal: React.FC = () => {
                     <li>Quick Game: +25 points if game ends in &lt;25 moves</li>
                   </ul>
 
-                  <h4 className="font-medium mt-4">Strategic Play</h4>
+                  <h4 className="font-semibold mt-4">Strategic Play</h4>
                   <ul className="list-disc list-inside ml-4 space-y-1 text-sm sm:text-base">
                     <li>Shot Efficiency: +2 points per unused shot</li>
                     <li>First Blood: +15 points for first hit</li>
                     <li>Ship Destroyer: +30 points per ship destroyed</li>
                   </ul>
 
-                  <h4 className="font-medium mt-4">Daily & Weekly Activity</h4>
+                  <h4 className="font-semibold mt-4">
+                    Daily & Weekly Activity
+                  </h4>
                   <ul className="list-disc list-inside ml-4 space-y-1 text-sm sm:text-base">
                     <li>Daily Player: +25 points for first game each day</li>
                     <li>Weekly Commitment: +100 points for 5+ games/week</li>
                   </ul>
 
-                  <h4 className="font-medium mt-4">Referral Program</h4>
+                  <h4 className="font-semibold mt-4">Referral Program</h4>
                   <ul className="list-disc list-inside ml-4 space-y-1 text-sm sm:text-base">
                     <li>
                       New Player Referral: +100 points when invitee’s first game
