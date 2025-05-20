@@ -20,6 +20,7 @@ import useSystemFunctions from "@/hooks/useSystemFunctions";
 import useBalance from "@/hooks/useBalance";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useAppActions from "@/store/app/actions";
+import { setInvitation } from "@/store/invite";
 
 const schema = z.object({
   code: z
@@ -36,6 +37,7 @@ const KPGameCodeInput = ({
   const {
     inviteState: { invitation, invitationLoading, loadingInviteAcceptance },
     appState,
+    dispatch,
   } = useSystemFunctions();
   const { getInvitation } = useInviteActions();
   const { checkTokenBalance } = useBalance();
@@ -57,6 +59,24 @@ const KPGameCodeInput = ({
   const usdcBalance = Number(
     balances?.find((token) => token.symbol === "USDC")?.balance || 0
   );
+
+  const formatCodeWithHyphens = (raw: string) => {
+    // Remove all non-alphanumeric and uppercase
+    const cleaned = raw.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+    // Format as XXX-XXX-XX or XXX-XXX-XXX
+    if (cleaned.length === 8) {
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(
+        6,
+        8
+      )}`;
+    } else if (cleaned.length === 9) {
+      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(
+        6,
+        9
+      )}`;
+    }
+    return cleaned;
+  };
 
   useEffect(() => {
     if (invitation && invitation.stakeAmount) {
@@ -82,27 +102,9 @@ const KPGameCodeInput = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWallet?.address]);
 
-  const formatCodeWithHyphens = (raw: string) => {
-    // Remove all non-alphanumeric and uppercase
-    const cleaned = raw.replace(/[^A-Z0-9]/gi, "").toUpperCase();
-    // Format as XXX-XXX-XX or XXX-XXX-XXX
-    if (cleaned.length === 8) {
-      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(
-        6,
-        8
-      )}`;
-    } else if (cleaned.length === 9) {
-      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(
-        6,
-        9
-      )}`;
-    }
-    return cleaned;
-  };
-
   useEffect(() => {
     const timer = setTimeout(async () => {
-      if (!code) return;
+      if (!code) return dispatch(setInvitation(null));
 
       // 1) Clean + uppercase
       const cleaned = code.replace(/[^A-Z0-9]/gi, "").toUpperCase();
@@ -112,8 +114,7 @@ const KPGameCodeInput = ({
       // 3) Only proceed if the *formatted* string matches your schema
       const parseResult = schema.safeParse({ code: formatted });
       if (!parseResult.success) {
-        // you could clear out stale invitation here if you like
-        return;
+        return dispatch(setInvitation(null));
       }
 
       // 4) push it up and fetch

@@ -19,6 +19,7 @@ import {
   StarIcon,
 } from "@/public/icons";
 import Points from "@/components/dialougue/points";
+import { setInvitation } from "@/store/invite";
 
 const SelectGameScreen = ({
   nextScreen,
@@ -29,6 +30,7 @@ const SelectGameScreen = ({
 }) => {
   const {
     inviteState: { loadingInviteAcceptance, invitation, invitationLoading },
+    dispatch,
   } = useSystemFunctions();
   const { acceptBettingInvite } = useInviteActions();
   const { approveTransfer } = useWithdrawal();
@@ -58,7 +60,10 @@ const SelectGameScreen = ({
       id: "join",
       name: "Join a Game",
       description: "Enter an invite code to join",
-      action: () => setJoining(true),
+      action: () => {
+        dispatch(setInvitation(null));
+        setJoining(true);
+      },
       disabled: false,
     },
     {
@@ -119,7 +124,7 @@ const SelectGameScreen = ({
         disabled: !canAccept || loadingInviteAcceptance,
         hide: !isJoining,
       }}
-      showPoints
+      showPoints={!isJoining}
       className="pt-[88px]"
     >
       <div className="flex flex-col items-center gap-16 max-sm:gap-7 self-stretch w-full">
