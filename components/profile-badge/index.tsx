@@ -45,9 +45,9 @@ const KPProfileBadge = ({
     {
       title: "Log out",
       fullWidth: true,
-      onClick: () => {
-        logout();
-        navigate.push("/");
+      onClick: async () => {
+        await logout();
+        window.location.href = "/";
       },
       variant: "secondary",
     },

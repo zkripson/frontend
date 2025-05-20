@@ -12,12 +12,14 @@ import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
 import KPProfileBadge from "../profile-badge";
 import KPLevel from "../level";
 import KPGameRuleModal from "../game-rule-modal";
+import { usePlayerActions } from "@/store/player/actions";
 
 const KPHeader = () => {
   const { checkTokenBalance } = useBalance();
   const { pathname } = useSystemFunctions();
   const { linkedFarcaster, linkedTwitter, activeWallet } =
     usePrivyLinkedAccounts();
+  const { getPlayerRewards } = usePlayerActions();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -29,6 +31,8 @@ const KPHeader = () => {
   useEffect(() => {
     checkTokenBalance(TOKEN_ADDRESSES.USDC);
     checkTokenBalance(TOKEN_ADDRESSES.SHIP);
+
+    getPlayerRewards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWallet?.address]);
 

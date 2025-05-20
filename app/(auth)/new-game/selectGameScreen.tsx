@@ -31,6 +31,7 @@ const SelectGameScreen = ({
   const {
     inviteState: { loadingInviteAcceptance, invitation, invitationLoading },
     dispatch,
+    playerState: { playerRewards },
   } = useSystemFunctions();
   const { acceptBettingInvite } = useInviteActions();
   const { approveTransfer } = useWithdrawal();
@@ -66,14 +67,14 @@ const SelectGameScreen = ({
       },
       disabled: false,
     },
-    {
-      id: "quick",
-      name: "Quick Match",
-      description: "Get matched with random players",
-      action: () => {},
-      disabled: true,
-      status: "coming soon",
-    },
+    // {
+    //   id: "quick",
+    //   name: "Quick Match",
+    //   description: "Get matched with random players",
+    //   action: () => {},
+    //   disabled: true,
+    //   status: "coming soon",
+    // },
   ];
 
   const selects = [
@@ -87,7 +88,7 @@ const SelectGameScreen = ({
           key={game.id}
           onClick={() => {
             audio.play("place");
-            if (!game.status && game.action) {
+            if (game.action) {
               game.action();
             }
           }}

@@ -3,6 +3,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import appReducer from "./app";
 import gameReducer from "./game";
 import inviteReducer from "./invite";
+import playerReducer from "./player";
 
 export interface CallbackProps {
   onSuccess?: Function;
@@ -14,6 +15,7 @@ export const store = configureStore({
     app: appReducer,
     game: gameReducer,
     invite: inviteReducer,
+    player: playerReducer,
   },
 });
 
