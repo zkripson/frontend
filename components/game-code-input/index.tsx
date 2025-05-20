@@ -101,15 +101,26 @@ const KPGameCodeInput = ({
   };
 
   useEffect(() => {
-    const fetchInvite = async () => {
-      if (!code || !schema.safeParse({ code }).success) return;
-      // Format code with hyphens before submitting
-      const formattedCode = formatCodeWithHyphens(code);
-      setCode?.(formattedCode);
-      await getInvitation(formattedCode);
-    };
+    const timer = setTimeout(async () => {
+      if (!code) return;
 
-    const timer = setTimeout(fetchInvite, 300);
+      // 1) Clean + uppercase
+      const cleaned = code.replace(/[^A-Z0-9]/gi, "").toUpperCase();
+      // 2) Inject hyphens
+      const formatted = formatCodeWithHyphens(cleaned);
+
+      // 3) Only proceed if the *formatted* string matches your schema
+      const parseResult = schema.safeParse({ code: formatted });
+      if (!parseResult.success) {
+        // you could clear out stale invitation here if you like
+        return;
+      }
+
+      // 4) push it up and fetch
+      setCode?.(formatted);
+      await getInvitation(formatted);
+    }, 300);
+
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code]);
