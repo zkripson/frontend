@@ -59,8 +59,8 @@ const GameSession = () => {
 
   return (
     <div className="relative flex items-center justify-center flex-1">
-      <LoadingOverlay loading={!loadingDone} loadingMessages={messages} />
-
+      <LoadingOverlay loading={true} loadingMessages={messages} />
+      {/* 
       {loadingDone && (
         <motion.div
           key="game"
@@ -148,7 +148,7 @@ const GameSession = () => {
           }
         }
         gameOverPointsSummary={gameOverPointsSummary}
-      />
+      /> */}
     </div>
   );
 };
