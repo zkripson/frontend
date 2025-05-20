@@ -145,63 +145,63 @@ const KPGameRuleModal: React.FC = () => {
                   </h2>
 
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">
-                    What are Battleship Rebbons?
+                    What are Battleship Ribbons?
                   </h3>
                   <p className="text-sm sm:text-base mb-4">
-                    Battleship Rebbons are your gateway to rewards in the
+                    Battleship Ribbons are your gateway to rewards in the
                     Battleship ecosystem. They accrue for playing games, winning
-                    matches, and growing our community. Each week, Rebbons can
+                    matches, and growing our community. Each week, Ribbons can
                     be converted into $SHIP tokens, unlocking special features
                     and perks.
                   </p>
 
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">
-                    How to Earn Rebbons
+                    How to Earn Ribbons
                   </h3>
                   <h4 className="font-semibold mt-2">Game Participation</h4>
                   <ul className="list-disc list-inside ml-4 space-y-1 text-sm sm:text-base">
-                    <li>Playing Games: 50 Rebbons per completed game</li>
-                    <li>Victory Bonus: +150 Rebbons for a win (200 total)</li>
+                    <li>Playing Games: 50 Ribbons per completed game</li>
+                    <li>Victory Bonus: +150 Ribbons for a win (200 total)</li>
                     <li>
-                      Win Streak: +20 Rebbons per consecutive win (resets on
+                      Win Streak: +20 Ribbons per consecutive win (resets on
                       loss)
                     </li>
                     <li>
-                      Quick Game: +25 Rebbons if game ends in &lt;25 moves
+                      Quick Game: +25 Ribbons if game ends in &lt;25 moves
                     </li>
                   </ul>
 
                   <h4 className="font-semibold mt-4">Strategic Play</h4>
                   <ul className="list-disc list-inside ml-4 space-y-1 text-sm sm:text-base">
-                    <li>Shot Efficiency: +2 Rebbons per unused shot</li>
-                    <li>First Blood: +15 Rebbons for first hit</li>
-                    <li>Ship Destroyer: +30 Rebbons per ship destroyed</li>
+                    <li>Shot Efficiency: +2 Ribbons per unused shot</li>
+                    <li>First Blood: +15 Ribbons for first hit</li>
+                    <li>Ship Destroyer: +30 Ribbons per ship destroyed</li>
                   </ul>
 
                   <h4 className="font-semibold mt-4">
                     Daily & Weekly Activity
                   </h4>
                   <ul className="list-disc list-inside ml-4 space-y-1 text-sm sm:text-base">
-                    <li>Daily Player: +25 Rebbons for first game each day</li>
-                    <li>Weekly Commitment: +100 Rebbons for 5+ games/week</li>
+                    <li>Daily Player: +25 Ribbons for first game each day</li>
+                    <li>Weekly Commitment: +100 Ribbons for 5+ games/week</li>
                   </ul>
 
                   <h4 className="font-semibold mt-4">Referral Program</h4>
                   <ul className="list-disc list-inside ml-4 space-y-1 text-sm sm:text-base">
                     <li>
-                      New Player Referral: +100 Rebbons when invitee’s first
+                      New Player Referral: +100 Ribbons when invitee’s first
                       game completes
                     </li>
                     <li>
-                      Referral Game Bonus: +10 Rebbons per game your referrals
+                      Referral Game Bonus: +10 Ribbons per game your referrals
                       play
                     </li>
                     <li>
-                      Referral Commission: 10% of all Rebbons your referrals
+                      Referral Commission: 10% of all Ribbons your referrals
                       earn
                     </li>
                     <li>
-                      Multi-level Referrals: +5 Rebbons when your referrals
+                      Multi-level Referrals: +5 Ribbons when your referrals
                       bring in new players
                     </li>
                   </ul>
@@ -212,7 +212,7 @@ const KPGameRuleModal: React.FC = () => {
                   <ul className="list-decimal list-inside ml-4 space-y-1 text-sm sm:text-base">
                     <li>Snapshot: Mondays at 11:59 PM UTC</li>
                     <li>Claim Window: Tuesdays at 4:20 PM UTC</li>
-                    <li>Minimum 100 Rebbons required</li>
+                    <li>Minimum 100 Ribbons required</li>
                     <li>14-day claim period before expiration</li>
                   </ul>
                 </section>

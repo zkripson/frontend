@@ -95,7 +95,7 @@ const RewardsScreen = () => {
       ),
     },
     {
-      title: "Referral Rebbons",
+      title: "Referral Ribbons",
       description:
         Number(data?.referralPoints?.earned || 0)?.toLocaleString() || "0",
     },
