@@ -82,7 +82,7 @@ export type GameOverPointsSummary = Record<
 >;
 
 export interface GameOverMessage extends WebSocketMessage {
-  type: "game_over";
+  type: "game_end_completed";
   status: string;
   winner: string;
   reason: "COMPLETED" | "FORFEIT" | "TIMEOUT";
@@ -250,9 +250,12 @@ export function useGameWebSocket(sessionId: string) {
         wsServiceRef.current.on("shot_result", handler as (data: any) => void);
       }
     },
-    game_over: (handler: (data: GameOverMessage) => void) => {
+    game_end_completed: (handler: (data: GameOverMessage) => void) => {
       if (wsServiceRef.current) {
-        wsServiceRef.current.on("game_over", handler as (data: any) => void);
+        wsServiceRef.current.on(
+          "game_end_completed",
+          handler as (data: any) => void
+        );
       }
     },
     turn_timeout: (handler: (data: TurnTimeoutMessage) => void) => {
@@ -369,9 +372,12 @@ export function useGameWebSocket(sessionId: string) {
         );
       }
     },
-    game_over: (handler: (data: GameOverMessage) => void) => {
+    game_end_completed: (handler: (data: GameOverMessage) => void) => {
       if (wsServiceRef.current) {
-        wsServiceRef.current.off("game_over", handler as (data: any) => void);
+        wsServiceRef.current.off(
+          "game_end_completed",
+          handler as (data: any) => void
+        );
       }
     },
     points_awarded: (handler: (data: PointsAwardedMessage) => void) => {

@@ -722,7 +722,7 @@ const useGameSession = (sessionId: string) => {
     on.game_started(handleGameStarted);
     on.shot_fired(handleShotFired);
     on.turn_timeout(handleTurnTimeout);
-    on.game_over(handleGameOver);
+    on.game_end_completed(handleGameOver);
     on.draw_rematch(handleDrawRematch);
     on.rematch_ready(handleRematchReady);
     on.message("ship_sunk", handleShipSunk);
@@ -737,7 +737,7 @@ const useGameSession = (sessionId: string) => {
       off.board_submitted(handleBoardSubmitted);
       off.game_started(handleGameStarted);
       off.shot_fired(handleShotFired);
-      off.game_over(handleGameOver);
+      off.game_end_completed(handleGameOver);
       on.draw_rematch(handleDrawRematch);
       on.rematch_ready(handleRematchReady);
       off.error(handleError);
