@@ -81,6 +81,16 @@ export type GameOverPointsSummary = Record<
   }
 >;
 
+export interface GameOverProcessingMessage extends WebSocketMessage {
+  type: "game_end_processing";
+  status: "processing";
+  winner: string;
+  reason: string;
+  message: string;
+  isBettingGame: boolean;
+  timestamp: number;
+}
+
 export interface GameOverMessage extends WebSocketMessage {
   type: "game_end_completed";
   status: string;
@@ -250,6 +260,16 @@ export function useGameWebSocket(sessionId: string) {
         wsServiceRef.current.on("shot_result", handler as (data: any) => void);
       }
     },
+    game_end_processing: (
+      handler: (data: GameOverProcessingMessage) => void
+    ) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.on(
+          "game_end_processing",
+          handler as (data: any) => void
+        );
+      }
+    },
     game_end_completed: (handler: (data: GameOverMessage) => void) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.on(
@@ -372,6 +392,16 @@ export function useGameWebSocket(sessionId: string) {
         );
       }
     },
+    game_end_processing: (
+      handler: (data: GameOverProcessingMessage) => void
+    ) => {
+      if (wsServiceRef.current) {
+        wsServiceRef.current.off(
+          "game_end_processing",
+          handler as (data: any) => void
+        );
+      }
+    },
     game_end_completed: (handler: (data: GameOverMessage) => void) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.off(
@@ -398,13 +428,13 @@ export function useGameWebSocket(sessionId: string) {
       }
     },
 
-    draw_rematch: (handler: (data: TurnTimeoutMessage) => void) => {
+    draw_rematch: (handler: (data: DrawRematch) => void) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.on("draw_rematch", handler as (data: any) => void);
       }
     },
 
-    rematch_ready: (handler: (data: TurnTimeoutMessage) => void) => {
+    rematch_ready: (handler: (data: RematchReady) => void) => {
       if (wsServiceRef.current) {
         wsServiceRef.current.on(
           "rematch_ready",
