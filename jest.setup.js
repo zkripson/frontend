@@ -101,3 +101,31 @@ global.Audio = jest.fn(() => ({
   duration: 0,
   paused: true,
 }));
+
+// Mock WebSocket globally
+global.WebSocket = jest.fn(() => ({
+  close: jest.fn(),
+  send: jest.fn(),
+  readyState: 1, // WebSocket.OPEN
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  onopen: null,
+  onclose: null,
+  onmessage: null,
+  onerror: null,
+}));
+
+// Mock Farcaster Frame SDK
+jest.mock('@farcaster/frame-sdk', () => ({
+  sdk: {
+    context: {
+      frameData: null,
+      user: null,
+    },
+    actions: {
+      ready: jest.fn(),
+      close: jest.fn(),
+      openUrl: jest.fn(),
+    },
+  },
+}));
