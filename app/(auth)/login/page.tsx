@@ -40,7 +40,7 @@ const Social = () => {
   useEffect(() => {
     if (stage === "setup") {
       const timer = setTimeout(() => {
-        navigate.push("/new-game");
+        navigate.replace("/");
       }, 10000);
       return () => clearTimeout(timer);
     }

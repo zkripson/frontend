@@ -2,23 +2,11 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import classNames from "classnames";
 
-import {
-  KPClickAnimation,
-  KPDialougue,
-  KPGameCodeInput,
-  KPGameTypeCard,
-} from "@/components";
+import { KPDialougue, KPGameCodeInput, KPGameTypeCard } from "@/components";
 import useInviteActions from "@/store/invite/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import { useAudio } from "@/providers/AudioProvider";
 import useWithdrawal from "@/hooks/useWithdrawal";
-import {
-  ArrowRightAltIcon,
-  ArrowRightIcon,
-  CloseIcon,
-  StarIcon,
-} from "@/public/icons";
-import Points from "@/components/dialougue/points";
 import { setInvitation } from "@/store/invite";
 
 const SelectGameScreen = ({
@@ -31,7 +19,6 @@ const SelectGameScreen = ({
   const {
     inviteState: { loadingInviteAcceptance, invitation, invitationLoading },
     dispatch,
-    playerState: { playerRewards },
   } = useSystemFunctions();
   const { acceptBettingInvite } = useInviteActions();
   const { approveTransfer } = useWithdrawal();

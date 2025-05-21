@@ -1002,7 +1002,7 @@ const useGameSession = (sessionId: string) => {
     : isWinner
     ? "win"
     : "loss";
-  const handlePlayAgain = () => navigate.push("/new-game");
+  const handlePlayAgain = () => navigate.replace("/");
 
   const updateShipPosition = (id: string, pos: { x: number; y: number }) => {
     setGameStateLocal((prev) => ({

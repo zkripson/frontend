@@ -23,6 +23,7 @@ const KPProfileBadge = ({
     navigate,
   } = useSystemFunctions();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const isTwitter = !!linkedTwitter && !linkedFarcaster;
   const iconSrc = linkedFarcaster
@@ -46,8 +47,9 @@ const KPProfileBadge = ({
       title: "Log out",
       fullWidth: true,
       onClick: async () => {
+        setLoggingOut(true);
         await logout();
-        window.location.href = "/";
+        window.location.href = "/login";
       },
       variant: "secondary",
     },
@@ -159,6 +161,7 @@ const KPProfileBadge = ({
                       }}
                       isMachine
                       small
+                      loading={action.title === "Log out" && loggingOut}
                     />
                   ))}
                 </div>
