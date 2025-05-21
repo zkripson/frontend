@@ -12,7 +12,7 @@
     "postbuild": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
-    "@farcaster/frame-sdk": "^0.0.37",
+    "@farcaster/frame-sdk": "^0.0.48",
     "@hookform/resolvers": "^5.0.1",
     "@privy-io/react-auth": "^2.11.1",
     "@privy-io/wagmi": "^1.0.3",

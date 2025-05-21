@@ -7,12 +7,19 @@
   "frame": {
     "version": "1",
     "name": "Battleship",
-    "iconUrl": "https://app.bship.fun/game-logo.jpg",
+    "subtitle": "Command Your Fleet to Victory",
+    "description": "Turn strategy into league domination with classic battleship Ranking rewards",
+    "iconUrl": "https://app.bship.fun/logo-white.png",
     "homeUrl": "https://app.bship.fun",
     "imageUrl": "https://app.bship.fun/game-preview-bg.png",
     "buttonTitle": "Play Now",
-    "splashImageUrl": "https://app.bship.fun/game-preview-bg.png",
+    "splashImageUrl": "https://app.bship.fun/logo.png",
     "splashBackgroundColor": "#20262D",
-    "webhookUrl": "https://app.bship.fun/api/webhook"
+    "webhookUrl": "https://app.bship.fun/api/webhook",
+    "primaryCategory": "games",
+    "tags": ["battleship", "rewards", "leaderboard", "warpcast", "earn"],
+    "ogTitle": "Battleship",
+    "ogDescription": "Turn strategy into league domination with classic battleship Ranking rewards",
+    "ogImageUrl": "https://app.bship.fun/game-preview-bg.png"
   }
 }

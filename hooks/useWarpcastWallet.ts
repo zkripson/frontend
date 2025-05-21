@@ -1,5 +1,6 @@
 import FrameSDK from "@farcaster/frame-sdk";
 import { useState, useEffect } from "react";
+import type * as Provider from "ox/Provider";
 
 // Define a generic EIP-1193 Ethereum Provider type
 type EthereumRequest = {
@@ -17,7 +18,7 @@ type EthereumProvider = {
 };
 
 const useWarpcastWallet = () => {
-  const [provider, setProvider] = useState<EthereumProvider | null>(null);
+  const [provider, setProvider] = useState<Provider.Provider | null>(null);
   const [address, setAddress] = useState<`0x${string}` | null>(null);
 
   useEffect(() => {
@@ -26,7 +27,10 @@ const useWarpcastWallet = () => {
         // Check if we're in a Frame and SDK is available
         if (FrameSDK.wallet && FrameSDK.wallet.ethProvider) {
           // Cast to our provider type
-          const ethProvider = FrameSDK.wallet.ethProvider as EthereumProvider;
+          const ethProvider = await FrameSDK.wallet.getEthereumProvider();
+
+          if (!ethProvider) return;
+
           setProvider(ethProvider);
 
           try {

@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import FrameSDK from "@farcaster/frame-sdk";
+import { sdk } from "@farcaster/frame-sdk";
 import { useLoginToFrame } from "@privy-io/react-auth/farcaster";
 import { usePrivy } from "@privy-io/react-auth";
 
@@ -21,7 +21,7 @@ const useConnectToFarcaster = () => {
 
       const { nonce } = await initLoginToFrame();
 
-      const result = await FrameSDK.actions.signIn({ nonce: nonce });
+      const result = await sdk.actions.signIn({ nonce: nonce });
 
       await loginToFrame({
         message: result.message,
@@ -34,29 +34,15 @@ const useConnectToFarcaster = () => {
 
   // Detect if app is loaded in a Farcaster frame
   useEffect(() => {
-    const detectFrameEnvironment = () => {
-      if (typeof window !== "undefined") {
-        const userAgent = window.navigator.userAgent.toLowerCase();
-        const searchParams = new URLSearchParams(window.location.search);
+    const detectFrameEnvironment = async () => {
+      const isMiniApp = await sdk.isInMiniApp();
 
-        const isInFrame =
-          searchParams.has("fc") ||
-          searchParams.has("fc-frame") ||
-          window.location.href.includes("fc-frame") ||
-          document.referrer.includes("farcaster") ||
-          document.referrer.includes("warpcast") ||
-          window !== window.parent ||
-          userAgent.includes("farcaster") ||
-          userAgent.includes("warpcast");
+      setIsFrameLoaded(isMiniApp);
 
-        setIsFrameLoaded(isInFrame);
-
-        // We can also log this for debugging
-        if (isInFrame) {
-          setTimeout(() => {
-            FrameSDK.actions.addFrame();
-          }, 15000);
-        }
+      if (isMiniApp) {
+        setTimeout(() => {
+          sdk.actions.addMiniApp();
+        }, 15000);
       }
     };
 
@@ -66,15 +52,15 @@ const useConnectToFarcaster = () => {
   useEffect(
     function initFrameSDK() {
       const load = async () => {
-        const user = await FrameSDK.context;
+        const user = await sdk.context;
 
         if (user?.user) {
           dispatch(setFarcasterContext(user.user));
         }
-        FrameSDK.actions.ready();
+        sdk.actions.ready();
       };
 
-      if (FrameSDK && !isSDKLoaded) {
+      if (sdk && !isSDKLoaded) {
         setIsSDKLoaded(true);
         load();
       }
