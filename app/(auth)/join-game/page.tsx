@@ -34,6 +34,7 @@ const JoinGameComponent = () => {
   } = useSystemFunctions();
   const [error, setError] = useState<string | null>(null);
   const [canAccept, setCanAccept] = useState(false);
+  const [approvingTransfer, setApprovingTransfer] = useState(false);
 
   const code = searchParams.get("code");
 
@@ -41,10 +42,13 @@ const JoinGameComponent = () => {
     if (!code || !invitation?.stakeAmount) return;
 
     try {
+      setApprovingTransfer(true);
       await approveTransfer(Number(invitation?.stakeAmount));
       await acceptBettingInvite(code);
     } catch (err) {
       setError("Failed to join the game. Please try again later.");
+    } finally {
+      setApprovingTransfer(false);
     }
   };
 
@@ -103,8 +107,9 @@ const JoinGameComponent = () => {
           onClick: handleAcceptInvite,
           icon: "arrow",
           iconPosition: "right",
-          loading: loadingInviteAcceptance || invitationLoading,
-          disabled: loadingInviteAcceptance || !canAccept,
+          loading:
+            loadingInviteAcceptance || invitationLoading || approvingTransfer,
+          disabled: loadingInviteAcceptance || !canAccept || approvingTransfer,
         }}
       >
         <div className="flex flex-col items-center gap-3 self-stretch w-full mt-5">

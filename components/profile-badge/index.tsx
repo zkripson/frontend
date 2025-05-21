@@ -157,7 +157,9 @@ const KPProfileBadge = ({
                       className="w-full h-[38px]"
                       onClick={() => {
                         action?.onClick?.();
-                        setDropdownOpen(false);
+                        if (action.title !== "Log out") {
+                          setDropdownOpen(false);
+                        }
                       }}
                       isMachine
                       small

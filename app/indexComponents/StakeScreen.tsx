@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -43,6 +43,8 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
   const { approveTransfer } = useWithdrawal();
   const { balances, loadingBalance } = appState;
 
+  const [approvingTransfer, setApprovingTransfer] = useState(false);
+
   const {
     register: registerStake,
     handleSubmit,
@@ -75,6 +77,7 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
           "error"
         );
       }
+      setApprovingTransfer(true);
       await approveTransfer(amount);
 
       setTimeout(() => {
@@ -83,6 +86,8 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
       }, 500);
     } catch (error) {
       showToast("Failed to stake", "error");
+    } finally {
+      setApprovingTransfer(false);
     }
   };
 
@@ -109,8 +114,8 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
           onClick: handleSubmit((data) => onSubmit(data.stake)),
           icon: "arrow",
           iconPosition: "right",
-          disabled: disableNextButton,
-          loading: loadingInviteCreation,
+          disabled: disableNextButton || approvingTransfer,
+          loading: loadingInviteCreation || approvingTransfer,
         }}
         className="pt-[88px]"
       >
@@ -128,6 +133,7 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
                 className="flex-1"
                 type="number"
                 isUSDC
+                disabled={approvingTransfer}
               />
               <KPButton
                 isMachine
@@ -135,6 +141,7 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
                 title="---"
                 onClick={handleMinus}
                 className="min-w-8 min-h-8 sm:min-w-[55px] sm:min-h-[52px]"
+                disabled={approvingTransfer}
               />
               <KPButton
                 isMachine
@@ -142,6 +149,7 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
                 title="+"
                 onClick={handlePlus}
                 className="min-w-8 min-h-8 sm:min-w-[55px] sm:min-h-[52px]"
+                disabled={approvingTransfer}
               />
             </div>
 
