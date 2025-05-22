@@ -23,6 +23,7 @@ import KPLevel from "./level";
 import KPTokenProgressCard from "./token-progress-card";
 import KPProgressClaimButton from "./progress-claim-button";
 import KPGameRuleModal from "./game-rule-modal";
+import KPOngoingSessionsNotifier from "./session-notifier";
 
 export {
   KPDialougue,
@@ -50,4 +51,5 @@ export {
   KPTokenProgressCard,
   KPProgressClaimButton,
   KPGameRuleModal,
+  KPOngoingSessionsNotifier,
 };

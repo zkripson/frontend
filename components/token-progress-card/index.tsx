@@ -61,9 +61,9 @@ const KPTokenProgressCard = ({
         <div className="flex-grow sm:px-4 text-primary-300">
           <h3 className="text-sm font-medium">Tokens Earned</h3>
           <div className="mt-1 text-[clamp(14px,5vw,18px)] font-bold">
-            ${earned}{" "}
+            {earned}{" "}
             <span className="font-normal text-[clamp(10px,5vw,12px)]">
-              / ${goal}
+              / {goal}
             </span>
           </div>
           <p className="mt-1 text-[clamp(10px,5vw,12px)] text-primary-300">
