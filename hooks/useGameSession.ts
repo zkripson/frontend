@@ -118,7 +118,7 @@ interface Ship {
 const useGameSession = (sessionId: string) => {
   // --- HOOKS ---
   const { activeWallet } = usePrivyLinkedAccounts();
-  const { gameState, navigate } = useSystemFunctions();
+  const { gameState, navigate, playerState } = useSystemFunctions();
   const gameActions = useGameActions();
   const { getOpponentProfile } = usePlayerActions();
   const { messages, loadingDone } = useLoadingSequence(loadingMessages);
@@ -736,11 +736,11 @@ const useGameSession = (sessionId: string) => {
   useEffect(() => {
     const opponentAddress =
       gameStateLocal.players.find((p) => p !== activeWallet?.address) || "";
-    if (opponentAddress && gameStateLocal.gameStatus === "ACTIVE") {
+    if (opponentAddress && !playerState.opponentProfile) {
       getOpponentProfile(opponentAddress);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameStateLocal.players]);
+  }, [gameStateLocal.players, playerState.opponentProfile]);
 
   const canPlaceShip = (
     cells: { x: number; y: number }[],
