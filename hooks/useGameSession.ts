@@ -20,6 +20,7 @@ import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
 import { useAudio } from "@/providers/AudioProvider";
 import { useToggleInfo } from "@/hooks/useToggleInfo";
+import { usePlayerActions } from "@/store/player/actions";
 
 const loadingMessages: string[] = [
   "Creating opponent fleet...",
@@ -117,8 +118,9 @@ interface Ship {
 const useGameSession = (sessionId: string) => {
   // --- HOOKS ---
   const { activeWallet } = usePrivyLinkedAccounts();
-  const { gameState, navigate } = useSystemFunctions();
+  const { gameState, navigate, playerState } = useSystemFunctions();
   const gameActions = useGameActions();
+  const { getOpponentProfile } = usePlayerActions();
   const { messages, loadingDone } = useLoadingSequence(loadingMessages);
   const [generalMessage, setGeneralMessage] = useState<{
     key: any;
@@ -126,8 +128,10 @@ const useGameSession = (sessionId: string) => {
     shipName?: string;
   } | null>(null);
   // --- New State for Points Events ---
-  const [pointsAwarded, setPointsAwarded] =
-    useState<PointsAwardedMessage | null>(null);
+  const [pointsAwarded, setPointsAwarded] = useState<PointsAwardedMessage[]>(
+    []
+  );
+
   const [pointsSummary, setPointsSummary] =
     useState<PointsSummaryMessage | null>(null);
   const [gameStateLocal, setGameStateLocal] = useState<
@@ -556,91 +560,52 @@ const useGameSession = (sessionId: string) => {
     // Handler for game over event
     const handleGameOver = (data: GameOverMessage) => {
       console.log("Game over:", data);
-      const { winner, finalState } = data;
 
-      // Stop all timers
       clearTimers();
 
-      setGameStateLocal((prev) => {
-        const finalPlayerStats = { ...prev.playerStats };
+      // 2. Format finalState exactly as you received it
+      const formattedFinalState = {
+        shots: data.finalState.shots.map(({ player, x, y }) => ({
+          player,
+          x,
+          y,
+          isHit: false,
+          timestamp: data.timestamp,
+        })),
+        sunkShips: { ...data.finalState.sunkShips },
+        gameStartedAt: data.finalState.gameStartedAt,
+        gameEndedAt: data.finalState.gameEndedAt,
+        duration: data.finalState.duration,
+        isBettingGame: data.finalState.isBettingGame,
+      };
 
-        const patchedFinalState = {
-          shots: Array.isArray(finalState?.shots)
-            ? finalState.shots.map((shot) => ({
-                player: shot.player,
-                x: shot.x,
-                y: shot.y,
-                isHit: false,
-                timestamp: Date.now(),
-              }))
-            : [],
-          sunkShips:
-            typeof finalState?.sunkShips === "object" &&
-            finalState.sunkShips !== null
-              ? ({ ...finalState.sunkShips } as Record<string, number>)
-              : {},
-          gameStartedAt:
-            typeof finalState?.gameStartedAt === "number"
-              ? finalState.gameStartedAt
-              : prev.gameStartedAt || 0,
-          gameEndedAt:
-            typeof finalState?.gameEndedAt === "number"
-              ? finalState.gameEndedAt
-              : Date.now(),
-          duration:
-            typeof finalState?.gameEndedAt === "number" &&
-            typeof finalState?.gameStartedAt === "number"
-              ? Math.max(0, finalState.gameEndedAt - finalState.gameStartedAt)
-              : 0,
-          isBettingGame: false,
-        };
+      // 3. Take playerStats straight from the payload
+      const formattedPlayerStats: GameState["playerStats"] = {
+        ...data.playerStats,
+      };
 
-        Object.keys(finalPlayerStats).forEach((address) => {
-          if (finalPlayerStats[address]) {
-            const totalTurnTime =
-              (patchedFinalState.gameEndedAt -
-                patchedFinalState.gameStartedAt) /
-              1000;
-            const averageTurnTime = Math.round(
-              totalTurnTime / (finalPlayerStats[address].shotsCount || 1)
-            );
+      // 4. Play the appropriate sound
+      if (!data.winner) {
+        audio?.play("game_draw_restart_voiceover");
+      } else if (data.winner === activeWallet?.address) {
+        audio?.play("you_won_voiceover");
+      } else {
+        audio?.play("you_lost_voiceover");
+      }
 
-            finalPlayerStats[address] = {
-              ...finalPlayerStats[address],
-              shipsSunk: patchedFinalState.sunkShips[address] || 0,
-              accuracy:
-                finalPlayerStats[address].shotsCount > 0
-                  ? Math.round(
-                      (finalPlayerStats[address].hitsCount /
-                        finalPlayerStats[address].shotsCount) *
-                        100
-                    )
-                  : 0,
-              avgTurnTime: averageTurnTime || 0,
-            };
-          }
-        });
+      // 5. Commit everything to local state
+      setGameStateLocal((prev) => ({
+        ...prev,
+        gameStatus: "COMPLETED",
+        winner: data.winner,
+        finalState: formattedFinalState,
+        playerStats: formattedPlayerStats,
+      }));
 
-        // Play winner/loser/draw sound
-        if (!winner) {
-          if (audio) audio.play("game_draw_restart_voiceover");
-        } else if (winner === activeWallet?.address) {
-          if (audio) audio.play("you_won_voiceover");
-        } else {
-          if (audio) audio.play("you_lost_voiceover");
-        }
-
-        return {
-          ...prev,
-          gameStatus: "COMPLETED",
-          winner: winner || null,
-          finalState: patchedFinalState,
-          playerStats: finalPlayerStats,
-        };
-      });
-
+      // 6. Push through the server-computed points breakdown
       setGameOverPointsSummary(data.pointsSummary);
 
+      // 7. Done processing
       setGameOverProcessing(false);
     };
 
@@ -722,7 +687,8 @@ const useGameSession = (sessionId: string) => {
 
     // Handler for points awarded event
     const handlePointsAwarded = (data: PointsAwardedMessage) => {
-      setPointsAwarded(data);
+      setPointsAwarded((prev) => [...prev, data]);
+      audio.play("coins");
     };
 
     // Handler for points summary event
@@ -765,6 +731,16 @@ const useGameSession = (sessionId: string) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, sessionId]);
+
+  // Fetch opponent's profile when opponent joins
+  useEffect(() => {
+    const opponentAddress =
+      gameStateLocal.players.find((p) => p !== activeWallet?.address) || "";
+    if (opponentAddress && !playerState.opponentProfile) {
+      getOpponentProfile(opponentAddress);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStateLocal.players, playerState.opponentProfile]);
 
   const canPlaceShip = (
     cells: { x: number; y: number }[],

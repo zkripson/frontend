@@ -89,7 +89,7 @@ const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
             onClick={onClick}
             isMachine
             fullWidth
-            disabled={!bettingCreation}
+            disabled={!bettingCreation || loadingInviteCreation}
           />
         ))}
       </div>

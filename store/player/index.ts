@@ -1,20 +1,21 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { 
-  PlayerProfile, 
-  OngoingSession, 
-  PlayerRewards, 
-  Leaderboard, 
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import {
+  PlayerProfile,
+  OngoingSession,
+  PlayerRewards,
+  Leaderboard,
   WeeklyLeaderboard,
   PointsDistribution,
   PointsStats,
-  PlayerPointsResponse
-} from './types';
+  PlayerPointsResponse,
+} from "./types";
 
 export interface PlayerState {
   // Profile data
   playerProfile: PlayerProfile | null;
+  opponentProfile: PlayerProfile | null;
   ongoingSessions: OngoingSession[];
-  
+
   // Rewards and points data
   playerRewards: PlayerRewards | null;
   playerPoints: PlayerPointsResponse | null;
@@ -22,11 +23,12 @@ export interface PlayerState {
   weeklyLeaderboard: WeeklyLeaderboard | null;
   pointsDistribution: PointsDistribution | null;
   pointsStats: PointsStats | null;
-  
+
   // Loading state flags
   loading: {
     createProfile: boolean;
     getProfile: boolean;
+    getOpponentProfile: boolean;
     updateProfile: boolean;
     getOngoingSessions: boolean;
     getPlayerRewards: boolean;
@@ -41,8 +43,9 @@ export interface PlayerState {
 const initialState: PlayerState = {
   // Profile data
   playerProfile: null,
+  opponentProfile: null,
   ongoingSessions: [],
-  
+
   // Rewards and points data
   playerRewards: null,
   playerPoints: null,
@@ -50,11 +53,12 @@ const initialState: PlayerState = {
   weeklyLeaderboard: null,
   pointsDistribution: null,
   pointsStats: null,
-  
+
   // Loading state flags
   loading: {
     createProfile: false,
     getProfile: false,
+    getOpponentProfile: false,
     updateProfile: false,
     getOngoingSessions: false,
     getPlayerRewards: false,
@@ -63,11 +67,11 @@ const initialState: PlayerState = {
     getWeeklyLeaderboard: false,
     getPointsDistribution: false,
     getPointsStats: false,
-  }
+  },
 };
 
 const playerSlice = createSlice({
-  name: 'player',
+  name: "player",
   initialState,
   reducers: {
     // Loading state actions
@@ -95,13 +99,19 @@ const playerSlice = createSlice({
     setGetWeeklyLeaderboardLoading: (state, action: PayloadAction<boolean>) => {
       state.loading.getWeeklyLeaderboard = action.payload;
     },
-    setGetPointsDistributionLoading: (state, action: PayloadAction<boolean>) => {
+    setGetPointsDistributionLoading: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
       state.loading.getPointsDistribution = action.payload;
     },
     setGetPointsStatsLoading: (state, action: PayloadAction<boolean>) => {
       state.loading.getPointsStats = action.payload;
     },
-    
+    setGetOpponentProfileLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading.getOpponentProfile = action.payload;
+    },
+
     // Data update actions
     setPlayerProfile: (state, action: PayloadAction<PlayerProfile>) => {
       state.playerProfile = action.payload;
@@ -121,21 +131,27 @@ const playerSlice = createSlice({
     setWeeklyLeaderboard: (state, action: PayloadAction<WeeklyLeaderboard>) => {
       state.weeklyLeaderboard = action.payload;
     },
-    setPointsDistribution: (state, action: PayloadAction<PointsDistribution>) => {
+    setPointsDistribution: (
+      state,
+      action: PayloadAction<PointsDistribution>
+    ) => {
       state.pointsDistribution = action.payload;
     },
     setPointsStats: (state, action: PayloadAction<PointsStats>) => {
       state.pointsStats = action.payload;
     },
-    
+    setOpponentProfile: (state, action: PayloadAction<PlayerProfile>) => {
+      state.opponentProfile = action.payload;
+    },
+
     // Reset actions
     resetPlayerState: (state) => {
       return initialState;
-    }
-  }
+    },
+  },
 });
 
-export const { 
+export const {
   // Loading state actions
   setCreateProfileLoading,
   setGetProfileLoading,
@@ -147,7 +163,8 @@ export const {
   setGetWeeklyLeaderboardLoading,
   setGetPointsDistributionLoading,
   setGetPointsStatsLoading,
-  
+  setGetOpponentProfileLoading,
+
   // Data update actions
   setPlayerProfile,
   setOngoingSessions,
@@ -157,9 +174,10 @@ export const {
   setWeeklyLeaderboard,
   setPointsDistribution,
   setPointsStats,
-  
+  setOpponentProfile,
+
   // Reset actions
-  resetPlayerState
+  resetPlayerState,
 } = playerSlice.actions;
 
 export default playerSlice.reducer;

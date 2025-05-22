@@ -5,6 +5,7 @@ import useTruncateText from "@/hooks/useTruncateText";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import General, { GeneralMessageKey } from "./general";
 import Info from "./info";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 interface GameFooterProps {
   overlaps: { x: number; y: number }[];
@@ -29,6 +30,10 @@ export function GameFooter({
   opponentStatus,
   mode,
 }: GameFooterProps) {
+  const {
+    playerState: { opponentProfile },
+  } = useSystemFunctions();
+
   const showWarning = overlaps.length > 0;
 
   // YOUR profile from Privy-linked accounts
@@ -74,7 +79,8 @@ export function GameFooter({
 
         <KPGameBadge
           status={opponentStatus}
-          username={opponentName || "–"}
+          username={opponentProfile?.username || opponentName || "–"}
+          avatarUrl={opponentProfile?.avatar || undefined}
           isPlayer={false}
         />
       </div>
@@ -101,7 +107,8 @@ export function GameFooter({
           />
           <KPGameBadge
             status={opponentStatus}
-            username={opponentName || "–"}
+            username={opponentProfile?.username || opponentName || "–"}
+            avatarUrl={opponentProfile?.avatar || undefined}
             isPlayer={false}
           />
         </div>

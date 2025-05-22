@@ -93,25 +93,47 @@ export interface GameOverProcessingMessage extends WebSocketMessage {
 
 export interface GameOverMessage extends WebSocketMessage {
   type: "game_end_completed";
-  status: string;
+  status: "completed";
   winner: string;
-  reason: "COMPLETED" | "FORFEIT" | "TIMEOUT";
+  reason: "COMPLETED" | "FORFEIT" | "TIMEOUT" | "TIME_LIMIT";
   finalState: {
     shots: Array<{ x: number; y: number; player: string }>;
     sunkShips: Record<string, number>;
     gameStartedAt: number;
     gameEndedAt: number;
+    duration: number;
+    isBettingGame: boolean;
+    bettingInfo: {
+      inviteId: string;
+      totalPool: string;
+      resolved: boolean;
+    };
   };
+  playerStats: Record<
+    string,
+    {
+      address: string;
+      shotsCount: number;
+      hitsCount: number;
+      accuracy: number;
+      shipsSunk: number;
+      avgTurnTime: number;
+    }
+  >;
   pointsAwarded: Record<string, number>;
   pointsSummary: GameOverPointsSummary;
-}
-
-export interface PointsAwardedMessage extends WebSocketMessage {
-  type: "points_awarded";
-  points: number;
-  category: string;
-  totalPoints: number;
-  player: string;
+  bettingResolved: boolean;
+  bettingPayouts: {
+    winner: {
+      address: string;
+      amount: string;
+    };
+    loser: {
+      address: string;
+      amount: string;
+    };
+  };
+  timestamp: number;
 }
 
 export type PointsSummary =
@@ -138,6 +160,14 @@ export interface PointsSummaryMessage extends WebSocketMessage {
   totalPoints: number;
   breakdown: Record<PointsSummary, number>;
   isWinner: boolean;
+}
+
+export interface PointsAwardedMessage extends WebSocketMessage {
+  type: "points_awarded";
+  points: number;
+  category: PointsSummary;
+  totalPoints: number;
+  player: string;
 }
 
 export interface DrawRematch extends WebSocketMessage {

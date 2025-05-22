@@ -15,11 +15,13 @@ import {
 } from ".";
 import { CallbackProps } from "..";
 import useAppActions from "../app/actions";
+import { usePlayerActions } from "../player/actions";
 
 const useInviteActions = () => {
   const { dispatch, navigate } = useSystemFunctions();
   const { activeWallet } = usePrivyLinkedAccounts();
   const { showToast } = useAppActions();
+  const { getOpponentProfile } = usePlayerActions();
 
   const createInvite = async (callback?: CallbackProps) => {
     try {
@@ -156,6 +158,10 @@ const useInviteActions = () => {
       const response = await inviteAPI.getInvitation(code);
 
       dispatch(setInvitation(response));
+
+      if (response.creator) {
+        getOpponentProfile(response.creator);
+      }
 
       callback?.onSuccess?.(response);
     } catch (err) {
