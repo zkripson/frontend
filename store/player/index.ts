@@ -44,53 +44,7 @@ const initialState: PlayerState = {
   // Profile data
   playerProfile: null,
   opponentProfile: null,
-  ongoingSessions: [
-    {
-      sessionId: "sess-001",
-      status: "active",
-      createdAt: Date.now() - 5 * 60_000, // 5 minutes ago
-      creator: "0xABC123...",
-      opponent: "0xDEF456...",
-      isBettingGame: false,
-      stakeAmount: null,
-    },
-    {
-      sessionId: "sess-002",
-      status: "waiting",
-      createdAt: Date.now() - 15 * 60_000, // 15 minutes ago
-      creator: "0x7890AB...",
-      opponent: null,
-      isBettingGame: true,
-      stakeAmount: "10.00",
-    },
-    {
-      sessionId: "sess-003",
-      status: "active",
-      createdAt: Date.now() - 30 * 60_000, // 30 minutes ago
-      creator: "0x111AAA...",
-      opponent: "0x222BBB...",
-      isBettingGame: true,
-      stakeAmount: "5.00",
-    },
-    {
-      sessionId: "sess-004",
-      status: "active",
-      createdAt: Date.now() - 2 * 60_000, // 2 minutes ago
-      creator: "0x333CCC...",
-      opponent: "0x444DDD...",
-      isBettingGame: false,
-      stakeAmount: null,
-    },
-    {
-      sessionId: "sess-005",
-      status: "waiting",
-      createdAt: Date.now() - 60 * 60_000, // 1 hour ago
-      creator: "0x555EEE...",
-      opponent: null,
-      isBettingGame: true,
-      stakeAmount: "20.00",
-    },
-  ],
+  ongoingSessions: [],
 
   // Rewards and points data
   playerRewards: null,
