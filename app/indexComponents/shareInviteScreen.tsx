@@ -72,7 +72,7 @@ const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
           ) : (
             <span
               style={{
-                fontSize: "clamp(21px, 3vw, 36px)",
+                fontSize: "clamp(18px, 3vw, 36px)",
                 lineHeight: 1,
               }}
               className="tracking-[8px] md:tracking-[12px] font-semibold text-white"

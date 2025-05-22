@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import classNames from "classnames";
 import CountUp from "react-countup";
+import { useEffect, useRef } from "react";
 
 import { KPDialougue, KPTokenProgressCard } from "@/components";
 import {
@@ -59,6 +60,17 @@ const VictoryStatus = ({
     console.warn("VictoryStatus got unexpected status:", status);
     status = "win";
   }
+
+  // Ref to the scrolling container
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom on new points
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (container) {
+      container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+    }
+  }, [pointsAwarded]);
 
   const stats = formatStats(playerStats);
   const totalEarned = gameOverPointsSummary?.[playerStats.address]?.total;
@@ -140,7 +152,10 @@ const VictoryStatus = ({
       <h1 className="text-[clamp(20px,5vw,28px)] text-primary-50 font-MachineStd">
         Processing Game Result...
       </h1>
-      <div className="flex flex-col gap-3 w-full bg-primary-1200 border border-primary-450 border-dashed rounded-2xl p-3 md:p-4 lg:p-6">
+      <div
+        ref={scrollRef}
+        className="flex flex-col gap-3 max-sm:max-h-72 max-h-[450px] w-full bg-primary-1200 border border-primary-450 border-dashed rounded-2xl p-3 md:p-4 lg:p-6 overflow-y-auto"
+      >
         {pointsAwarded.map((msg, idx) => (
           <div
             key={idx}

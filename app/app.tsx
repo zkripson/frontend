@@ -2,10 +2,11 @@
 
 import { useEffect } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { KPToastNotification } from "@/components";
+import { KPOngoingSessionsNotifier, KPToastNotification } from "@/components";
 import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import Image from "next/image";
+import { usePlayerActions } from "@/store/player/actions";
 
 export default function RootApp({
   children,
@@ -14,7 +15,11 @@ export default function RootApp({
 }>) {
   const {} = useConnectToFarcaster();
   const { user, ready, authenticated } = usePrivy();
-  const { navigate } = useSystemFunctions();
+  const {
+    navigate,
+    playerState: { ongoingSessions },
+  } = useSystemFunctions();
+  const { getOngoingSessions } = usePlayerActions();
 
   useEffect(() => {
     if (!ready) return;
@@ -25,6 +30,14 @@ export default function RootApp({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, ready]);
+
+  // On initial load, fetch ongoing sessions once
+  useEffect(() => {
+    if (ready && authenticated && ongoingSessions.length === 0) {
+      getOngoingSessions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, authenticated, ongoingSessions]);
 
   return (
     <>
@@ -40,6 +53,7 @@ export default function RootApp({
 
       {children}
       <KPToastNotification />
+      <KPOngoingSessionsNotifier />
     </>
   );
 }
