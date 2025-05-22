@@ -27,6 +27,7 @@ import ArrowIcon from "./arrow-icon";
 import StarIcon from "./star-icon";
 import CheckAltIcon from "./check-alt-icon";
 import Question from "./question";
+import Meh from "./meh";
 
 export {
   CloseIcon,
@@ -58,4 +59,5 @@ export {
   ArrowRightAltIcon,
   CheckAltIcon,
   Question,
+  Meh,
 };

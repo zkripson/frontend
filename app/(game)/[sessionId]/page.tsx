@@ -56,6 +56,7 @@ const GameSession = () => {
     connectionError,
     gameOverPointsSummary,
     gameOverProcessing,
+    pointsAwarded,
   } = useGameSession(params.sessionId as string);
 
   return (
@@ -150,6 +151,7 @@ const GameSession = () => {
           }
         }
         gameOverPointsSummary={gameOverPointsSummary}
+        pointsAwarded={pointsAwarded}
       />
     </div>
   );

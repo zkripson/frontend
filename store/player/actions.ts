@@ -19,6 +19,8 @@ import {
   setWeeklyLeaderboard,
   setPointsDistribution,
   setPointsStats,
+  setOpponentProfile,
+  setGetOpponentProfileLoading,
 } from "./index";
 import { CreateProfileRequest, UpdateProfileRequest } from "./types";
 import useAppActions from "../app/actions";
@@ -63,6 +65,23 @@ export const usePlayerActions = () => {
       callbacks?.onError?.(err);
     } finally {
       dispatch(setGetProfileLoading(false));
+    }
+  };
+
+  const getOpponentProfile = async (
+    address: string,
+    callbacks?: CallbackProps
+  ) => {
+    try {
+      dispatch(setGetOpponentProfileLoading(true));
+      const profile = await playerApi.getProfile(address);
+      dispatch(setOpponentProfile(profile));
+      callbacks?.onSuccess?.(profile);
+      return profile;
+    } catch (err) {
+      callbacks?.onError?.(err);
+    } finally {
+      dispatch(setGetOpponentProfileLoading(false));
     }
   };
 
@@ -209,5 +228,6 @@ export const usePlayerActions = () => {
     getWeeklyLeaderboard,
     getPointsDistribution,
     getPointsStats,
+    getOpponentProfile,
   };
 };

@@ -13,6 +13,7 @@ const KPFullscreenLoader = ({
 }: IKPFullscreenLoader) => {
   const {
     inviteState: { invitation, bettingCreation },
+    playerState: { opponentProfile },
   } = useSystemFunctions();
 
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
@@ -44,7 +45,8 @@ const KPFullscreenLoader = ({
             }
             leftAvatarUrl={pfp!}
             leftName={username}
-            className=""
+            rightAvatarUrl={opponentProfile?.avatar}
+            rightName={opponentProfile?.username}
           />
         )}
         <div className="relative w-full max-w-[357px] max-sm:max-w-[277px] h-[60px] max-sm:max-h-[37px] bg-primary-450 border border-primary-300 px-3.5 py-2.5 max-sm:px-2 max-sm:py-1.5">

@@ -152,6 +152,10 @@ export const sounds = {
     typeof window !== "undefined"
       ? new Howl({ src: ["/sounds/you_won_voiceover.mp3"], volume: 0.7 })
       : undefined,
+  coins:
+    typeof window !== "undefined"
+      ? new Howl({ src: ["/sounds/coins.mp3"], volume: 0.7 })
+      : undefined,
 };
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({

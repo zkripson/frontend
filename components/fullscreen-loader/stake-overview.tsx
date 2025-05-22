@@ -4,6 +4,8 @@ import Image from "next/image";
 interface StakeOverviewProps {
   leftName: string;
   leftAvatarUrl: string;
+  rightName?: string;
+  rightAvatarUrl?: string;
   amount: number | string;
   className?: string;
 }
@@ -12,6 +14,8 @@ const StakeOverview = ({
   leftName,
   leftAvatarUrl,
   amount,
+  rightAvatarUrl,
+  rightName,
 }: StakeOverviewProps) => (
   <div
     className={`flex flex-col md:flex-row items-center justify-center lg:gap-10 bg-transparent text-primary-50 p-5 gap-5`}
@@ -62,9 +66,25 @@ const StakeOverview = ({
       </div>
     </div>
 
-    <div className="w-20 h-20 flex items-center justify-center">
-      <Question />
-    </div>
+    {rightName && rightAvatarUrl ? (
+      <div className="flex flex-col items-center">
+        <span className="mb-2 text-[clamp(10px,5vw,16px)] font-bold uppercase">
+          {rightName}
+        </span>
+        <div className="relative w-20 h-20">
+          <Image
+            src={rightAvatarUrl}
+            alt={rightName}
+            fill
+            className="rounded-full object-cover border-[3px] border-primary-50"
+          />
+        </div>
+      </div>
+    ) : (
+      <div className="w-20 h-20 flex items-center justify-center">
+        <Question />
+      </div>
+    )}
   </div>
 );
 
