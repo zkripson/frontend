@@ -14,7 +14,7 @@ const Points = () => {
     <KPClickAnimation
       onClick={() => navigate.push("/rewards")}
       className={classNames(
-        "rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer mt-12 lg:mt-20",
+        "rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer mt-12 lg:mt-20 shadow-lg shadow-primary-100/50",
         {
           hidden: !playerRewards,
         }

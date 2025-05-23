@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import KPIconButton from "../icon-button";
+import KPButton from "../button";
 
 const SESSION_PATH_REGEX =
   /^\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(\/.*)?$/;
@@ -20,6 +21,7 @@ const KPOngoingSessionsNotifier = () => {
     navigate,
   } = useSystemFunctions();
 
+  // Hide notifier on session pages or when no sessions
   if (sessions.length === 0 || SESSION_PATH_REGEX.test(pathname)) {
     return null;
   }
@@ -34,16 +36,27 @@ const KPOngoingSessionsNotifier = () => {
 
   return (
     <>
-      <Image
-        src="/images/kripson.jpeg"
-        alt="Ongoing Sessions"
-        width={80}
-        height={80}
-        className="fixed bottom-4 right-4 size-10 sm:size-14 md:size-16 cursor-pointer z-50 rounded-full"
+      {/* Floating indicator */}
+      <div
         onClick={handleIndicatorClick}
-      />
+        className="fixed bottom-4 right-4 z-50 cursor-pointer"
+      >
+        <Image
+          src="/images/pendingBattles.png"
+          alt="Ongoing Sessions"
+          width={80}
+          height={80}
+          className="size-10 sm:size-14 md:size-16 object-fill scale-150"
+        />
 
-      {/* Modal Overlay */}
+        <div className="absolute -bottom-4 -left-3 max-sm:-left-1.5 max-w-[130%] overflow-hidden">
+          <span className="inline-block whitespace-nowrap animate-marquee text-primary-50 text-[clamp(10px,5vw,14px)]">
+            pending games
+          </span>
+        </div>
+      </div>
+
+      {/* Modal */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -59,7 +72,7 @@ const KPOngoingSessionsNotifier = () => {
               exit={{ scale: 0.85 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              {/* Close Button */}
+              {/* Close */}
               <div className="absolute top-2 right-2 z-10">
                 <KPIconButton
                   icon="close"
@@ -77,36 +90,50 @@ const KPOngoingSessionsNotifier = () => {
                   <Link
                     key={session.sessionId}
                     href={`/${session.sessionId}`}
-                    className="block p-4 bg-white/25 backdrop-blur-md border border-primary-450 border-dashed rounded-2xl hover:bg-white/40 transition"
+                    className="block p-4 max-sm:p-2.5 bg-white/25 backdrop-blur-md border border-primary-450 border-dashed rounded-2xl hover:shadow-lg transition-shadow"
                     onClick={() => setIsOpen(false)}
                   >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium text-primary-800 truncate">
-                        ID: {session.sessionId}
-                      </span>
-                      <span
-                        className={
-                          "text-sm px-2 py-1 rounded-full " +
-                          (session.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800")
-                        }
-                      >
-                        {session.status}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        {session.isBettingGame && session.stakeAmount && (
+                          <span className="text-xs font-medium text-primary-800 bg-primary-50 px-2 py-0.5 rounded-full">
+                            Stake:{" "}
+                            <span className="font-bold">
+                              ${session.stakeAmount}
+                            </span>
+                          </span>
+                        )}
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            session.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {session.status.charAt(0).toUpperCase() +
+                            session.status.slice(1)}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-primary-300 italic">
+                        {typeof session.createdAt === "number"
+                          ? new Date(session.createdAt).toLocaleString(
+                              undefined,
+                              {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              }
+                            )
+                          : session.createdAt}
                       </span>
                     </div>
-                    <p className="text-sm text-primary-600">
-                      Created: {new Date(session.createdAt).toLocaleString()}
-                    </p>
-                    <p className="text-sm text-primary-600">
-                      Players: {session.creator} vs{" "}
-                      {session.opponent ?? "Waiting..."}
-                    </p>
-                    {session.isBettingGame && session.stakeAmount && (
-                      <p className="text-sm text-primary-600">
-                        Stake: ${session.stakeAmount}
-                      </p>
-                    )}
+
+                    <KPButton
+                      title="Join Battle"
+                      fullWidth
+                      variant="primary"
+                      small
+                      isMachine
+                    />
                   </Link>
                 ))}
               </div>
