@@ -100,7 +100,8 @@ export default function RootLayout({
                 "type": "launch_frame",
                 "name": "Battleship",
                 "url": "https://app.bship.fun",
-                "splashImageUrl": "https://app.bship.fun/logo.png",
+                "splashImageUrl": "https://app.bship.fun/logo-bg.png",
+                "iconUrl": "https://app.bship.fun/logo-bg.png",
                 "splashBackgroundColor": "#20262D"
               }
             }

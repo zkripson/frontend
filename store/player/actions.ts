@@ -113,6 +113,7 @@ export const usePlayerActions = () => {
 
       dispatch(setGetOngoingSessionsLoading(true));
       const response = await playerApi.getOngoingSessions(activeWallet.address);
+
       dispatch(setOngoingSessions(response.ongoingSessions));
       callbacks?.onSuccess?.(response);
       return response;

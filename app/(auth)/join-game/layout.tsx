@@ -16,7 +16,8 @@ export default function JoinLayout({
               "action": {
                 "type": "launch_frame",
                 "name": "Battleship",
-                "splashImageUrl": "https://app.bship.fun/logo.png",
+                "splashImageUrl": "https://app.bship.fun/logo-bg.png",
+                "iconUrl": "https://app.bship.fun/logo-bg.png",
                 "splashBackgroundColor": "#20262D"
               }
             }

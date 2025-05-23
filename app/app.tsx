@@ -7,6 +7,7 @@ import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import Image from "next/image";
 import { usePlayerActions } from "@/store/player/actions";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 
 export default function RootApp({
   children,
@@ -20,6 +21,7 @@ export default function RootApp({
     playerState: { ongoingSessions },
   } = useSystemFunctions();
   const { getOngoingSessions } = usePlayerActions();
+  const { activeWallet } = usePrivyLinkedAccounts();
 
   useEffect(() => {
     if (!ready) return;
@@ -33,11 +35,9 @@ export default function RootApp({
 
   // On initial load, fetch ongoing sessions once
   useEffect(() => {
-    if (ready && authenticated && ongoingSessions.length === 0) {
-      getOngoingSessions();
-    }
+    getOngoingSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, authenticated, ongoingSessions]);
+  }, [activeWallet?.address]);
 
   return (
     <>
