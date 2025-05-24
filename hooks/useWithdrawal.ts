@@ -1,6 +1,13 @@
 import { SendTransactionModalUIOptions } from "@privy-io/react-auth";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
-import { parseUnits, encodeFunctionData, type Address, erc20Abi } from "viem";
+import {
+  parseUnits,
+  encodeFunctionData,
+  type Address,
+  erc20Abi,
+  createPublicClient,
+  http,
+} from "viem";
 
 import useAppActions from "@/store/app/actions";
 import TOKEN_ADDRESSES from "@/constants/tokenAddresses";
@@ -153,6 +160,27 @@ const useWithdrawal = () => {
           },
           { uiOptions }
         );
+      }
+
+      // Wait for transaction receipt
+      if (hash) {
+        const publicClient = createPublicClient({
+          chain: defaultChain,
+          transport: http(),
+        });
+
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: hash as `0x${string}`,
+        });
+
+        if (receipt.status === "success") {
+          showToast("Approval confirmed!", "success");
+        } else {
+          showToast("Something went wrong. Try again!", "error");
+          throw new Error("Approval failed");
+        }
+
+        return receipt;
       }
 
       return hash;
