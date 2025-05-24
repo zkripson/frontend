@@ -736,11 +736,12 @@ const useGameSession = (sessionId: string) => {
   useEffect(() => {
     const opponentAddress =
       gameStateLocal.players.find((p) => p !== activeWallet?.address) || "";
-    if (opponentAddress && !playerState.opponentProfile) {
+
+    if (opponentAddress) {
       getOpponentProfile(opponentAddress);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameStateLocal.players, playerState.opponentProfile]);
+  }, [gameStateLocal.players, activeWallet?.address]);
 
   const canPlaceShip = (
     cells: { x: number; y: number }[],
