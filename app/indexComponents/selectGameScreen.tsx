@@ -27,13 +27,20 @@ const SelectGameScreen = ({
   const [isJoining, setJoining] = useState(false);
   const [canAccept, setCanAccept] = useState(false);
   const [code, setCode] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async () => {
-    if (!code) return;
+    try {
+      if (!code) return;
 
-    await approveTransfer(Number(invitation?.stakeAmount));
+      setLoading(true);
+      await approveTransfer(Number(invitation?.stakeAmount));
 
-    await acceptBettingInvite(code);
+      await acceptBettingInvite(code);
+    } catch (e) {
+    } finally {
+      setLoading(false);
+    }
   };
 
   const gameTypes = [
@@ -108,8 +115,8 @@ const SelectGameScreen = ({
         onClick: onSubmit,
         icon: "arrow",
         iconPosition: "right",
-        loading: loadingInviteAcceptance || invitationLoading,
-        disabled: !canAccept || loadingInviteAcceptance,
+        loading: loadingInviteAcceptance || invitationLoading || loading,
+        disabled: !canAccept || loadingInviteAcceptance || loading,
         hide: !isJoining,
       }}
       showPoints={!isJoining}
