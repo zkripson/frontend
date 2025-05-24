@@ -77,7 +77,6 @@ export const usePlayerActions = () => {
       const profile = await playerApi.getProfile(address);
       dispatch(setOpponentProfile(profile));
       callbacks?.onSuccess?.(profile);
-      return profile;
     } catch (err) {
       callbacks?.onError?.(err);
     } finally {
