@@ -26,6 +26,8 @@ const KPOngoingSessionsNotifier = () => {
     return null;
   }
 
+  const floatingTitle = `Join Battle${sessions.length > 1 ? "s" : ""}`;
+
   const handleIndicatorClick = () => {
     if (sessions.length === 1) {
       navigate.push(`/${sessions[0].sessionId}`);
@@ -36,24 +38,26 @@ const KPOngoingSessionsNotifier = () => {
 
   return (
     <>
-      {/* Floating indicator */}
       <div
         onClick={handleIndicatorClick}
-        className="fixed bottom-4 right-4 z-50 cursor-pointer"
+        className="fixed bottom-4 right-4 z-50 cursor-pointer flex flex-col items-center"
       >
-        <Image
-          src="/images/pendingBattles.png"
-          alt="Ongoing Sessions"
-          width={80}
-          height={80}
-          className="size-10 sm:size-14 md:size-16 object-fill scale-150"
-        />
-
-        <div className="absolute -bottom-4 -left-3 max-sm:-left-1.5 max-w-[130%] overflow-hidden">
-          <span className="inline-block whitespace-nowrap animate-marquee text-primary-50 text-[clamp(10px,5vw,14px)]">
-            pending games
-          </span>
+        <div className="relative">
+          {/* Glowing pulse behind the icon */}
+          <div className="absolute inset-0 rounded-full bg-primary-50/90 blur-xl animate-ping" />
+          <Image
+            src="/images/pendingBattles.png"
+            alt="Ongoing Sessions"
+            width={80}
+            height={80}
+            className="relative size-10 sm:size-14 md:size-16 object-fill scale-150"
+          />
         </div>
+
+        {/* Centered, animated text */}
+        <span className="text-primary-50 text-[clamp(10px,5vw,14px)] font-bold animate-bounce">
+          {floatingTitle}
+        </span>
       </div>
 
       {/* Modal */}
