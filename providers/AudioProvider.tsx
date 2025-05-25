@@ -35,10 +35,10 @@ export const sounds = {
       ? new Howl({ src: ["/sounds/timer-ticks.mp3"], volume: 0.1 })
       : undefined,
   // Voiceovers and additional sounds
-  miss_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/miss_voiceover.mp3"], volume: 0.7 })
-      : undefined,
+  // miss_voiceover:
+  //   typeof window !== "undefined"
+  //     ? new Howl({ src: ["/sounds/miss_voiceover.mp3"], volume: 0.7 })
+  //     : undefined,
   hit_voiceover:
     typeof window !== "undefined"
       ? new Howl({ src: ["/sounds/hit_voiceover.mp3"], volume: 0.7 })
