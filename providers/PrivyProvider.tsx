@@ -8,7 +8,7 @@ export const defaultChain = isDevEnv ? baseSepolia : base;
 
 export const privyConfig: PrivyClientConfig = {
   defaultChain,
-  loginMethods: ["farcaster", "twitter"],
+  loginMethods: ["twitter"],
   embeddedWallets: {
     ethereum: {
       createOnLogin: "all-users",

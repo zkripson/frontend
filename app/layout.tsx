@@ -46,26 +46,26 @@ export const metadata: Metadata = {
     title: "Speed Battle",
     description:
       "Speed Battle is a game of strategy and skill. Play against other players to earn rewards.",
-    url: "https://app.bship.fun",
+    url: "https://app.speedbattle.fun",
     type: "website",
     images: [
       {
-        url: "https://app.bship.fun/game-preview-bg.png",
+        url: "https://app.speedbattle.fun/game-preview-bg.png",
         width: 1200,
         height: 630,
       },
     ],
-    siteName: "app.bship.fun",
+    siteName: "app.speedbattle.fun",
   },
   twitter: {
     card: "summary_large_image",
-    site: "https://app.bship.fun",
+    site: "https://app.speedbattle.fun",
     title: "Speed Battle",
     description:
       "Speed Battle is a game of strategy and skill. Play against other players to earn rewards.",
     images: [
       {
-        url: "https://app.bship.fun/game-preview-bg.png",
+        url: "https://app.speedbattle.fun/game-preview-bg.png",
         width: 1200,
         height: 630,
       },
@@ -93,15 +93,15 @@ export default function RootLayout({
           name="fc:frame"
           content='{
             "version": "next",
-            "imageUrl": "https://app.bship.fun/game-preview-bg.png",
+            "imageUrl": "https://app.speedbattle.fun/game-preview-bg.png",
             "button":{
               "title": "Play Now",
               "action": {
                 "type": "launch_frame",
                 "name": "Speed Battle",
-                "url": "https://app.bship.fun",
-                "splashImageUrl": "https://app.bship.fun/logo-bg.png",
-                "iconUrl": "https://app.bship.fun/logo-bg.png",
+                "url": "https://app.speedbattle.fun",
+                "splashImageUrl": "https://app.speedbattle.fun/logo-bg.png",
+                "iconUrl": "https://app.speedbattle.fun/logo-bg.png",
                 "splashBackgroundColor": "#20262D"
               }
             }
@@ -112,7 +112,7 @@ export default function RootLayout({
         <meta property="fc:frame:button:1:action" content="post_redirect" />
         <meta
           property="fc:frame:post_url"
-          content="https://app.bship.fun/api/frame-handler"
+          content="https://app.speedbattle.fun/api/frame-handler"
         />
       </head>
 

@@ -10,14 +10,14 @@ export default function JoinLayout({
           name="fc:frame"
           content='{
             "version": "next",
-            "imageUrl": "https://app.bship.fun/game-preview-bg.png",
+            "imageUrl": "https://app.speedbattle.fun/game-preview-bg.png",
             "button":{
               "title": "Join Game",
               "action": {
                 "type": "launch_frame",
                 "name": "Speed Battle",
-                "splashImageUrl": "https://app.bship.fun/logo-bg.png",
-                "iconUrl": "https://app.bship.fun/logo-bg.png",
+                "splashImageUrl": "https://app.speedbattle.fun/logo-bg.png",
+                "iconUrl": "https://app.speedbattle.fun/logo-bg.png",
                 "splashBackgroundColor": "#20262D"
               }
             }
