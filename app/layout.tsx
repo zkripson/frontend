@@ -18,11 +18,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Battleship",
+  title: "Speed Battle",
   description:
-    "Battleship is a game of strategy and skill. Play against other players to earn rewards.",
+    "Speed Battle is a game of strategy and skill. Play against other players to earn rewards.",
   keywords: [
-    "Battleship",
+    "Speed Battle",
     "Game",
     "Strategy",
     "Skill",
@@ -36,16 +36,16 @@ export const metadata: Metadata = {
     "Blockchain Game",
     "Blockchain Gaming",
   ],
-  applicationName: "Battleship",
+  applicationName: "Speed Battle",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Battleship",
+    title: "Speed Battle",
   },
   openGraph: {
-    title: "Battleship",
+    title: "Speed Battle",
     description:
-      "Battleship is a game of strategy and skill. Play against other players to earn rewards.",
+      "Speed Battle is a game of strategy and skill. Play against other players to earn rewards.",
     url: "https://app.bship.fun",
     type: "website",
     images: [
@@ -60,9 +60,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "https://app.bship.fun",
-    title: "Battleship",
+    title: "Speed Battle",
     description:
-      "Battleship is a game of strategy and skill. Play against other players to earn rewards.",
+      "Speed Battle is a game of strategy and skill. Play against other players to earn rewards.",
     images: [
       {
         url: "https://app.bship.fun/game-preview-bg.png",
@@ -98,7 +98,7 @@ export default function RootLayout({
               "title": "Play Now",
               "action": {
                 "type": "launch_frame",
-                "name": "Battleship",
+                "name": "Speed Battle",
                 "url": "https://app.bship.fun",
                 "splashImageUrl": "https://app.bship.fun/logo-bg.png",
                 "iconUrl": "https://app.bship.fun/logo-bg.png",

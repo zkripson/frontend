@@ -15,7 +15,7 @@ export default function JoinLayout({
               "title": "Join Game",
               "action": {
                 "type": "launch_frame",
-                "name": "Battleship",
+                "name": "Speed Battle",
                 "splashImageUrl": "https://app.bship.fun/logo-bg.png",
                 "iconUrl": "https://app.bship.fun/logo-bg.png",
                 "splashBackgroundColor": "#20262D"
