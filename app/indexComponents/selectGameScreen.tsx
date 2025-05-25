@@ -110,15 +110,18 @@ const SelectGameScreen = ({
     <KPDialougue
       title="welcome"
       showCloseButton
-      primaryCta={{
-        title: "Next",
-        onClick: onSubmit,
-        icon: "arrow",
-        iconPosition: "right",
-        loading: loadingInviteAcceptance || invitationLoading || loading,
-        disabled: !canAccept || loadingInviteAcceptance || loading,
-        hide: !isJoining,
-      }}
+      primaryCta={
+        !isJoining
+          ? undefined
+          : {
+              title: "Next",
+              onClick: onSubmit,
+              icon: "arrow",
+              iconPosition: "right",
+              loading: loadingInviteAcceptance || invitationLoading || loading,
+              disabled: !canAccept || loadingInviteAcceptance || loading,
+            }
+      }
       showPoints={!isJoining}
       className="pt-[88px]"
     >

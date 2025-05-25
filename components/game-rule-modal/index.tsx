@@ -77,7 +77,7 @@ const KPGameRuleModal: React.FC = () => {
                       <ul className="list-disc list-inside ml-6 space-y-1 mt-1">
                         <li>Position 5 ships on your 10×10 grid:</li>
                         <li>Carrier (5 cells)</li>
-                        <li>Battleship (4 cells)</li>
+                        <li>Speed Battle (4 cells)</li>
                         <li>Cruiser (3 cells)</li>
                         <li>Submarine (3 cells)</li>
                         <li>Destroyer (2 cells)</li>
@@ -145,14 +145,14 @@ const KPGameRuleModal: React.FC = () => {
                   </h2>
 
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">
-                    What are Battleship Ribbons?
+                    What are Speed Battle Ribbons?
                   </h3>
                   <p className="text-sm sm:text-base mb-4">
-                    Battleship Ribbons are your gateway to rewards in the
-                    Battleship ecosystem. They accrue for playing games, winning
-                    matches, and growing our community. Each week, Ribbons can
-                    be converted into $SHIP tokens, unlocking special features
-                    and perks.
+                    Speed Battle Ribbons are your gateway to rewards in the
+                    Speed Battle ecosystem. They accrue for playing games,
+                    winning matches, and growing our community. Each week,
+                    Ribbons can be converted into $SHIP tokens, unlocking
+                    special features and perks.
                   </p>
 
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">

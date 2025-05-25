@@ -72,7 +72,7 @@ const GameSession = () => {
           className="w-full h-full flex flex-col items-center justify-center"
         >
           {connectionError && (
-            <div className="absolute top-0 w-full bg-red-500 text-white p-2 text-center">
+            <div className="absolute top-0 w-full bg-orange-500 text-white p-2 text-center">
               {connectionError}
             </div>
           )}

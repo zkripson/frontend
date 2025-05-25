@@ -47,14 +47,14 @@ const KPHeader = () => {
           <div className="flex items-center gap-2">
             <Image
               src="/images/bship.png"
-              alt="Battleship Logo"
+              alt="Speed Battle Logo"
               width={59}
               height={59}
               quality={100}
               className="lg:size-[59px] md:size-[50px] size-[45px]"
             />
             <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
-              BATTLESHIP GAME
+              SPEED BATTLE
             </h1>
           </div>
 
