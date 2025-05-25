@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePrivy } from "@privy-io/react-auth";
+import { LoginModalOptions, usePrivy } from "@privy-io/react-auth";
 
 import { KPDialougue, KPFullscreenLoader } from "@/components";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
@@ -29,7 +29,9 @@ const Social = () => {
         return;
       }
 
-      return login();
+      return login({
+        loginMethods: ["twitter"],
+      });
     } catch (e) {
       //
     } finally {
@@ -99,9 +101,7 @@ const Social = () => {
                 variant: "primary",
                 isMachine: true,
                 fullWidth: true,
-                multipleicons: isFrameLoaded
-                  ? ["farcaster"]
-                  : ["x", "farcaster"],
+                multipleicons: isFrameLoaded ? ["farcaster"] : ["x"],
                 loading: loading,
               }}
             >
