@@ -226,7 +226,11 @@ export function useGameWebSocket(sessionId: string) {
       });
 
       wsServiceRef.current.on("error", (error) => {
-        setConnectionError("WebSocket connection error");
+        setConnectionError("Game connection error. Reconnecting...");
+        // Attempt to reconnect when an error occurs
+        if (wsServiceRef.current) {
+          wsServiceRef.current.connect();
+        }
       });
     }
 
