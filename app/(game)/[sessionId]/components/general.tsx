@@ -151,7 +151,6 @@ export default function General({
         "opponent_sunk_submarine_voiceover",
         "opponent_sunk_destroyer_voiceover",
         "hit_voiceover",
-        "miss_voiceover",
         "game_start_voiceover",
         "another_hit_voiceover",
         "game_over_voiceover",
