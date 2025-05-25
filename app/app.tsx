@@ -41,11 +41,13 @@ export default function RootApp({
         if (isMiniApp) {
           await loginToFarcasterFrame();
         } else {
-          navigate.push("/login");
+          await navigate.push("/login");
         }
       }
 
-      setIsReady(true);
+      setTimeout(() => {
+        setIsReady(true);
+      }, 1500);
     };
 
     load();
@@ -71,10 +73,7 @@ export default function RootApp({
             transition={{ duration: 0.6 }}
             className="absolute bottom-0 right-0 left-0 w-screen z-[9999999]"
           >
-            <KPFullscreenLoader
-              title="SETTING UP GAME PROFILE..."
-              loaderDuration={6}
-            />
+            <KPFullscreenLoader title="LOADING..." loaderDuration={6} />
           </motion.div>
         </AnimatePresence>
       )}
