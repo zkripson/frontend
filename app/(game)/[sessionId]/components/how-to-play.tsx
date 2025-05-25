@@ -51,17 +51,22 @@ const HowToPlay: React.FC = () => {
 
               <div className="p-4 flex flex-col gap-10">
                 <ol className="list-decimal list-outside pl-4 space-y-3 text-base leading-relaxed h-fit lg:h-96">
-                  <li>Place your fleet by dragging ships onto the grid.</li>
-                  <li>Click a ship to rotate its orientation.</li>
+                  <li>Place your fleet by clicking on ships.</li>
+                  <li>On the grid, click a ship to rotate its orientation.</li>
+                  <li>Drag a ship to position it anywhere on the grid.</li>
+                  <li>Once ready, click on {"Ready"} to start the game.</li>
                   <li>
-                    Once ready, switch to Game mode to start firing shots.
-                  </li>
-                  <li>
-                    Click on a cell to fire; green fires indicate hits, white
-                    circles are misses.
+                    Once the game begins, {"you'll"} see a 3-minute countdown
+                    timer. During your turn, you have 15 seconds to click on a
+                    square to fire your shot(guessing where your {"opponent's"}{" "}
+                    ship is placed). If you take too long, your turn will
+                    automatically skip to give your opponent a chance to play.
                   </li>
                   <li>Sunk ships will disintegrate over time.</li>
-                  <li>The first to sink all opponent ships wins!</li>
+                  <li>
+                    The player that sunk the most ships or first to sink all
+                    opponent ships wins the game!
+                  </li>
                 </ol>
 
                 <div

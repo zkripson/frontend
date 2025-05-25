@@ -114,22 +114,22 @@ const playerSlice = createSlice({
 
     // Data update actions
     setPlayerProfile: (state, action: PayloadAction<PlayerProfile>) => {
-      state.playerProfile = action.payload;
+      state.playerProfile = { ...action.payload };
     },
     setOngoingSessions: (state, action: PayloadAction<OngoingSession[]>) => {
-      state.ongoingSessions = action.payload;
+      state.ongoingSessions = [...action.payload];
     },
     setPlayerRewards: (state, action: PayloadAction<PlayerRewards>) => {
-      state.playerRewards = action.payload;
+      state.playerRewards = { ...action.payload };
     },
     setPlayerPoints: (state, action: PayloadAction<PlayerPointsResponse>) => {
-      state.playerPoints = action.payload;
+      state.playerPoints = { ...action.payload };
     },
     setLeaderboard: (state, action: PayloadAction<Leaderboard>) => {
-      state.leaderboard = action.payload;
+      state.leaderboard = { ...action.payload };
     },
     setWeeklyLeaderboard: (state, action: PayloadAction<WeeklyLeaderboard>) => {
-      state.weeklyLeaderboard = action.payload;
+      state.weeklyLeaderboard = { ...action.payload };
     },
     setPointsDistribution: (
       state,
@@ -138,10 +138,10 @@ const playerSlice = createSlice({
       state.pointsDistribution = action.payload;
     },
     setPointsStats: (state, action: PayloadAction<PointsStats>) => {
-      state.pointsStats = action.payload;
+      state.pointsStats = { ...action.payload };
     },
     setOpponentProfile: (state, action: PayloadAction<PlayerProfile>) => {
-      state.opponentProfile = action.payload;
+      state.opponentProfile = { ...action.payload };
     },
 
     // Reset actions

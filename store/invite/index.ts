@@ -59,7 +59,7 @@ export const inviteReducer = createSlice({
     },
 
     setInvitation(state, action: PayloadAction<GetInvitationResponse | null>) {
-      state.invitation = action.payload;
+      state.invitation = action.payload ? { ...action.payload } : null;
     },
 
     setInvitationLoading(state, action: PayloadAction<boolean>) {

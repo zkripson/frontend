@@ -4,6 +4,7 @@ import appReducer from "./app";
 import gameReducer from "./game";
 import inviteReducer from "./invite";
 import playerReducer from "./player";
+import adminReducer from "./admin";
 
 export interface CallbackProps {
   onSuccess?: Function;
@@ -16,6 +17,7 @@ export const store = configureStore({
     game: gameReducer,
     invite: inviteReducer,
     player: playerReducer,
+    admin: adminReducer,
   },
 });
 

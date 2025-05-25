@@ -13,6 +13,7 @@ import KPProfileBadge from "../profile-badge";
 import KPLevel from "../level";
 import KPGameRuleModal from "../game-rule-modal";
 import { usePlayerActions } from "@/store/player/actions";
+import Link from "next/link";
 
 const KPHeader = () => {
   const { checkTokenBalance } = useBalance();
@@ -44,7 +45,7 @@ const KPHeader = () => {
         )}
       >
         <div className="flex justify-between items-center w-full h-full relative">
-          <div className="flex items-center gap-2">
+          <Link href={"/"} className="flex items-center gap-2">
             <Image
               src="/images/bship.png"
               alt="Speed Battle Logo"
@@ -56,7 +57,7 @@ const KPHeader = () => {
             <h1 className="font-MachineStd text-primary-300 text-[clamp(20px,5vw,2rem)] leading-none -mb-2">
               SPEED BATTLE
             </h1>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-4">
             {/* Desktop: show menu */}

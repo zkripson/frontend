@@ -21,6 +21,7 @@ const useSystemFunctions = () => {
   const gameState = useAppSelector((state) => state.game);
   const inviteState = useAppSelector((state) => state.invite);
   const playerState = useAppSelector((state) => state.player);
+  const adminState = useAppSelector((state) => state.admin);
 
   return {
     // functions
@@ -35,6 +36,7 @@ const useSystemFunctions = () => {
     gameState,
     inviteState,
     playerState,
+    adminState,
   };
 };
 
