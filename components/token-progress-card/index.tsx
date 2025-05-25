@@ -66,9 +66,9 @@ const KPTokenProgressCard = ({
               / {goal}
             </span>
           </div>
-          <p className="mt-1 text-[clamp(10px,5vw,12px)] text-primary-300">
+          {/* <p className="mt-1 text-[clamp(10px,5vw,12px)] text-primary-300">
             Next: Level {nextLevel}
-          </p>
+          </p> */}
         </div>
 
         {/* Chevron Icon */}

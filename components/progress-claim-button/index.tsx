@@ -29,14 +29,14 @@ const KPProgressClaimButton: React.FC<IKPProgressClaimButtonProps> = ({
   return (
     <div
       className={classNames(
-        "w-full max-sm:max-w-24 max-w-[141px] flex flex-col gap-1",
+        "w-full max-sm:max-w-24 max-w-[141px] flex flex-col gap-1 relative",
         className
       )}
     >
       {/* Progress Bar */}
       <div
         className={classNames(
-          "w-full h-2 rounded-full overflow-hidden",
+          "w-full h-2 rounded-full overflow-hidden opacity-30",
           trackColor
         )}
       >
@@ -59,7 +59,7 @@ const KPProgressClaimButton: React.FC<IKPProgressClaimButtonProps> = ({
           isMachine
           small
           fullWidth
-          className="max-sm:h-8 h-10"
+          className="max-sm:h-8 h-10 opacity-30"
         />
       )}
 
@@ -79,6 +79,12 @@ const KPProgressClaimButton: React.FC<IKPProgressClaimButtonProps> = ({
           </span>
         </div>
       )}
+
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="bg-material px-4 py-1.5 border border-primary-600 rounded-full text-primary-600 text-[clamp(8px,5vw,10px)] leading-none whitespace-nowrap">
+          Coming Soon
+        </div>
+      </div>
     </div>
   );
 };

@@ -71,10 +71,10 @@ const RewardsScreen = () => {
       description: "Daily Streak",
       isStreak: true,
     },
-    {
-      title: "Current Level",
-      description: "LEVEL 2",
-    },
+    // {
+    //   title: "Current Level",
+    //   description: "LEVEL 2",
+    // },
     {
       title: "Total Weekly Points",
       description: Number(data?.weeklyPoints || 0)?.toLocaleString() || "0",
@@ -164,7 +164,7 @@ const RewardsScreen = () => {
 
         <KPProgressClaimButton
           percentage={percentageTimeLeftToClaim}
-          status={status ? "claimable" : "locked"}
+          status={"claimable"}
           onClaim={() => {}}
         />
       </div>
