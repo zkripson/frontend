@@ -62,7 +62,7 @@ const KPHeader = () => {
             {/* Desktop: show menu */}
             <div className="hidden md:flex items-center gap-4">
               <KPGameRuleModal />
-              {/* <KPLevel /> */}
+              <KPLevel />
               {showProfileBadge && (
                 <div className="shrink-0 w-fit">
                   <KPProfileBadge avatarUrl={pfp} username={username} />
@@ -91,13 +91,13 @@ const KPHeader = () => {
                 <div className="mt-2">
                   <KPGameRuleModal />
                 </div>
-                {/* <div
+                <div
                   className={classNames("w-fit", {
                     " mb-4": !showProfileBadge,
                   })}
                 >
                   <KPLevel />
-                </div> */}
+                </div>
                 {showProfileBadge && (
                   <div className="shrink-0 w-fit mb-4">
                     <KPProfileBadge avatarUrl={pfp} username={username} />

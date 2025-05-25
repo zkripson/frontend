@@ -71,10 +71,10 @@ const RewardsScreen = () => {
       description: "Daily Streak",
       isStreak: true,
     },
-    // {
-    //   title: "Current Level",
-    //   description: "LEVEL 2",
-    // },
+    {
+      title: "Current Level",
+      description: "LEVEL 1",
+    },
     {
       title: "Total Weekly Points",
       description: Number(data?.weeklyPoints || 0)?.toLocaleString() || "0",

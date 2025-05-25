@@ -38,7 +38,7 @@ const Points = () => {
           </div>
         </div>
 
-        {/* <div className="rounded-[50px] px-3 h-6 lg:h-7 flex items-center justify-center gap-2 border border-primary-300">
+        <div className="rounded-[50px] px-3 h-6 lg:h-7 flex items-center justify-center gap-2 border border-primary-300">
           <div className="hidden lg:block">
             <StarIcon fill="#44190C" width={14} height={14} />
           </div>
@@ -48,9 +48,9 @@ const Points = () => {
           </div>
 
           <p className="text-primary-300 font-medium text-[10px] lg:text-[13px]">
-            Level 2
+            Level 1
           </p>
-        </div> */}
+        </div>
       </div>
 
       <ArrowRightAltIcon size="18" />

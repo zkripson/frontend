@@ -17,7 +17,7 @@ const KPLevel = () => {
     >
       <StarIcon fill="#44190C" width={14} height={14} />
       <span className="text-[12px] text-primary-300 font-medium -mb-0.5">
-        Level 2
+        Level 1
       </span>
       <ArrowRightAltIcon size="16" />
     </Link>
