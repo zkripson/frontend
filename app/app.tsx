@@ -1,13 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePrivy } from "@privy-io/react-auth";
-import { KPOngoingSessionsNotifier, KPToastNotification } from "@/components";
+import {
+  KPFullscreenLoader,
+  KPOngoingSessionsNotifier,
+  KPToastNotification,
+} from "@/components";
 import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import Image from "next/image";
 import { usePlayerActions } from "@/store/player/actions";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
+import { sdk } from "@farcaster/frame-sdk";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function RootApp({
   children,
@@ -22,13 +28,27 @@ export default function RootApp({
   } = useSystemFunctions();
   const { getOngoingSessions } = usePlayerActions();
   const { activeWallet } = usePrivyLinkedAccounts();
+  const { loginToFarcasterFrame } = useConnectToFarcaster();
+
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!ready) return;
+    const load = async () => {
+      if (!ready) return;
 
-    if (!user && !authenticated) {
-      navigate.push("/login");
-    }
+      if (!user && !authenticated) {
+        const isMiniApp = await sdk.isInMiniApp();
+        if (isMiniApp) {
+          await loginToFarcasterFrame();
+        } else {
+          navigate.push("/login");
+        }
+      }
+
+      setIsReady(true);
+    };
+
+    load();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, ready]);
@@ -41,14 +61,22 @@ export default function RootApp({
 
   return (
     <>
-      {!ready && (
-        <div className="flex flex-col justify-center items-center h-screen bg-primary-250 gap-4 absolute bottom-0 right-0 left-0 w-screen z-[9999999]">
-          <Image src="/logo.png" alt="logo" width={112} height={112} priority />
-
-          <h1 className="text-3xl md:text-[42px] leading-none text-primary-50 uppercase font-MachineStd animate-bounce">
-            BATTLESHIP
-          </h1>
-        </div>
+      {!isReady && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="setup"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6 }}
+            className="absolute bottom-0 right-0 left-0 w-screen z-[9999999]"
+          >
+            <KPFullscreenLoader
+              title="SETTING UP GAME PROFILE..."
+              loaderDuration={6}
+            />
+          </motion.div>
+        </AnimatePresence>
       )}
 
       {children}

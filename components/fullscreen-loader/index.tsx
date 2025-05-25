@@ -10,6 +10,7 @@ const KPFullscreenLoader = ({
   title,
   loadingMessages,
   showStakeOverview,
+  loaderDuration = 10,
 }: IKPFullscreenLoader) => {
   const {
     inviteState: { invitation, bettingCreation },
@@ -55,7 +56,7 @@ const KPFullscreenLoader = ({
             initial={{ width: "0%" }}
             animate={{ width: "100%" }}
             transition={{
-              duration: 10,
+              duration: loaderDuration,
               ease: "easeInOut",
             }}
           />
