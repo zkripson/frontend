@@ -685,10 +685,16 @@ const useGameSession = (sessionId: string) => {
       // TODO: UI update - show error message to user
     };
 
-    // Handler for points awarded event
     const handlePointsAwarded = (data: PointsAwardedMessage) => {
-      setPointsAwarded((prev) => [...prev, data]);
-      audio.play("coins");
+      if (data.player !== activeWallet?.address) return;
+      setPointsAwarded((prev) => {
+        if (prev.some((msg) => msg.category === data.category)) {
+          return prev;
+        }
+
+        audio.play("coins");
+        return [...prev, data];
+      });
     };
 
     // Handler for points summary event
@@ -734,8 +740,11 @@ const useGameSession = (sessionId: string) => {
 
   // Fetch opponent's profile when opponent joins
   useEffect(() => {
-    const opponentAddress =
-      gameStateLocal.players.find((p) => p !== activeWallet?.address) || "";
+    const opponentAddress = gameStateLocal.players.find(
+      (p) => p !== activeWallet?.address
+    );
+
+    if (!opponentAddress || opponentAddress === activeWallet?.address) return;
 
     if (opponentAddress) {
       getOpponentProfile(opponentAddress);

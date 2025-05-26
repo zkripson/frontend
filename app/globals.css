@@ -79,7 +79,7 @@ body {
 *,
 *::before,
 *::after {
-  cursor: url("/images/cursor_smaller.png") 0 0, auto !important;
+  cursor: url("/images/cursor_smaller.webp") 0 0, auto !important;
 }
 
 /* Then: put text fields back to normal */

@@ -7,7 +7,7 @@ const KPGameBadge = ({
   username,
   isPlayer,
 }: IKPGameBadge) => {
-  const imageURL: string = avatarUrl ? avatarUrl : "/images/kripson.jpeg";
+  const imageURL: string = avatarUrl ? avatarUrl : "/images/kripson.webp";
 
   return (
     <div className="flex flex-col gap-1.5 items-start justify-start w-full max-w-[158px] lg:max-w-fit">

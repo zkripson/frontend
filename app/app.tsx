@@ -9,7 +9,6 @@ import {
 } from "@/components";
 import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
-import Image from "next/image";
 import { usePlayerActions } from "@/store/player/actions";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { sdk } from "@farcaster/frame-sdk";
@@ -22,10 +21,7 @@ export default function RootApp({
 }>) {
   const {} = useConnectToFarcaster();
   const { user, ready, authenticated } = usePrivy();
-  const {
-    navigate,
-    playerState: { ongoingSessions },
-  } = useSystemFunctions();
+  const { navigate } = useSystemFunctions();
   const { getOngoingSessions } = usePlayerActions();
   const { activeWallet } = usePrivyLinkedAccounts();
   const { loginToFarcasterFrame } = useConnectToFarcaster();
