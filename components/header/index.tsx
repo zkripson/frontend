@@ -47,7 +47,7 @@ const KPHeader = () => {
         <div className="flex justify-between items-center w-full h-full relative">
           <Link href={"/"} className="flex items-center gap-2">
             <Image
-              src="/images/bship.png"
+              src="/images/bship.webp"
               alt="Speed Battle Logo"
               width={59}
               height={59}

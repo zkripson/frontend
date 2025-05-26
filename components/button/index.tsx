@@ -11,7 +11,7 @@ import KPLoader from "../loader";
 const icons = {
   farcaster: (
     <Image
-      src="/images/farcaster.png"
+      src="/images/farcaster.webp"
       alt="farcaster"
       width={32}
       height={32}
@@ -21,7 +21,7 @@ const icons = {
   ),
   x: (
     <Image
-      src="/images/x.png"
+      src="/images/x.webp"
       alt="farcaster"
       width={32}
       height={32}

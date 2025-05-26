@@ -46,7 +46,7 @@ const KPOngoingSessionsNotifier = () => {
           {/* Glowing pulse behind the icon */}
           <div className="absolute inset-0 rounded-full bg-primary-50/90 blur-xl animate-ping" />
           <Image
-            src="/images/pendingBattles.png"
+            src="/images/pendingBattles.webp"
             alt="Ongoing Sessions"
             width={80}
             height={80}

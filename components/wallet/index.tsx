@@ -199,7 +199,7 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
                 )}
                 <div className="flex items-center gap-1 md:gap-3">
                   <Image
-                    src="/images/usdc-logo.png"
+                    src="/images/usdc-logo.webp"
                     alt={selectedToken?.symbol || "token"}
                     width={18}
                     height={18}

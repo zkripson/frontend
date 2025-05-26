@@ -233,7 +233,7 @@ export default function General({
             style={{ width: 62, height: 62 }}
           >
             <Image
-              src="/images/general.png"
+              src="/images/general.webp"
               alt="General Choco"
               width={62}
               height={62}

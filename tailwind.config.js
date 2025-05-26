@@ -9,13 +9,13 @@ module.exports = {
   theme: {
     extend: {
       backgroundImage: {
-        primaryBackground: "url('/images/primaryBackground.png')",
-        dialougue: "url('/images/dialougue.png')",
+        primaryBackground: "url('/images/primaryBackground.webp')",
+        dialougue: "url('/images/dialougue.webp')",
         kripson: "url('/images/kripson.png')",
-        iconButton: "url('/images/iconButton.png')",
-        material: "url(/images/material.png)",
-        loadingBackground: "url('/images/loadingBackground.png')",
-        gameBackground: "url('/images/gameBackground.png')",
+        iconButton: "url('/images/iconButton.webp')",
+        material: "url(/images/material.webp)",
+        loadingBackground: "url('/images/loadingBackground.webp')",
+        gameBackground: "url('/images/gameBackground.webp')",
       },
       colors: {
         primary: {

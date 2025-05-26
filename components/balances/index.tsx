@@ -36,7 +36,7 @@ const KPBalances = ({ isSmall }: { isSmall?: boolean }) => {
           >
             {token.symbol.toLowerCase() === "usdt" && (
               <Image
-                src="/images/usdt.png"
+                src="/images/usdt.webp"
                 alt="usdt"
                 width={18}
                 height={18}

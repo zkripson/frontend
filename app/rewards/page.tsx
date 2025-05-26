@@ -123,7 +123,7 @@ const RewardsScreen = () => {
             {item.isStreak && (
               <Image
                 alt="streak"
-                src="/images/streak.png"
+                src="/images/streak.webp"
                 width={31}
                 height={45}
                 className="w-[18px] h-6 lg:w-7 lg:h-9 lg:-ml-1"

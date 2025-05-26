@@ -27,10 +27,10 @@ const KPProfileBadge = ({
 
   const isTwitter = !!linkedTwitter && !linkedFarcaster;
   const iconSrc = linkedFarcaster
-    ? "/images/farcaster.png"
+    ? "/images/farcaster.webp"
     : linkedTwitter
-    ? "/images/x.png"
-    : "/images/farcaster.png";
+    ? "/images/x.webp"
+    : "/images/farcaster.webp";
 
   const actions: Array<IKPButton> = [
     {
@@ -77,7 +77,7 @@ const KPProfileBadge = ({
       >
         <div className="flex items-center gap-2">
           <Image
-            src={avatarUrl || "/images/kripson.jpeg"}
+            src={avatarUrl || "/images/kripson.webp"}
             alt={username}
             width={300}
             height={300}

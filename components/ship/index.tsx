@@ -197,7 +197,7 @@ export default function KPShip({
               >
                 {hit && (
                   <Image
-                    src="/images/fire.png"
+                    src="/images/fire.webp"
                     alt="hit"
                     width={cellSize * 0.85}
                     height={cellSize * 0.85}

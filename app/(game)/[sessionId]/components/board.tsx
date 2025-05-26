@@ -262,7 +262,7 @@ const Board: React.FC<BoardProps> = ({
                     />
                   ) : (
                     <Image
-                      src="/images/fire.png"
+                      src="/images/fire.webp"
                       alt="hit"
                       width={Math.floor(cellSize * 0.85)}
                       height={Math.floor(cellSize * 0.85)}

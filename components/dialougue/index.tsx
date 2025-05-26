@@ -65,7 +65,7 @@ const KPDialougue = ({
 
       {showKripsonImage && (
         <Image
-          src="/images/kripson.jpeg"
+          src="/images/kripson.webp"
           alt="Kripson"
           width={500}
           height={500}
