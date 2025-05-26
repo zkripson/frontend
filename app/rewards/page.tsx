@@ -76,7 +76,7 @@ const RewardsScreen = () => {
       description: "LEVEL 1",
     },
     {
-      title: "Total Weekly Points",
+      title: "Total Weekly Ribbons",
       description: Number(data?.weeklyPoints || 0)?.toLocaleString() || "0",
     },
     {

@@ -50,7 +50,7 @@ const HowToPlay: React.FC = () => {
               </header>
 
               <div className="p-4 flex flex-col gap-10">
-                <ol className="list-decimal list-outside pl-4 space-y-3 text-base leading-relaxed h-fit lg:h-96">
+                <ol className="list-decimal list-outside pl-4 space-y-3 text-base leading-relaxed h-[52vh] lg:h-96 overflow-y-auto">
                   <li>Place your fleet by clicking on ships.</li>
                   <li>On the grid, click a ship to rotate its orientation.</li>
                   <li>Drag a ship to position it anywhere on the grid.</li>

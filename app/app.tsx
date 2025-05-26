@@ -24,7 +24,7 @@ export default function RootApp({
   const { user, ready, authenticated } = usePrivy();
   const {
     navigate,
-    playerState: { ongoingSessions },
+    playerState: { opponentProfile },
   } = useSystemFunctions();
   const { getOngoingSessions } = usePlayerActions();
   const { activeWallet } = usePrivyLinkedAccounts();
@@ -60,6 +60,8 @@ export default function RootApp({
     getOngoingSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWallet?.address]);
+
+  console.log("opponentProfile", opponentProfile);
 
   return (
     <>

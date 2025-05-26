@@ -1,8 +1,12 @@
 "use client";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
+import { useParams } from "next/navigation";
 
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
-import { useParams } from "next/navigation";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
+import useGameSession from "@/hooks/useGameSession";
+import { resetOpponentState } from "@/store/player";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { GameHeader } from "./components/GameHeader";
 import { SetupPanel } from "./components/SetupPanel";
@@ -10,11 +14,10 @@ import GameBoardContainer from "./components/GameBoardContainer";
 import GameFooter from "./components/GameFooter";
 import VictoryStatus from "./components/VictoryStatus";
 
-import useGameSession from "@/hooks/useGameSession";
-
 const GameSession = () => {
   const params = useParams();
   const { activeWallet } = usePrivyLinkedAccounts();
+  const { dispatch } = useSystemFunctions();
 
   const {
     gameStateLocal,
@@ -58,6 +61,13 @@ const GameSession = () => {
     gameOverProcessing,
     pointsAwarded,
   } = useGameSession(params.sessionId as string);
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetOpponentState(null));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="relative flex items-center justify-center flex-1">

@@ -11,7 +11,7 @@ const KPTokenProgressCard = ({
   const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const progress = Math.min(earned / goal, 1);
+  const progress = 99;
   const offset = circumference * (1 - progress);
 
   // Determine which view to render based on earned tokens
@@ -19,6 +19,7 @@ const KPTokenProgressCard = ({
     return (
       <Link
         href="/rewards"
+        replace
         className="bg-primary-50 rounded-2xl p-4 flex items-center justify-between cursor-pointer"
       >
         {/* Progress Circle with Icon */}
@@ -59,13 +60,10 @@ const KPTokenProgressCard = ({
 
         {/* Text Content */}
         <div className="flex-grow sm:px-4 text-primary-300">
-          <h3 className="text-sm font-medium">Tokens Earned</h3>
-          <div className="mt-1 text-[clamp(14px,5vw,18px)] font-bold">
-            {earned}{" "}
-            <span className="font-normal text-[clamp(10px,5vw,12px)]">
-              / {goal}
-            </span>
-          </div>
+          <h3 className="text-sm font-medium">Ribbons Earned</h3>
+          <span className="text-[clamp(24px,5vw,30px)] font-bold">
+            {earned}
+          </span>
           {/* <p className="mt-1 text-[clamp(10px,5vw,12px)] text-primary-300">
             Next: Level {nextLevel}
           </p> */}
@@ -82,7 +80,7 @@ const KPTokenProgressCard = ({
     <div className="bg-primary-50 rounded-2xl p-2 w-full flex flex-col items-center justify-center gap-3">
       <Meh />
       <p className="text-[clamp(10px,2.5vw,12px)] text-primary-300 text-center">
-        NO TOKENS EARNED IN THIS BATTLE
+        NO RIBBONS EARNED IN THIS BATTLE
       </p>
     </div>
   );
