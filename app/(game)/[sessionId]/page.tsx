@@ -60,6 +60,7 @@ const GameSession = () => {
     gameOverPointsSummary,
     gameOverProcessing,
     pointsAwarded,
+    bettingPayouts,
   } = useGameSession(params.sessionId as string);
 
   useEffect(() => {
@@ -162,6 +163,7 @@ const GameSession = () => {
         }
         gameOverPointsSummary={gameOverPointsSummary}
         pointsAwarded={pointsAwarded}
+        bettingPayouts={bettingPayouts}
       />
     </div>
   );

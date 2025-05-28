@@ -11,7 +11,7 @@ const Meh = () => (
       stroke="#44190C"
       strokeWidth="2"
       strokeLinecap="round"
-      stroke-linejoin="round"
+      strokeLinejoin="round"
     />
   </svg>
 );
