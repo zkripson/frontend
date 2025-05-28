@@ -1,8 +1,14 @@
 import axios, { AxiosError } from "axios";
 import { getAccessToken } from "@privy-io/react-auth";
 
+const baseURL = process.env.NEXT_PUBLIC_BASE_API_URL;
+
+if (!baseURL) {
+  throw new Error("NEXT_PUBLIC_BASE_API_URL not found");
+}
+
 const axiosInstance = axios.create({
-  baseURL: "https://zk-battleship-backend.nj-345.workers.dev/api/",
+  baseURL,
 });
 
 axiosInstance.interceptors.response.use(

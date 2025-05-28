@@ -31,8 +31,8 @@ const Points = () => {
           </div>
 
           <div className="flex flex-col justify-start items-start text-primary-300">
-            <p className="text-[8px] md:text-xs">Your Ribbons</p>
-            <p className="text-[13px] md:text-[18px] font-medium">
+            <p className="text-[10px] md:text-sm">Your Ribbons</p>
+            <p className="text-[15px] md:text-[20px] font-medium">
               {totalPoints}
             </p>
           </div>
