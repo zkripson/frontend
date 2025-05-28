@@ -22,8 +22,9 @@ export default function RootApp({
   const {} = useConnectToFarcaster();
   const { user, ready, authenticated } = usePrivy();
   const { navigate } = useSystemFunctions();
-  const { getOngoingSessions } = usePlayerActions();
-  const { activeWallet } = usePrivyLinkedAccounts();
+  const { getOngoingSessions, createProfile } = usePlayerActions();
+  const { activeWallet, linkedFarcaster, linkedTwitter } =
+    usePrivyLinkedAccounts();
   const { loginToFarcasterFrame } = useConnectToFarcaster();
 
   const [isReady, setIsReady] = useState(false);
@@ -56,6 +57,29 @@ export default function RootApp({
     getOngoingSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWallet?.address]);
+
+  useEffect(() => {
+    if (activeWallet && (linkedFarcaster || linkedTwitter)) {
+      const avatar =
+        linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || "";
+      const username =
+        linkedFarcaster?.username || linkedTwitter?.username || "";
+
+      createProfile({
+        address: activeWallet.address,
+        avatar,
+        username,
+        preferences: {
+          animationsEnabled: true,
+          autoSubmitOnHit: true,
+          notifications: true,
+          soundEnabled: true,
+          theme: "dark",
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWallet, linkedFarcaster, linkedTwitter]);
 
   return (
     <>
