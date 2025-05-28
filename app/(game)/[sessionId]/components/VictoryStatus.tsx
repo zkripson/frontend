@@ -213,7 +213,7 @@ const VictoryStatus = ({
               hide: status === "draw",
             }}
           >
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={gameOverProcessing ? "loading" : "main"}
                 initial={{ opacity: 0 }}
