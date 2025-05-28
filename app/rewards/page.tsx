@@ -104,10 +104,10 @@ const RewardsScreen = () => {
       description:
         Number(data?.referralPoints?.earned || 0)?.toLocaleString() || "0",
     },
-    {
-      title: "Total Referrals",
-      description: "6",
-    },
+    // {
+    //   title: "Total Referrals",
+    //   description: "6",
+    // },
   ];
 
   useEffect(() => {
