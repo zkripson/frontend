@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+
 import useGameActions from "@/store/game/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import useGameWebSocket, {
@@ -15,6 +16,7 @@ import useGameWebSocket, {
   PointsSummaryMessage,
   GameOverPointsSummary,
   GameOverProcessingMessage,
+  BettingPayouts,
 } from "@/hooks/useGameWebSocket";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
@@ -134,6 +136,9 @@ const useGameSession = (sessionId: string) => {
 
   const [pointsSummary, setPointsSummary] =
     useState<PointsSummaryMessage | null>(null);
+
+  const [bettingPayouts, setBettingPayouts] = useState<BettingPayouts>();
+
   const [gameStateLocal, setGameStateLocal] = useState<
     GameState & {
       sunkEnemyShips: {
@@ -605,7 +610,10 @@ const useGameSession = (sessionId: string) => {
       // 6. Push through the server-computed points breakdown
       setGameOverPointsSummary(data.pointsSummary);
 
-      // 7. Done processing
+      // 7.Update betting payout
+      setBettingPayouts(data.bettingPayouts);
+
+      // 8. Done processing
       setGameOverProcessing(false);
     };
 
@@ -1194,6 +1202,7 @@ const useGameSession = (sessionId: string) => {
     // --- New State for Points Events ---
     pointsAwarded,
     pointsSummary,
+    bettingPayouts,
     gameOverPointsSummary,
     gameOverProcessing,
   };

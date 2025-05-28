@@ -91,6 +91,16 @@ export interface GameOverProcessingMessage extends WebSocketMessage {
   timestamp: number;
 }
 
+export type Payout = {
+  address: string;
+  amount: string;
+};
+
+export type BettingPayouts = {
+  winner: Payout;
+  loser: Payout;
+};
+
 export interface GameOverMessage extends WebSocketMessage {
   type: "game_end_completed";
   status: "completed";
@@ -123,16 +133,7 @@ export interface GameOverMessage extends WebSocketMessage {
   pointsAwarded: Record<string, number>;
   pointsSummary: GameOverPointsSummary;
   bettingResolved: boolean;
-  bettingPayouts: {
-    winner: {
-      address: string;
-      amount: string;
-    };
-    loser: {
-      address: string;
-      amount: string;
-    };
-  };
+  bettingPayouts: BettingPayouts;
   timestamp: number;
 }
 

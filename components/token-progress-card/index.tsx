@@ -1,11 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
+import CountUp from "react-countup";
 
 import { ArrowRightAltIcon, Meh, StarIcon } from "@/public/icons";
 
 const KPTokenProgressCard = ({
   earned,
-  goal,
-  nextLevel,
+  payout,
+  status,
 }: IKPTokenProgressCard) => {
   const size = 62;
   const strokeWidth = 8;
@@ -14,7 +16,6 @@ const KPTokenProgressCard = ({
   const progress = 99;
   const offset = circumference * (1 - progress);
 
-  // Determine which view to render based on earned tokens
   if (earned > 0) {
     return (
       <Link
@@ -59,14 +60,30 @@ const KPTokenProgressCard = ({
         </div>
 
         {/* Text Content */}
-        <div className="flex-grow sm:px-4 text-primary-300">
+        <div className="flex-grow sm:px-4 text-primary-300 flex flex-col gap-1">
+          {status === "win" && payout && (
+            <div className="flex items-center gap-2 justify-center">
+              <Image
+                src="/images/usdc-logo.webp"
+                alt="USDC"
+                width={20}
+                height={20}
+                quality={100}
+                className="w-5 h-5"
+              />
+              <CountUp
+                start={0}
+                end={parseFloat(payout)}
+                duration={1.5}
+                decimals={2}
+                suffix=" USDC"
+                className="text-base font-semibold text-primary-800"
+              />
+            </div>
+          )}
+
           <h3 className="text-sm font-medium">Ribbons Earned</h3>
-          <span className="text-[clamp(24px,5vw,30px)] font-bold">
-            {earned}
-          </span>
-          {/* <p className="mt-1 text-[clamp(10px,5vw,12px)] text-primary-300">
-            Next: Level {nextLevel}
-          </p> */}
+          <span className="text-[min(5vw,30px)] font-bold">{earned}</span>
         </div>
 
         {/* Chevron Icon */}
@@ -75,7 +92,6 @@ const KPTokenProgressCard = ({
     );
   }
 
-  // Fallback view when no tokens earned
   return (
     <div className="bg-primary-50 rounded-2xl p-2 w-full flex flex-col items-center justify-center gap-3">
       <Meh />
