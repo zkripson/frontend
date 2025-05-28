@@ -142,7 +142,11 @@ const KPProfileBadge = ({
                       className="flex items-center justify-center gap-5 bg-primary-450/25 backdrop-blur-sm border border-primary-50 rounded-full h-10"
                     >
                       <span className="text-[18px] leading-none text-white">
-                        ${balance}
+                        $
+                        {Number(balance).toLocaleString("en-US", {
+                          maximumFractionDigits: 2,
+                          minimumFractionDigits: 2,
+                        })}
                       </span>
                       <span className="text-[12px] leading-none text-white">
                         {symbol}
