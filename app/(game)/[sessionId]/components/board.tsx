@@ -306,13 +306,21 @@ const Board: React.FC<BoardProps> = ({
         ))}
       </div>
 
-      <div className="w-full h-full absolute top-0 left-0 pointer-events-none flex items-center justify-center">
-        {mode === "game" && !yourTurn && (
+      {mode === "game" && (
+        <div
+          className={classNames(
+            "absolute pointer-events-none flex items-center justify-center transition-all duration-500",
+            {
+              "w-full h-full top-0 left-0": !yourTurn,
+              "w-full -top-[5%]": yourTurn,
+            }
+          )}
+        >
           <span className="text-[clamp(18px, 2vw, 24px)] leading-none text-primary-50 whitespace-nowrap text-[24px] font-MachineStd">
             {yourTurn ? "YOUR TURN" : "⏳ OPPONENT's TURN"}
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

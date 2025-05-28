@@ -167,7 +167,7 @@ const VictoryStatus = ({
               {msg.category.toLowerCase().replace(/_/g, " ")}
             </span>
             <span className="font-bold text-primary-50">
-              <CountUp start={0} end={msg.points} duration={0.6} prefix="+" />
+              <CountUp start={0} end={msg.points} duration={2} prefix="+" />
             </span>
           </div>
         ))}
