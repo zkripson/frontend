@@ -56,8 +56,8 @@ const HowToPlay: React.FC = () => {
                   <li>Drag a ship to position it anywhere on the grid.</li>
                   <li>Once ready, click on {"Ready"} to start the game.</li>
                   <li>
-                    Once the game begins, {"you'll"} see a 3-minute countdown
-                    timer. During your turn, you have 15 seconds to click on a
+                    Once the game begins, {"you'll"} see a 2-minute countdown
+                    timer. During your turn, you have 10 seconds to click on a
                     square to fire your shot(guessing where your {"opponent's"}{" "}
                     ship is placed). If you take too long, your turn will
                     automatically skip to give your opponent a chance to play.
