@@ -1,7 +1,8 @@
 {
-  "name": "frontend",
+  "name": "speedbattle",
   "version": "0.1.0",
   "private": true,
+  "author": "Justice Eziefule",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
