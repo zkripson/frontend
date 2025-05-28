@@ -77,7 +77,7 @@ const KPGameRuleModal: React.FC = () => {
                       <ul className="list-disc list-inside ml-6 space-y-1 mt-1">
                         <li>Position 5 ships on your 10×10 grid:</li>
                         <li>Carrier (5 cells)</li>
-                        <li>Speed Battle (4 cells)</li>
+                        <li>Battleship (4 cells)</li>
                         <li>Cruiser (3 cells)</li>
                         <li>Submarine (3 cells)</li>
                         <li>Destroyer (2 cells)</li>
@@ -102,7 +102,7 @@ const KPGameRuleModal: React.FC = () => {
                       <ul className="list-disc list-inside ml-6 space-y-1 mt-1">
                         <li>Players alternate firing shots</li>
                         <li>Select a coordinate to attack (e.g., A5, C7)</li>
-                        <li>You have 15 seconds per turn</li>
+                        <li>You have 10 seconds per turn</li>
                         <li>
                           Hit = continue your turn; Miss = opponent’s turn
                         </li>
@@ -112,7 +112,7 @@ const KPGameRuleModal: React.FC = () => {
                       <strong>Win Conditions</strong>
                       <ul className="list-disc list-inside ml-6 space-y-1 mt-1">
                         <li>Sink all enemy ships to win</li>
-                        <li>Game has a 3-minute time limit</li>
+                        <li>Game has a 2-minute time limit</li>
                         <li>
                           If time runs out, player with most ships sunk wins
                         </li>
@@ -141,7 +141,7 @@ const KPGameRuleModal: React.FC = () => {
 
                 <section>
                   <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4">
-                    Rebbon System
+                    Ribbon System
                   </h2>
 
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">

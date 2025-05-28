@@ -14,12 +14,12 @@ interface KPTimerProps {
 
 const KPTimer: React.FC<KPTimerProps> = ({
   turnStartedAt,
-  turnDuration = 15_000, // 15 seconds per turn
+  turnDuration = 10_000, // 10 seconds per turn
   onExpire,
   isGame,
 }) => {
-  // 3 minute game timer (180000 ms)
-  const GAME_DURATION = 180_000;
+  // 2 minute game timer (180000 ms)
+  const GAME_DURATION = 120_000;
   const [remaining, setRemaining] = useState(
     isGame ? GAME_DURATION : turnDuration
   );
@@ -113,7 +113,7 @@ const KPTimer: React.FC<KPTimerProps> = ({
       lastGameRem = GAME_DURATION;
       gameOverRef.current = false;
       if (gameTimerRef.current) clearInterval(gameTimerRef.current);
-      // Start 3-min timer
+      // Start 2-min timer
       gameTimerRef.current = setInterval(() => {
         const elapsed = Date.now() - gameStart;
         const rem = Math.max(0, GAME_DURATION - elapsed);
