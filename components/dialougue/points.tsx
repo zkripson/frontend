@@ -10,14 +10,16 @@ const Points = () => {
   } = useSystemFunctions();
 
   const totalPoints = Number(playerRewards?.totalPoints || 0).toLocaleString();
+
+  if (!playerRewards) {
+    return <MockPoints />;
+  }
+
   return (
     <KPClickAnimation
       onClick={() => navigate.push("/rewards")}
       className={classNames(
-        "rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer mt-12 lg:mt-20 shadow-lg shadow-primary-100/50",
-        {
-          hidden: !playerRewards,
-        }
+        "rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer mt-12 lg:mt-20 shadow-lg shadow-primary-100/50"
       )}
     >
       <div className="flex items-center gap-6 lg:gap-8">
@@ -51,6 +53,38 @@ const Points = () => {
             Level 1
           </p>
         </div> */}
+      </div>
+
+      <ArrowRightAltIcon size="18" />
+    </KPClickAnimation>
+  );
+};
+
+const MockPoints = () => {
+  const { navigate } = useSystemFunctions();
+
+  return (
+    <KPClickAnimation
+      onClick={() => navigate.push("/rewards")}
+      className={classNames(
+        "rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer mt-12 lg:mt-20 shadow-lg shadow-primary-100/50"
+      )}
+    >
+      <div className="flex items-center gap-6 lg:gap-8">
+        <div className="flex items-center gap-2 lg:gap-3">
+          <div className="hidden lg:flex bg-iconButton bg-contain bg-no-repeat size-8 md:size-[39px] items-center justify-center">
+            <StarIcon />
+          </div>
+
+          <div className="flex lg:hidden bg-iconButton bg-contain bg-no-repeat size-6 items-center justify-center">
+            <StarIcon width={12} height={13} />
+          </div>
+
+          <div className="flex flex-col justify-start items-start text-primary-300">
+            <p className="text-[10px] md:text-sm">Your Ribbons</p>
+            <p className="text-[15px] md:text-[20px] font-medium">0</p>
+          </div>
+        </div>
       </div>
 
       <ArrowRightAltIcon size="18" />
