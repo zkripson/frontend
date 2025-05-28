@@ -50,7 +50,8 @@ const ContentSecurityPolicy = `
     https://sepolia.base.org
     https://api.pimlico.io/v2/84532/rpc
     https://auth.privy.io
-    https://auth.privy.io/api/v2/farcaster/init;
+    https://auth.privy.io/api/v2/farcaster/init
+    https://api.bship.fun;
 
   
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
