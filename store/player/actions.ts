@@ -113,7 +113,12 @@ export const usePlayerActions = () => {
       dispatch(setGetOngoingSessionsLoading(true));
       const response = await playerApi.getOngoingSessions(activeWallet.address);
 
-      dispatch(setOngoingSessions(response.ongoingSessions));
+      const validSessions = response.ongoingSessions.filter((session) => {
+        const ageMs = Date.now() - session.createdAt;
+        return ageMs <= 24 * 60 * 60 * 1000;
+      });
+
+      dispatch(setOngoingSessions(validSessions));
       callbacks?.onSuccess?.(response);
       return response;
     } catch (err) {

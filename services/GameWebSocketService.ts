@@ -1,6 +1,6 @@
 /**
  * GameWebSocketService
- * 
+ *
  * A service for managing WebSocket connections to the game backend.
  * Handles connection establishment, reconnection, message handling, and event dispatching.
  */
@@ -23,14 +23,21 @@ export class GameWebSocketService {
    * Establishes a WebSocket connection to the game server
    */
   connect(): void {
-    if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
-      console.log('WebSocket connection already exists');
+    if (
+      this.ws &&
+      (this.ws.readyState === WebSocket.OPEN ||
+        this.ws.readyState === WebSocket.CONNECTING)
+    ) {
       return;
     }
 
-    const wsUrl = `${this.backendUrl.replace('http', 'ws')}/api/game-updates?sessionId=${this.sessionId}&address=${this.playerAddress}`;
+    const wsUrl = `${this.backendUrl.replace(
+      "http",
+      "ws"
+    )}/api/game-updates?sessionId=${this.sessionId}&address=${
+      this.playerAddress
+    }`;
 
-    console.log(`Connecting to WebSocket: ${wsUrl}`);
     this.ws = new WebSocket(wsUrl);
 
     this.setupEventHandlers();
@@ -44,17 +51,15 @@ export class GameWebSocketService {
     if (!this.ws) return;
 
     this.ws.onopen = () => {
-      console.log('WebSocket connection established');
       this.reconnectAttempts = 0;
 
       // Trigger any registered open handlers
-      this.triggerEvent('open', {});
+      this.triggerEvent("open", {});
     };
 
     this.ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log('WebSocket message received:', data);
 
         // Trigger type-specific event handlers
         if (data.type) {
@@ -62,20 +67,19 @@ export class GameWebSocketService {
         }
 
         // Also trigger general message handler
-        this.triggerEvent('message', data);
+        this.triggerEvent("message", data);
       } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+        console.error("Error parsing WebSocket message:", error);
       }
     };
 
     this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      this.triggerEvent('error', error);
+      console.error("WebSocket error:", error);
+      this.triggerEvent("error", error);
     };
 
     this.ws.onclose = (event) => {
-      console.log(`WebSocket connection closed: ${event.code} ${event.reason}`);
-      this.triggerEvent('close', event);
+      this.triggerEvent("close", event);
 
       // Clean up ping interval
       this.clearPingInterval();
@@ -83,13 +87,12 @@ export class GameWebSocketService {
       // Attempt to reconnect if not closed intentionally
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
         this.reconnectAttempts++;
-        console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
 
         setTimeout(() => {
           this.connect();
         }, this.reconnectInterval * this.reconnectAttempts);
       } else {
-        console.error('Maximum reconnect attempts reached');
+        console.error("Maximum reconnect attempts reached");
       }
     };
   }
@@ -100,11 +103,11 @@ export class GameWebSocketService {
   private setupPingInterval(): void {
     // Clear any existing interval first
     this.clearPingInterval();
-    
+
     // Set up a ping interval (every 30 seconds)
     this.pingInterval = setInterval(() => {
       if (this.isConnected()) {
-        this.send({ type: 'ping' });
+        this.send({ type: "ping" });
       }
     }, 30000);
   }
@@ -124,9 +127,9 @@ export class GameWebSocketService {
    */
   disconnect(): void {
     this.clearPingInterval();
-    
+
     if (this.ws) {
-      this.ws.close(1000, 'Intentional disconnection');
+      this.ws.close(1000, "Intentional disconnection");
       this.ws = null;
     }
   }
@@ -154,7 +157,7 @@ export class GameWebSocketService {
 
     const handlers = this.eventHandlers.get(event);
     if (!handlers) return;
-    
+
     const index = handlers.indexOf(handler);
 
     if (index !== -1) {
@@ -188,7 +191,7 @@ export class GameWebSocketService {
    */
   send(message: any): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.error('Cannot send message: WebSocket is not connected');
+      console.error("Cannot send message: WebSocket is not connected");
       return;
     }
 

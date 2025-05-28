@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+
 import useGameActions from "@/store/game/actions";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import useGameWebSocket, {
@@ -15,6 +16,7 @@ import useGameWebSocket, {
   PointsSummaryMessage,
   GameOverPointsSummary,
   GameOverProcessingMessage,
+  BettingPayouts,
 } from "@/hooks/useGameWebSocket";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import { useLoadingSequence } from "@/hooks/useLoadingSequence";
@@ -134,6 +136,9 @@ const useGameSession = (sessionId: string) => {
 
   const [pointsSummary, setPointsSummary] =
     useState<PointsSummaryMessage | null>(null);
+
+  const [bettingPayouts, setBettingPayouts] = useState<BettingPayouts>();
+
   const [gameStateLocal, setGameStateLocal] = useState<
     GameState & {
       sunkEnemyShips: {
@@ -330,14 +335,12 @@ const useGameSession = (sessionId: string) => {
   // WebSocket connection setup
   useEffect(() => {
     // 📥 DEBUG: log every incoming message
-    on.message("*", (data) => {
-      console.debug("🔴 WS raw message:", data);
-    });
+    // on.message("*", (data) => {
+    //   console.debug("🔴 WS raw message:", data);
+    // });
 
     // Handler for initial session state
     const handleSessionState = (data: SessionStateMessage) => {
-      console.log("Session state received:", data);
-
       // Update game state while preserving all properties
       setGameStateLocal((prev) => ({
         ...prev, // Preserve ALL existing state properties
@@ -359,8 +362,6 @@ const useGameSession = (sessionId: string) => {
 
     // Handler for player joined event
     const handlePlayerJoined = (data: PlayerJoinedMessage) => {
-      console.log("Player joined:", data);
-
       setGameStateLocal((prev) => ({
         ...prev,
         players: data.players || prev.players,
@@ -373,8 +374,6 @@ const useGameSession = (sessionId: string) => {
 
     // Handler for board submitted event
     const handleBoardSubmitted = (data: BoardSubmittedMessage) => {
-      console.log("Board submitted:", data);
-
       setGameStateLocal((prev) => ({
         ...prev,
         gameStatus: data.gameStatus,
@@ -397,8 +396,6 @@ const useGameSession = (sessionId: string) => {
 
     // Handler for game started event
     const handleGameStarted = (data: GameStartedMessage) => {
-      console.log("Game started:", data);
-
       setGameStateLocal((prev) => ({
         ...prev,
         gameStatus: "ACTIVE",
@@ -413,7 +410,6 @@ const useGameSession = (sessionId: string) => {
 
     // Handler for shot fired event (handles all shot updates)
     const handleShotFired = (data: ShotFiredMessage) => {
-      console.log("Shot fired:", data);
       const { x, y, player, isHit, nextTurn, turnStartedAt, sunkShips, sunk } =
         data;
 
@@ -532,7 +528,6 @@ const useGameSession = (sessionId: string) => {
 
     // Handler for turn timeout event
     const handleTurnTimeout = (data: TurnTimeoutMessage) => {
-      console.log("Turn timeout:", data);
       const { nextTurn, turnStartedAt, message } = data;
 
       // Simply update the game state with the new turn info
@@ -544,11 +539,9 @@ const useGameSession = (sessionId: string) => {
       }));
 
       // TODO: Add a turn change sound effect
-      console.log("Turn changed due to timeout:", message);
     };
 
     const handleGameOverProcessing = (data: GameOverProcessingMessage) => {
-      console.log("Game over processing:", data);
       setGameOverProcessing(true);
       setGameStateLocal((prev) => ({
         ...prev,
@@ -559,8 +552,6 @@ const useGameSession = (sessionId: string) => {
 
     // Handler for game over event
     const handleGameOver = (data: GameOverMessage) => {
-      console.log("Game over:", data);
-
       clearTimers();
 
       // 2. Format finalState exactly as you received it
@@ -605,7 +596,10 @@ const useGameSession = (sessionId: string) => {
       // 6. Push through the server-computed points breakdown
       setGameOverPointsSummary(data.pointsSummary);
 
-      // 7. Done processing
+      // 7.Update betting payout
+      setBettingPayouts(data.bettingPayouts);
+
+      // 8. Done processing
       setGameOverProcessing(false);
     };
 
@@ -681,7 +675,6 @@ const useGameSession = (sessionId: string) => {
 
     // Handler for errors
     const handleError = (data: any) => {
-      console.log("WebSocket error:", data);
       // TODO: UI update - show error message to user
     };
 
@@ -1194,6 +1187,7 @@ const useGameSession = (sessionId: string) => {
     // --- New State for Points Events ---
     pointsAwarded,
     pointsSummary,
+    bettingPayouts,
     gameOverPointsSummary,
     gameOverProcessing,
   };

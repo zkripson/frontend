@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 
 import { KPDialougue, KPTokenProgressCard } from "@/components";
 import {
+  BettingPayouts,
   GameOverPointsSummary,
   PointsAwardedMessage,
 } from "@/hooks/useGameWebSocket";
@@ -44,6 +45,7 @@ interface VictoryStatusProps {
   gameOverPointsSummary?: GameOverPointsSummary;
   gameOverProcessing: boolean;
   pointsAwarded?: Array<PointsAwardedMessage>;
+  bettingPayouts?: BettingPayouts;
 }
 
 const VictoryStatus = ({
@@ -55,6 +57,7 @@ const VictoryStatus = ({
   gameOverPointsSummary,
   gameOverProcessing,
   pointsAwarded = [],
+  bettingPayouts,
 }: VictoryStatusProps) => {
   if (status !== "win" && status !== "loss" && status !== "draw") {
     console.warn("VictoryStatus got unexpected status:", status);
@@ -74,12 +77,13 @@ const VictoryStatus = ({
 
   const stats = formatStats(playerStats);
   const totalEarned = gameOverPointsSummary?.[playerStats.address]?.total;
+  const payout = bettingPayouts?.winner?.amount;
 
   const mainContent = (
     <div className="flex flex-col gap-6 max-sm:gap-3 w-full">
       <h1
         className={classNames(
-          "text-[66px] max-sm:text-[50px] leading-none font-MachineStd text-center",
+          "text-[66px] max-sm:text-[50px] leading-none font-MachineStd text-center max-sm:-mt-5",
           {
             "text-primary-1050": status === "win",
             "text-primary-1000": status === "loss",
@@ -109,9 +113,11 @@ const VictoryStatus = ({
 
       {status !== "draw" && (
         <KPTokenProgressCard
-          earned={totalEarned || 0}
+          earned={totalEarned || 10}
           goal={1500}
           nextLevel={3}
+          status={status}
+          payout={payout}
         />
       )}
 
