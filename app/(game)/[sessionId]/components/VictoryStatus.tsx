@@ -79,7 +79,7 @@ const VictoryStatus = ({
     <div className="flex flex-col gap-6 max-sm:gap-3 w-full">
       <h1
         className={classNames(
-          "text-[62px] max-sm:text-[45px] leading-none font-MachineStd text-center",
+          "text-[66px] max-sm:text-[50px] leading-none font-MachineStd text-center",
           {
             "text-primary-1050": status === "win",
             "text-primary-1000": status === "loss",
@@ -91,14 +91,14 @@ const VictoryStatus = ({
       </h1>
 
       <div className="flex flex-col gap-2">
-        <h2 className="text-[32px] max-sm:text-[20px] leading-none font-MachineStd text-primary-50">
+        <h2 className="text-[39px] max-sm:text-[29px] leading-none font-MachineStd text-primary-50">
           stats
         </h2>
         <div className="flex flex-col gap-3 items-center justify-center">
           {stats.map(({ title, value }) => (
             <div
               key={title}
-              className="flex items-center justify-center text-[12px] max-sm:text-[10.69px] leading-none text-primary-50"
+              className="flex items-center justify-center text-[16px] max-sm:text-[14px] leading-none text-primary-50"
             >
               <span>{title}:&nbsp;</span>
               <span className="font-bold">{value}</span>
@@ -107,11 +107,13 @@ const VictoryStatus = ({
         </div>
       </div>
 
-      <KPTokenProgressCard
-        earned={totalEarned || 0}
-        goal={1500}
-        nextLevel={3}
-      />
+      {status !== "draw" && (
+        <KPTokenProgressCard
+          earned={totalEarned || 0}
+          goal={1500}
+          nextLevel={3}
+        />
+      )}
 
       {/* {gameOverPointsSummary && status !== "draw" && (
         <div className="flex flex-col gap-1 items-center mt-2 p-2 rounded bg-primary-950/60 border border-primary-800 max-w-xs mx-auto">
@@ -165,7 +167,7 @@ const VictoryStatus = ({
               {msg.category.toLowerCase().replace(/_/g, " ")}
             </span>
             <span className="font-bold text-primary-50">
-              <CountUp start={0} end={msg.points} duration={0.6} prefix="+" />
+              <CountUp start={0} end={msg.points} duration={2} prefix="+" />
             </span>
           </div>
         ))}
@@ -199,6 +201,7 @@ const VictoryStatus = ({
               icon: "replay",
               onClick: onPlayAgain,
               iconPosition: "right",
+              hide: status === "draw",
               disabled: gameOverProcessing,
             }}
             secondaryCta={{
@@ -207,9 +210,10 @@ const VictoryStatus = ({
               variant: "tertiary",
               onClick: onHome,
               disabled: gameOverProcessing,
+              hide: status === "draw",
             }}
           >
-            <AnimatePresence>
+            <AnimatePresence mode="popLayout">
               <motion.div
                 key={gameOverProcessing ? "loading" : "main"}
                 initial={{ opacity: 0 }}

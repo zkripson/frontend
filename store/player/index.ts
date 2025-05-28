@@ -148,6 +148,10 @@ const playerSlice = createSlice({
     resetPlayerState: (state) => {
       return initialState;
     },
+
+    resetOpponentState: (state, action: PayloadAction<null>) => {
+      state.opponentProfile = action.payload;
+    },
   },
 });
 
@@ -178,6 +182,7 @@ export const {
 
   // Reset actions
   resetPlayerState,
+  resetOpponentState,
 } = playerSlice.actions;
 
 export default playerSlice.reducer;

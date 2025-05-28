@@ -39,7 +39,7 @@ const StakeOverview = ({
         <span className="text-5xl font-bold font-MachineStd">{amount}</span>
         <div className="flex items-center gap-1">
           <Image
-            src={"/images/usdc-logo.png"}
+            src={"/images/usdc-logo.webp"}
             alt="USDC"
             className="max-sm:size-5 size-7"
             width={28}
@@ -54,7 +54,7 @@ const StakeOverview = ({
         <span className="text-5xl font-bold font-MachineStd">{amount}</span>
         <div className="flex items-center gap-1">
           <Image
-            src="/images/usdc-logo.png"
+            src="/images/usdc-logo.webp"
             alt="USDC"
             className="max-sm:size-5 size-7"
             width={28}
