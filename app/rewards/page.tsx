@@ -105,8 +105,6 @@ const RewardsScreen = () => {
     },
   ];
 
-  console.log(percentageTimeLeftToClaim);
-
   return (
     <KPDialougue
       title="REWARDS"
