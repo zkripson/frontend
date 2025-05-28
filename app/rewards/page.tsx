@@ -1,9 +1,12 @@
 "use client";
 import { KPDialougue } from "@/components";
 import { KPProgressClaimButton } from "@/components";
+import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
+import { usePlayerActions } from "@/store/player/actions";
 import classNames from "classnames";
 import Image from "next/image";
+import { useEffect } from "react";
 
 // Function to calculate time remaining from a date string in format "YYYY-MM-DD"
 const calculateTimeRemaining = (dateString?: string) => {
@@ -57,6 +60,8 @@ const RewardsScreen = () => {
     navigate,
     playerState: { playerRewards: data },
   } = useSystemFunctions();
+  const { getPlayerRewards } = usePlayerActions();
+  const { activeWallet } = usePrivyLinkedAccounts();
 
   // Get time remaining from next claim date
   const nextClaimDate = data?.claimStatus?.nextClaimDate;
@@ -104,6 +109,11 @@ const RewardsScreen = () => {
       description: "6",
     },
   ];
+
+  useEffect(() => {
+    getPlayerRewards();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeWallet?.address]);
 
   return (
     <KPDialougue
