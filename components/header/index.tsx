@@ -35,7 +35,7 @@ const KPHeader = () => {
 
     getPlayerRewards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet?.address]);
+  }, [activeWallet]);
 
   return (
     <div className="layout-header-container">

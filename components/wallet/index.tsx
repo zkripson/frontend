@@ -124,7 +124,7 @@ const WalletComponent = ({ isDeposit = false }: { isDeposit?: boolean }) => {
       checkTokenBalance(TOKEN_ADDRESSES.SHIP);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet?.address]);
+  }, [activeWallet]);
 
   return (
     <div className="w-full h-full flex items-center justify-center relative">

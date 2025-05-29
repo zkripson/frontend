@@ -17,7 +17,7 @@ const useBalance = () => {
 
   const checkTokenBalance = useCallback(
     async (tokenAddress: `0x${string}`) => {
-      if (!activeWallet?.address) {
+      if (!activeWallet) {
         setError("No wallet connected");
         return null;
       }
@@ -38,7 +38,7 @@ const useBalance = () => {
           address: tokenAddress,
           abi: erc20Abi,
           functionName: "balanceOf",
-          args: [activeWallet.address as `0x${string}`],
+          args: [activeWallet as `0x${string}`],
         });
 
         // Format balance with correct decimals
@@ -76,7 +76,7 @@ const useBalance = () => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activeWallet?.address]
+    [activeWallet]
   );
 
   return {

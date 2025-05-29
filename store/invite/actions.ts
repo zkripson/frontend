@@ -29,7 +29,7 @@ const useInviteActions = () => {
 
       dispatch(setLoadingInviteCreation(true));
 
-      const creator = activeWallet.address;
+      const creator = activeWallet;
       const body = { creator };
       const response = await inviteAPI.createInvite(body);
 
@@ -50,7 +50,7 @@ const useInviteActions = () => {
 
       dispatch(setLoadingInviteAcceptance(true));
 
-      const player = activeWallet.address;
+      const player = activeWallet;
       const body = { player, code };
       const response = await inviteAPI.acceptInvite(body);
 
@@ -71,7 +71,7 @@ const useInviteActions = () => {
             message = "This invite has already been accepted";
             isAlreadyAcceptedError = true;
           } else {
-            message = apiError;
+            message = "Something went wrong!";
           }
         }
       }
@@ -92,7 +92,7 @@ const useInviteActions = () => {
 
       dispatch(setLoadingInviteCreation(true));
 
-      const creator = activeWallet.address;
+      const creator = activeWallet;
       const body = { creator, stakeAmount };
       const response = await inviteAPI.createBettingInvite(body);
 
@@ -117,7 +117,7 @@ const useInviteActions = () => {
 
       dispatch(setLoadingInviteAcceptance(true));
 
-      const player = activeWallet.address;
+      const player = activeWallet;
       const body = { player, code };
       const response = await inviteAPI.acceptBettingInvite(body);
 

@@ -2,21 +2,6 @@ import FrameSDK from "@farcaster/frame-sdk";
 import { useState, useEffect } from "react";
 import type * as Provider from "ox/Provider";
 
-// Define a generic EIP-1193 Ethereum Provider type
-type EthereumRequest = {
-  method: string;
-  params?: unknown[] | object;
-};
-
-type EthereumProvider = {
-  request: (args: EthereumRequest) => Promise<any>;
-  on: (event: string, listener: (...args: any[]) => void) => void;
-  removeListener?: (event: string, listener: (...args: any[]) => void) => void;
-  isMetaMask?: boolean;
-  isWarpcast?: boolean;
-  [key: string]: any;
-};
-
 const useWarpcastWallet = () => {
   const [provider, setProvider] = useState<Provider.Provider | null>(null);
   const [address, setAddress] = useState<`0x${string}` | null>(null);

@@ -56,7 +56,7 @@ export default function RootApp({
   useEffect(() => {
     getOngoingSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet?.address]);
+  }, [activeWallet]);
 
   useEffect(() => {
     if (activeWallet && (linkedFarcaster || linkedTwitter)) {
@@ -66,7 +66,7 @@ export default function RootApp({
         linkedFarcaster?.username || linkedTwitter?.username || "";
 
       createProfile({
-        address: activeWallet.address,
+        address: activeWallet,
         avatar,
         username,
         preferences: {

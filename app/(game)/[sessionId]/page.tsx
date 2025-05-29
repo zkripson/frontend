@@ -152,8 +152,8 @@ const GameSession = () => {
         onPlayAgain={handlePlayAgain}
         onHome={handlePlayAgain}
         playerStats={
-          gameStateLocal.playerStats?.[activeWallet?.address || ""] || {
-            address: activeWallet?.address || "",
+          gameStateLocal.playerStats?.[activeWallet || ""] || {
+            address: activeWallet || "",
             shotsCount: 0,
             hitsCount: 0,
             accuracy: 0,
