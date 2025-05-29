@@ -4,6 +4,7 @@ import {
   WalletWithMetadata,
 } from "@privy-io/react-auth";
 import useConnectToFarcaster from "./useConnectToFarcaster";
+import useWarpcastWallet from "./useWarpcastWallet";
 
 function isPrivyWallet<T extends "ethereum" | "solana">(
   account: LinkedAccountWithMetadata,
@@ -16,21 +17,10 @@ function isPrivyWallet<T extends "ethereum" | "solana">(
   );
 }
 
-const isWalletWithAddress = (
-  account: LinkedAccountWithMetadata | undefined
-): account is LinkedAccountWithMetadata & { address: string } => {
-  return (
-    account?.type === "wallet" &&
-    !account?.delegated &&
-    account?.connectorType !== "embedded" &&
-    account?.walletClientType !== "privy" &&
-    "address" in (account || {})
-  );
-};
-
 const usePrivyLinkedAccounts = () => {
   const { user } = usePrivy();
   const { isFrameLoaded } = useConnectToFarcaster();
+  const { address: farcasterAddress } = useWarpcastWallet();
 
   const embeddedEvmWallet = user?.linkedAccounts.find((account) =>
     isPrivyWallet(account, "ethereum")
@@ -44,11 +34,9 @@ const usePrivyLinkedAccounts = () => {
     (account) => account.type === "smart_wallet"
   );
 
-  const farcasterWallet = user?.linkedAccounts.find(isWalletWithAddress);
-
   const activeWallet = isFrameLoaded
-    ? farcasterWallet
-    : smartWallet || embeddedEvmWallet;
+    ? farcasterAddress
+    : smartWallet?.address || embeddedEvmWallet?.address;
 
   const linkedTwitter = user?.linkedAccounts?.find(
     (account) => account.type === "twitter_oauth"

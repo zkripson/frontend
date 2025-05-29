@@ -11,6 +11,7 @@ import { useAudio } from "@/providers/AudioProvider";
 import { useEffect, useState } from "react";
 import { Howler } from "howler";
 import { ArrowIcon } from "@/public/icons";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 interface GameHeaderProps {
   mode: "setup" | "game";
@@ -36,6 +37,7 @@ export function GameHeader({
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
   const { showToast } = useAppActions();
   const audio = useAudio();
+  const { appState } = useSystemFunctions();
 
   // Mute toggle state
   const [muted, setMuted] = useState(() => {
@@ -48,9 +50,12 @@ export function GameHeader({
     Howler.volume(muted ? 0 : 1);
   }, [muted]);
 
-  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const username =
+    appState?.farcasterContext?.username || linkedTwitter?.username || "";
   const pfp =
-    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
+    appState?.farcasterContext?.pfpUrl ||
+    linkedTwitter?.profilePictureUrl ||
+    undefined;
 
   const handleShareInvite = () => {
     if (navigator.share) {

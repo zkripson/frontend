@@ -16,6 +16,7 @@ const KPFullscreenLoader = ({
   const {
     inviteState: { invitation, bettingCreation },
     playerState: { opponentProfile, ongoingSessions },
+    appState,
   } = useSystemFunctions();
 
   const params = useParams();
@@ -37,9 +38,12 @@ const KPFullscreenLoader = ({
         0;
 
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
-  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const username =
+    appState?.farcasterContext?.username || linkedTwitter?.username || "";
   const pfp =
-    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
+    appState?.farcasterContext?.pfpUrl ||
+    linkedTwitter?.profilePictureUrl ||
+    undefined;
 
   return (
     <div

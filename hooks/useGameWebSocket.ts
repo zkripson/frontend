@@ -209,9 +209,9 @@ export function useGameWebSocket(sessionId: string) {
 
   // Create or use existing WebSocket service
   useEffect(() => {
-    if (!sessionId || !activeWallet?.address) return;
+    if (!sessionId || !activeWallet) return;
 
-    const playerAddress = activeWallet.address;
+    const playerAddress = activeWallet;
     const baseUrl = isDevEnv
       ? "https://zk-battleship-backend.nj-345.workers.dev"
       : "https://api.bship.fun";
@@ -273,7 +273,7 @@ export function useGameWebSocket(sessionId: string) {
         wsServiceRef.current = null;
       }
     };
-  }, [sessionId, activeWallet?.address]);
+  }, [sessionId, activeWallet]);
 
   /**
    * Registers a handler for a specific message type

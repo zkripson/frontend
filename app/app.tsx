@@ -21,7 +21,7 @@ export default function RootApp({
 }>) {
   const {} = useConnectToFarcaster();
   const { user, ready, authenticated } = usePrivy();
-  const { navigate } = useSystemFunctions();
+  const { navigate, appState } = useSystemFunctions();
   const { getOngoingSessions, createProfile } = usePlayerActions();
   const { activeWallet, linkedFarcaster, linkedTwitter } =
     usePrivyLinkedAccounts();
@@ -56,17 +56,19 @@ export default function RootApp({
   useEffect(() => {
     getOngoingSessions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet?.address]);
+  }, [activeWallet]);
 
   useEffect(() => {
     if (activeWallet && (linkedFarcaster || linkedTwitter)) {
-      const avatar =
-        linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || "";
       const username =
-        linkedFarcaster?.username || linkedTwitter?.username || "";
+        appState?.farcasterContext?.username || linkedTwitter?.username || "";
+      const avatar =
+        appState?.farcasterContext?.pfpUrl ||
+        linkedTwitter?.profilePictureUrl ||
+        "";
 
       createProfile({
-        address: activeWallet.address,
+        address: activeWallet,
         avatar,
         username,
         preferences: {

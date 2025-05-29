@@ -21,12 +21,16 @@ const KPHeader = () => {
   const { linkedFarcaster, linkedTwitter, activeWallet } =
     usePrivyLinkedAccounts();
   const { getPlayerRewards } = usePlayerActions();
+  const { appState } = useSystemFunctions();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const username =
+    appState?.farcasterContext?.username || linkedTwitter?.username || "";
   const pfp =
-    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
+    appState?.farcasterContext?.pfpUrl ||
+    linkedTwitter?.profilePictureUrl ||
+    undefined;
   const showProfileBadge = pathname === "/" || pathname === "/rewards";
 
   useEffect(() => {
@@ -35,7 +39,7 @@ const KPHeader = () => {
 
     getPlayerRewards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet?.address]);
+  }, [activeWallet]);
 
   return (
     <div className="layout-header-container">

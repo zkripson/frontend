@@ -122,7 +122,7 @@ const useWithdrawal = () => {
         abi: erc20Abi,
         functionName: "allowance",
         args: [
-          activeWallet?.address as `0x${string}`,
+          activeWallet as `0x${string}`,
           TOKEN_ADDRESSES.BETTING as Address,
         ],
       });
@@ -144,7 +144,7 @@ const useWithdrawal = () => {
       if (isFrameLoaded && warpcastAddress) {
         walletAddress = warpcastAddress;
       } else {
-        walletAddress = activeWallet?.address as `0x${string}`;
+        walletAddress = activeWallet as `0x${string}`;
       }
 
       // Check if already approved using both methods

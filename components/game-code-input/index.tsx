@@ -100,7 +100,7 @@ const KPGameCodeInput = ({
       checkTokenBalance(TOKEN_ADDRESSES.SHIP);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet?.address]);
+  }, [activeWallet]);
 
   useEffect(() => {
     const timer = setTimeout(async () => {

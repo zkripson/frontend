@@ -107,7 +107,7 @@ describe("useInviteActions", () => {
 
       // Verify API was called correctly
       expect(inviteAPI.createInvite).toHaveBeenCalledWith({
-        creator: mockactiveWallet.address,
+        creator: mockactiveWallet,
       });
 
       // Verify redux actions
@@ -151,7 +151,7 @@ describe("useInviteActions", () => {
       // Verify API was called correctly
       expect(inviteAPI.acceptInvite).toHaveBeenCalledWith({
         code: inviteCode,
-        player: mockactiveWallet.address,
+        player: mockactiveWallet,
       });
 
       // Verify redux actions

@@ -54,10 +54,10 @@ export const usePlayerActions = () => {
 
   const getProfile = async (callbacks?: CallbackProps) => {
     try {
-      if (!activeWallet?.address) return;
+      if (!activeWallet) return;
 
       dispatch(setGetProfileLoading(true));
-      const profile = await playerApi.getProfile(activeWallet.address);
+      const profile = await playerApi.getProfile(activeWallet);
       dispatch(setPlayerProfile(profile));
       callbacks?.onSuccess?.(profile);
       return profile;
@@ -89,13 +89,10 @@ export const usePlayerActions = () => {
     callbacks?: CallbackProps
   ) => {
     try {
-      if (!activeWallet?.address) return;
+      if (!activeWallet) return;
 
       dispatch(setUpdateProfileLoading(true));
-      const response = await playerApi.updateProfile(
-        activeWallet.address,
-        data
-      );
+      const response = await playerApi.updateProfile(activeWallet, data);
       dispatch(setPlayerProfile(response.profile));
       callbacks?.onSuccess?.(response);
       return response;
@@ -108,10 +105,10 @@ export const usePlayerActions = () => {
 
   const getOngoingSessions = async (callbacks?: CallbackProps) => {
     try {
-      if (!activeWallet?.address) return;
+      if (!activeWallet) return;
 
       dispatch(setGetOngoingSessionsLoading(true));
-      const response = await playerApi.getOngoingSessions(activeWallet.address);
+      const response = await playerApi.getOngoingSessions(activeWallet);
 
       const validSessions = response.ongoingSessions.filter((session) => {
         const ageMs = Date.now() - session.createdAt;
@@ -133,10 +130,10 @@ export const usePlayerActions = () => {
   // Rewards and points actions
   const getPlayerRewards = async (callbacks?: CallbackProps) => {
     try {
-      if (!activeWallet?.address) return;
+      if (!activeWallet) return;
 
       dispatch(setGetPlayerRewardsLoading(true));
-      const rewards = await playerApi.getPlayerRewards(activeWallet.address);
+      const rewards = await playerApi.getPlayerRewards(activeWallet);
       dispatch(setPlayerRewards(rewards));
       callbacks?.onSuccess?.(rewards);
       return rewards;
@@ -149,10 +146,10 @@ export const usePlayerActions = () => {
 
   const getPlayerPoints = async (callbacks?: CallbackProps) => {
     try {
-      if (!activeWallet?.address) return;
+      if (!activeWallet) return;
 
       dispatch(setGetPlayerPointsLoading(true));
-      const points = await playerApi.getPlayerPoints(activeWallet.address);
+      const points = await playerApi.getPlayerPoints(activeWallet);
       dispatch(setPlayerPoints(points));
       callbacks?.onSuccess?.(points);
       return points;

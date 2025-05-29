@@ -279,7 +279,7 @@ const useGameSession = (sessionId: string) => {
         );
         setGameTimeRemaining((prev) => {
           if (prev === remaining) return prev;
-          // if (remaining <= 0 && activeWallet?.address) {
+          // if (remaining <= 0 && activeWallet) {
           //   clearInterval(timer);
           //   gameActions.forfeitGame(ForfeitGameReason.TIMEOUT, {
           //     onSuccess: () => console.log("Game forfeited due to timeout"),
@@ -293,7 +293,7 @@ const useGameSession = (sessionId: string) => {
   }, [
     gameStateLocal.gameStartedAt,
     gameStateLocal.gameStatus,
-    activeWallet?.address,
+    activeWallet,
     gameActions,
   ]);
 
@@ -390,7 +390,7 @@ const useGameSession = (sessionId: string) => {
         playerStats: prev.playerStats,
       }));
 
-      if (!data.allBoardsSubmitted && data.player === activeWallet?.address) {
+      if (!data.allBoardsSubmitted && data.player === activeWallet) {
         setGeneralMessage({ key: "waiting", id: Date.now() });
       }
     };
@@ -414,20 +414,20 @@ const useGameSession = (sessionId: string) => {
       const { x, y, player, isHit, nextTurn, turnStartedAt, sunkShips, sunk } =
         data;
 
-      if (!activeWallet?.address) return;
+      if (!activeWallet) return;
 
       setGameStateLocal((prev) => {
         // If I'm the shooter, update enemy board
-        if (player === activeWallet.address) {
+        if (player === activeWallet) {
           const newEnemyBoard = prev.enemyBoard.map((row) => [...row]);
           newEnemyBoard[y][x] = isHit ? 2 : 1; // 2 for hit, 1 for miss
 
           const opponentAddress =
-            prev.players.find((p) => p !== activeWallet.address) || "";
+            prev.players.find((p) => p !== activeWallet) || "";
 
           // Update the player's stats in real-time
-          const currentStats = prev.playerStats?.[activeWallet.address] || {
-            address: activeWallet.address,
+          const currentStats = prev.playerStats?.[activeWallet] || {
+            address: activeWallet,
             shotsCount: 0,
             hitsCount: 0,
             accuracy: 0,
@@ -442,7 +442,7 @@ const useGameSession = (sessionId: string) => {
             turnStartedAt: turnStartedAt,
             playerStats: {
               ...prev.playerStats,
-              [activeWallet.address]: {
+              [activeWallet]: {
                 ...currentStats,
                 shotsCount: currentStats.shotsCount + 1,
                 hitsCount: currentStats.hitsCount + (isHit ? 1 : 0),
@@ -451,7 +451,7 @@ const useGameSession = (sessionId: string) => {
                     (currentStats.shotsCount + 1)) *
                     100
                 ),
-                shipsSunk: sunkShips[activeWallet.address] || 0,
+                shipsSunk: sunkShips[activeWallet] || 0,
                 avgTurnTime: calculateAvgTurnTime(
                   currentStats.avgTurnTime,
                   currentStats.shotsCount,
@@ -467,7 +467,7 @@ const useGameSession = (sessionId: string) => {
           newPlayerBoard[y][x] = isHit ? -2 : -1; // -2 for hit, -1 for miss
 
           const opponentAddress =
-            prev.players.find((p) => p !== activeWallet.address) || "";
+            prev.players.find((p) => p !== activeWallet) || "";
 
           // Update opponent's stats in real-time
           const opponentStats = prev.playerStats?.[opponentAddress] || {
@@ -511,7 +511,7 @@ const useGameSession = (sessionId: string) => {
       playSound(isHit ? "hit" : "miss");
 
       // Set general message for shot events
-      if (player === activeWallet?.address) {
+      if (player === activeWallet) {
         if (isHit) {
           setGeneralMessage({ key: "hit", id: Date.now() });
         } else {
@@ -579,7 +579,7 @@ const useGameSession = (sessionId: string) => {
       // 4. Play the appropriate sound
       if (!data.winner) {
         audio?.play("game_draw_restart_voiceover");
-      } else if (data.winner === activeWallet?.address) {
+      } else if (data.winner === activeWallet) {
         audio?.play("you_won_voiceover");
       } else {
         audio?.play("you_lost_voiceover");
@@ -607,7 +607,7 @@ const useGameSession = (sessionId: string) => {
     // Handler for ship sunk event
     const handleShipSunk = (data: any) => {
       // Only show 'sunk' message and update sunkEnemyShips if the player made the shot
-      if (data.player === activeWallet?.address) {
+      if (data.player === activeWallet) {
         setGeneralMessage({
           key: "sunk",
           id: Date.now(),
@@ -633,7 +633,7 @@ const useGameSession = (sessionId: string) => {
         });
       }
       // Update hitMap for the sunk ship ONLY if the sunk ship belongs to the local player
-      if (data.targetPlayer === activeWallet?.address) {
+      if (data.targetPlayer === activeWallet) {
         setGeneralMessage({
           key: "opponent-sunk",
           id: Date.now(),
@@ -680,7 +680,7 @@ const useGameSession = (sessionId: string) => {
     };
 
     const handlePointsAwarded = (data: PointsAwardedMessage) => {
-      if (data.player !== activeWallet?.address) return;
+      if (data.player !== activeWallet) return;
       setPointsAwarded((prev) => {
         if (prev.some((msg) => msg.category === data.category)) {
           return prev;
@@ -735,16 +735,16 @@ const useGameSession = (sessionId: string) => {
   // Fetch opponent's profile when opponent joins
   useEffect(() => {
     const opponentAddress = gameStateLocal.players.find(
-      (p) => p !== activeWallet?.address
+      (p) => p !== activeWallet
     );
 
-    if (!opponentAddress || opponentAddress === activeWallet?.address) return;
+    if (!opponentAddress || opponentAddress === activeWallet) return;
 
     if (opponentAddress) {
       getOpponentProfile(opponentAddress);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameStateLocal.players, activeWallet?.address]);
+  }, [gameStateLocal.players, activeWallet]);
 
   const canPlaceShip = (
     cells: { x: number; y: number }[],
@@ -767,7 +767,7 @@ const useGameSession = (sessionId: string) => {
   };
 
   const submitBoard = async () => {
-    if (!activeWallet?.address || gameStateLocal.ships.length === 0) return;
+    if (!activeWallet || gameStateLocal.ships.length === 0) return;
     setGameStateLocal((prev) => ({
       ...prev,
       gameStatus: "SETUP",
@@ -776,7 +776,7 @@ const useGameSession = (sessionId: string) => {
     try {
       await gameActions.submitBoardCommitment(
         {
-          address: activeWallet.address,
+          address: activeWallet,
           boardCommitment: generateBoardCommitment(),
           ships: gameStateLocal.ships,
         },
@@ -807,7 +807,7 @@ const useGameSession = (sessionId: string) => {
   // New UI State for simplicity
   const mode: "setup" | "game" =
     gameStateLocal.gameStatus === "ACTIVE" ? "game" : "setup";
-  const yourTurn = activeWallet?.address === gameStateLocal.currentTurn;
+  const yourTurn = activeWallet === gameStateLocal.currentTurn;
   const turnStartedAt = gameStateLocal.turnStartedAt ?? undefined;
   const gameCode = gameStateLocal.sessionId ?? undefined;
   const onHam = () => {}; // Placeholder, implement as needed
@@ -920,10 +920,7 @@ const useGameSession = (sessionId: string) => {
     }
 
     // Then check if it's the player's turn and cell hasn't been shot
-    if (
-      !activeWallet?.address ||
-      gameStateLocal.currentTurn !== activeWallet.address
-    ) {
+    if (!activeWallet || gameStateLocal.currentTurn !== activeWallet) {
       console.error("Not your turn");
       return;
     }
@@ -936,7 +933,7 @@ const useGameSession = (sessionId: string) => {
       await gameActions.makeShot({
         x,
         y,
-        address: activeWallet.address,
+        address: activeWallet,
       });
     } catch (error) {
       console.error("Error making shot:", error);
@@ -947,7 +944,7 @@ const useGameSession = (sessionId: string) => {
     Object.values(shipsInPosition).some((placed) => !placed) ||
     gameStateLocal.players.length < 2;
 
-  const selfAddress = activeWallet?.address ?? "";
+  const selfAddress = activeWallet ?? "";
   const opponentAddress =
     gameStateLocal.players.find((p) => p !== selfAddress) ?? "";
 
@@ -979,7 +976,7 @@ const useGameSession = (sessionId: string) => {
   const showVictory = gameStateLocal.gameStatus === "COMPLETED";
   const isDraw =
     gameStateLocal.gameStatus === "COMPLETED" && !gameStateLocal.winner;
-  const isWinner = gameStateLocal.winner === activeWallet?.address;
+  const isWinner = gameStateLocal.winner === activeWallet;
   const victoryStatus: "draw" | "win" | "loss" = isDraw
     ? "draw"
     : isWinner
@@ -1093,10 +1090,10 @@ const useGameSession = (sessionId: string) => {
   });
 
   const currentTurn =
-    gameStateLocal.currentTurn && activeWallet?.address
+    gameStateLocal.currentTurn && activeWallet
       ? {
           playerId: gameStateLocal.currentTurn,
-          isMyTurn: gameStateLocal.currentTurn === activeWallet.address,
+          isMyTurn: gameStateLocal.currentTurn === activeWallet,
         }
       : null;
 

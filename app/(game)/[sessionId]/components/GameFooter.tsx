@@ -32,15 +32,19 @@ export function GameFooter({
 }: GameFooterProps) {
   const {
     playerState: { opponentProfile },
+    appState,
   } = useSystemFunctions();
 
   const showWarning = overlaps.length > 0;
 
   // YOUR profile from Privy-linked accounts
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
-  const username = linkedFarcaster?.username || linkedTwitter?.username || "";
+  const username =
+    appState?.farcasterContext?.username || linkedTwitter?.username || "";
   const pfp =
-    linkedFarcaster?.pfp || linkedTwitter?.profilePictureUrl || undefined;
+    appState?.farcasterContext?.pfpUrl ||
+    linkedTwitter?.profilePictureUrl ||
+    undefined;
 
   // Opponent’s truncated address
   const { truncatedText: opponentName } = useTruncateText(

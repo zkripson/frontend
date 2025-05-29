@@ -23,10 +23,9 @@ const useFunding = () => {
   });
 
   const fundWallet = (amount?: string) => {
-    if (!activeWallet?.address)
-      return showToast("Something went wrong!", "error");
+    if (!activeWallet) return showToast("Something went wrong!", "error");
 
-    return fundEVMWallet(activeWallet?.address, {
+    return fundEVMWallet(activeWallet, {
       chain: defaultChain,
       amount,
       asset: {
