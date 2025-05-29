@@ -1,6 +1,16 @@
 import classNames from "classnames";
 
+import useSystemFunctions from "@/hooks/useSystemFunctions";
+import ExpiryCountdown from "./expiry-countdown";
+
 const KPGameDetails = ({ invitation, isSmall }: IKPGameDetails) => {
+  const {
+    playerState: { opponentProfile },
+  } = useSystemFunctions();
+
+  const creator = opponentProfile?.username
+    ? opponentProfile.username
+    : `${invitation.creator.slice(0, 6)}...${invitation.creator.slice(-4)}`;
   return (
     <div
       className={classNames(
@@ -63,7 +73,7 @@ const KPGameDetails = ({ invitation, isSmall }: IKPGameDetails) => {
             isSmall ? "text-xs" : "text-sm lg:text-base"
           )}
         >
-          {invitation.creator.slice(0, 6)}...{invitation.creator.slice(-4)}
+          {creator}
         </span>
       </div>
 
@@ -82,11 +92,7 @@ const KPGameDetails = ({ invitation, isSmall }: IKPGameDetails) => {
             isSmall ? "text-xs" : "text-sm lg:text-base"
           )}
         >
-          {Math.max(
-            0,
-            Math.floor((invitation.expiresAt - Date.now()) / 1000 / 60)
-          )}{" "}
-          minutes
+          <ExpiryCountdown createdAt={invitation.createdAt} />
         </span>
       </div>
     </div>
