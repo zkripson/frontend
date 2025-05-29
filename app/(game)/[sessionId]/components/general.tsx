@@ -187,21 +187,29 @@ export default function General({
     // This effect will run on every uniqueId change, even if messageKey is the same
   }, [uniqueId]);
 
-  // Show bubble on message change, hide after 2s
+  // Show bubble on message change, hide after 2s (unless waiting)
   useEffect(() => {
     if (!messageKey) return;
     setShowBubble(true);
-    const timeout = setTimeout(() => setShowBubble(false), 2000);
-    return () => clearTimeout(timeout);
+
+    // don’t auto‐hide if we’re in the “waiting” key
+    if (messageKey !== "waiting") {
+      const timeout = setTimeout(() => setShowBubble(false), 2000);
+      return () => clearTimeout(timeout);
+    }
+    // if messageKey === "waiting", we return nothing → bubble persists
   }, [messageKey, uniqueId]);
 
-  // Show mobile text on message change, hide after 2s
+  // Show mobile text, hide after 2s (unless waiting)
   const [showMobileText, setShowMobileText] = useState(false);
   useEffect(() => {
     if (!messageKey) return;
     setShowMobileText(true);
-    const timeout = setTimeout(() => setShowMobileText(false), 2000);
-    return () => clearTimeout(timeout);
+
+    if (messageKey !== "waiting") {
+      const timeout = setTimeout(() => setShowMobileText(false), 2000);
+      return () => clearTimeout(timeout);
+    }
   }, [messageKey, uniqueId]);
 
   const displayTextFinal = isArray

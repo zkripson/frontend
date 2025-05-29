@@ -28,6 +28,7 @@ interface GameBoardContainerProps {
   opponentShips?: ShipType[];
   waitingForOpponent?: boolean;
   yourTurn?: boolean;
+  boardSubmitted?: boolean;
 }
 
 export function GameBoardContainer({
@@ -48,6 +49,7 @@ export function GameBoardContainer({
   opponentShips = [],
   waitingForOpponent,
   yourTurn,
+  boardSubmitted,
 }: GameBoardContainerProps) {
   const {
     gameState: { loadingSubmitBoardCommitment },
@@ -102,6 +104,7 @@ export function GameBoardContainer({
           mode={mode}
           shots={{}}
           onShoot={handleShoot}
+          boardSubmitted={boardSubmitted}
         />
         <div className="bp1215:hidden w-full absolute top-[103%] left-0">
           <AnimatePresence mode="popLayout">
