@@ -33,6 +33,7 @@ interface BoardProps {
   onShoot: (x: number, y: number, isHit: boolean) => void;
   showAllShipsInGame?: boolean;
   yourTurn?: boolean;
+  boardSubmitted?: boolean;
 }
 
 const Board: React.FC<BoardProps> = ({
@@ -45,6 +46,7 @@ const Board: React.FC<BoardProps> = ({
   shots,
   showAllShipsInGame,
   yourTurn,
+  boardSubmitted,
 }) => {
   const { isXSmall, isSmall, isMedium, isLarge, isXLarge, is2XLarge } =
     useScreenDetect();
@@ -280,7 +282,8 @@ const Board: React.FC<BoardProps> = ({
       <div
         ref={cellsRef}
         className={classNames("absolute", {
-          "pointer-events-none": mode === "game",
+          "pointer-events-none":
+            mode === "game" || (mode === "setup" && boardSubmitted),
         })}
         style={{
           top: 0,
@@ -307,15 +310,7 @@ const Board: React.FC<BoardProps> = ({
       </div>
 
       {mode === "game" && (
-        <div
-          className={classNames(
-            "absolute pointer-events-none flex items-center justify-center transition-all duration-500",
-            {
-              "w-full h-full top-0 left-0": !yourTurn,
-              "w-full -top-[5%]": yourTurn,
-            }
-          )}
-        >
+        <div className="absolute pointer-events-none flex items-center justify-center transition-all duration-500 w-full -top-6">
           <span className="text-[clamp(18px, 2vw, 24px)] leading-none text-primary-50 whitespace-nowrap text-[24px] font-MachineStd">
             {yourTurn ? "YOUR TURN" : "⏳ OPPONENT's TURN"}
           </span>

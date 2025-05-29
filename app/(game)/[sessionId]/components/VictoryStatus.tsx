@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import classNames from "classnames";
 import CountUp from "react-countup";
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 
 import { KPDialougue, KPTokenProgressCard } from "@/components";
 import {
@@ -9,6 +10,7 @@ import {
   GameOverPointsSummary,
   PointsAwardedMessage,
 } from "@/hooks/useGameWebSocket";
+import RematchCountdown from "./rematch-countdown";
 
 const titles = {
   win: "You Win!",
@@ -81,21 +83,44 @@ const VictoryStatus = ({
 
   const mainContent = (
     <div className="flex flex-col gap-6 max-sm:gap-3 w-full">
-      <h1
-        className={classNames(
-          "text-[66px] max-sm:text-[50px] leading-none font-MachineStd text-center max-sm:-mt-5",
-          {
-            "text-primary-1050": status === "win",
-            "text-primary-1000": status === "loss",
-            "text-primary-250/80": status === "draw",
-          }
-        )}
-      >
-        {titles[status]}
-      </h1>
+      <div className="flex flex-col -space-y-3 max-sm:-space-y-1.5 items-center">
+        <h1
+          className={classNames(
+            "text-[66px] max-sm:text-[min(9vw,36px)] leading-none font-MachineStd text-center max-sm:-mt-5",
+            {
+              "text-primary-1050": status === "win",
+              "text-primary-1000": status === "loss",
+              "text-primary-250/80": status === "draw",
+            }
+          )}
+        >
+          {titles[status]}
+        </h1>
 
-      <div className="flex flex-col gap-2">
-        <h2 className="text-[39px] max-sm:text-[29px] leading-none font-MachineStd text-primary-50">
+        {status === "win" && payout && (
+          <div className="flex items-center gap-2 justify-center">
+            <Image
+              src="/images/usdc-logo.webp"
+              alt="USDC"
+              width={20}
+              height={20}
+              quality={100}
+              className="w-8 h-8 max-sm:size-5"
+            />
+            <CountUp
+              start={0}
+              end={parseFloat(payout)}
+              duration={1.5}
+              decimals={2}
+              suffix=" USDC"
+              className="text-[36px] max-sm:text-[min(9vw,20px)] font-semibold text-primary-1050"
+            />
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2 mt-5">
+        <h2 className="text-[39px] max-sm:text-[min(9vw,20px)] leading-none font-MachineStd text-primary-50">
           stats
         </h2>
         <div className="flex flex-col gap-3 items-center justify-center">
@@ -111,13 +136,13 @@ const VictoryStatus = ({
         </div>
       </div>
 
+      {status === "draw" && <RematchCountdown />}
+
       {status !== "draw" && (
         <KPTokenProgressCard
           earned={totalEarned || 0}
           goal={1500}
           nextLevel={3}
-          status={status}
-          payout={payout}
         />
       )}
 

@@ -61,6 +61,7 @@ const GameSession = () => {
     gameOverProcessing,
     pointsAwarded,
     bettingPayouts,
+    boardSubmitted,
   } = useGameSession(params.sessionId as string);
 
   useEffect(() => {
@@ -128,6 +129,7 @@ const GameSession = () => {
             onFireShot={makeShot}
             waitingForOpponent={gameStateLocal.players.length < 2}
             yourTurn={yourTurn}
+            boardSubmitted={boardSubmitted}
             {...(mode === "game" && { opponentShips })}
           />
 

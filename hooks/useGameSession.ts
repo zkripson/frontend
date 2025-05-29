@@ -175,6 +175,7 @@ const useGameSession = (sessionId: string) => {
   });
   const [gameOverPointsSummary, setGameOverPointsSummary] =
     useState<GameOverPointsSummary>();
+  const [boardSubmitted, setBoardSubmitted] = useState(false);
 
   const [turnTimeRemaining, setTurnTimeRemaining] = useState(15);
   const [gameTimeRemaining, setGameTimeRemaining] = useState(180);
@@ -780,7 +781,10 @@ const useGameSession = (sessionId: string) => {
           ships: gameStateLocal.ships,
         },
         {
-          onSuccess: () => setInventoryVisible(false),
+          onSuccess: () => {
+            setInventoryVisible(false);
+            setBoardSubmitted(true);
+          },
         }
       );
     } catch (error) {
@@ -1190,6 +1194,7 @@ const useGameSession = (sessionId: string) => {
     bettingPayouts,
     gameOverPointsSummary,
     gameOverProcessing,
+    boardSubmitted,
   };
 };
 

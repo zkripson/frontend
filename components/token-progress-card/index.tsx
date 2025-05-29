@@ -1,32 +1,33 @@
-import Image from "next/image";
+"use client";
 import Link from "next/link";
-import CountUp from "react-countup";
+
+import { useScreenDetect } from "@/hooks/useScreenDetect";
 
 import { ArrowRightAltIcon, Meh, StarIcon } from "@/public/icons";
 
-const KPTokenProgressCard = ({
-  earned,
-  payout,
-  status,
-}: IKPTokenProgressCard) => {
-  const size = 62;
-  const strokeWidth = 8;
+const KPTokenProgressCard = ({ earned }: IKPTokenProgressCard) => {
+  const { isXSmall, isSmall } = useScreenDetect();
+  const isCompact = isXSmall || isSmall;
+
+  const size = isCompact ? 48 : 62;
+  const strokeWidth = isCompact ? 6 : 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const progress = 99;
+  const progress = 99; // or wire up real progress
   const offset = circumference * (1 - progress);
+  const iconSize = isCompact ? 12 : 16;
 
   if (earned > 0) {
     return (
       <Link
         href="/rewards"
         replace
-        className="bg-primary-50 rounded-2xl p-4 flex items-center justify-between cursor-pointer"
+        className="bg-primary-50 rounded-2xl p-4 flex items-center justify-between cursor-pointer max-sm:p-2"
       >
-        {/* Progress Circle with Icon */}
-        <div className="relative w-16 h-16">
+        {/* Progress Circle */}
+        <div className="relative" style={{ width: size, height: size }}>
           <svg width={size} height={size} className="transform -rotate-90">
-            {/* Background Circle */}
+            {/* background */}
             <circle
               className="stroke-[#F7C785]"
               strokeWidth={strokeWidth}
@@ -35,7 +36,7 @@ const KPTokenProgressCard = ({
               cy={size / 2}
               r={radius}
             />
-            {/* Progress Circle */}
+            {/* progress */}
             <circle
               className="stroke-primary-200"
               strokeWidth={strokeWidth}
@@ -48,45 +49,21 @@ const KPTokenProgressCard = ({
               strokeLinecap="square"
             />
           </svg>
-          {/* Center Icon */}
+          {/* Star center */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="hidden lg:flex bg-iconButton bg-contain bg-no-repeat size-8 md:size-[39px] items-center justify-center">
-              <StarIcon />
-            </div>
-            <div className="flex lg:hidden bg-iconButton bg-contain bg-no-repeat size-9 items-center justify-center">
-              <StarIcon width={16} height={16} />
+            <div className="size-[65%] bg-iconButton bg-contain bg-no-repeat flex items-center justify-center mt-[1px] ml-[1px]">
+              <StarIcon width={iconSize} height={iconSize} />
             </div>
           </div>
         </div>
 
-        {/* Text Content */}
+        {/* Text */}
         <div className="flex-grow sm:px-4 text-primary-300 flex flex-col gap-1">
-          {status === "win" && payout && (
-            <div className="flex items-center gap-2 justify-center">
-              <Image
-                src="/images/usdc-logo.webp"
-                alt="USDC"
-                width={20}
-                height={20}
-                quality={100}
-                className="w-5 h-5"
-              />
-              <CountUp
-                start={0}
-                end={parseFloat(payout)}
-                duration={1.5}
-                decimals={2}
-                suffix=" USDC"
-                className="text-base font-semibold text-primary-800"
-              />
-            </div>
-          )}
-
-          <h3 className="text-sm font-medium">Ribbons Earned</h3>
+          <h3 className="text-[min(5vw,14px)] font-medium">Ribbons Earned</h3>
           <span className="text-[min(5vw,30px)] font-bold">{earned}</span>
         </div>
 
-        {/* Chevron Icon */}
+        {/* Chevron */}
         <ArrowRightAltIcon />
       </Link>
     );
