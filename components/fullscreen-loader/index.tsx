@@ -1,6 +1,7 @@
 "use client";
 import classNames from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
+import { useParams } from "next/navigation";
 
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import StakeOverview from "./stake-overview";
@@ -14,8 +15,26 @@ const KPFullscreenLoader = ({
 }: IKPFullscreenLoader) => {
   const {
     inviteState: { invitation, bettingCreation },
-    playerState: { opponentProfile },
+    playerState: { opponentProfile, ongoingSessions },
   } = useSystemFunctions();
+
+  const params = useParams();
+  const sessionId = params?.sessionId as string | undefined;
+
+  let sessionStakeAmount: number | string | undefined = undefined;
+  if (sessionId && ongoingSessions && ongoingSessions.length > 0) {
+    const session = ongoingSessions.find((s) => s.sessionId === sessionId);
+    if (session && session.stakeAmount) {
+      sessionStakeAmount = session.stakeAmount;
+    }
+  }
+
+  const amount =
+    sessionStakeAmount !== undefined
+      ? sessionStakeAmount
+      : Number(invitation?.stakeAmount) ||
+        Number(bettingCreation?.stakeAmount) ||
+        0;
 
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
   const username = linkedFarcaster?.username || linkedTwitter?.username || "";
@@ -39,11 +58,7 @@ const KPFullscreenLoader = ({
       >
         {showStakeOverview && (
           <StakeOverview
-            amount={
-              Number(invitation?.stakeAmount) ||
-              Number(bettingCreation?.stakeAmount) ||
-              0
-            }
+            amount={amount}
             leftAvatarUrl={pfp!}
             leftName={username}
             rightAvatarUrl={opponentProfile?.avatar}

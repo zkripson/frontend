@@ -113,7 +113,7 @@ const VictoryStatus = ({
 
       {status !== "draw" && (
         <KPTokenProgressCard
-          earned={totalEarned || 10}
+          earned={totalEarned || 0}
           goal={1500}
           nextLevel={3}
           status={status}
