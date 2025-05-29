@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { GameWebSocketService } from "../services/GameWebSocketService";
 import useSystemFunctions from "./useSystemFunctions";
 import usePrivyLinkedAccounts from "./usePrivyLinkedAccounts";
+import { isDevEnv } from "@/providers/PrivyProvider";
 
 // Types for WebSocket messages
 export interface WebSocketMessage {
@@ -207,7 +208,9 @@ export function useGameWebSocket(sessionId: string) {
     if (!sessionId || !activeWallet?.address) return;
 
     const playerAddress = activeWallet.address;
-    const baseUrl = "https://zk-battleship-backend.nj-345.workers.dev";
+    const baseUrl = isDevEnv
+      ? "https://zk-battleship-backend.nj-345.workers.dev"
+      : "https://api.bship.fun";
 
     if (!wsServiceRef.current) {
       wsServiceRef.current = new GameWebSocketService(
