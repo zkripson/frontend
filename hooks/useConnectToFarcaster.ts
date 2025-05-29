@@ -42,7 +42,7 @@ const useConnectToFarcaster = () => {
       if (isMiniApp) {
         setTimeout(() => {
           sdk.actions.addMiniApp();
-        }, 15000);
+        }, 5000);
       }
     };
 
