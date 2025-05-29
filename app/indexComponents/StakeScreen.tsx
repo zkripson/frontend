@@ -78,7 +78,7 @@ const StakeScreen: React.FC<StakeScreenProps> = ({ onBack, nextScreen }) => {
         );
       }
       setApprovingTransfer(true);
-      await approveTransfer(amount);
+      await approveTransfer();
 
       setTimeout(() => {
         nextScreen();

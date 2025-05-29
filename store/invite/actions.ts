@@ -102,6 +102,7 @@ const useInviteActions = () => {
     } catch (error) {
       console.error(error);
       callback?.onError?.(error);
+      return showToast("Something went wrong!", "error");
     } finally {
       dispatch(setLoadingInviteCreation(false));
     }
@@ -142,7 +143,7 @@ const useInviteActions = () => {
         }
       }
 
-      showToast(message, "error");
+      showToast("Something went wrong!", "error");
       callback?.onError?.(err);
     } finally {
       dispatch(setLoadingInviteAcceptance(false));

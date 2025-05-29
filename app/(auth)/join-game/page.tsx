@@ -43,7 +43,7 @@ const JoinGameComponent = () => {
 
     try {
       setApprovingTransfer(true);
-      await approveTransfer(Number(invitation?.stakeAmount));
+      await approveTransfer();
       await acceptBettingInvite(code);
     } catch (err) {
       setError("Failed to join the game. Please try again later.");

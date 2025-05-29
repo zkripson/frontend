@@ -17,6 +17,7 @@ import useBalance from "./useBalance";
 import { defaultChain } from "@/providers/PrivyProvider";
 import useConnectToFarcaster from "./useConnectToFarcaster";
 import useWarpcastWallet from "./useWarpcastWallet";
+import usePrivyLinkedAccounts from "./usePrivyLinkedAccounts";
 
 type TokenType = keyof typeof TOKEN_ADDRESSES;
 
@@ -28,6 +29,7 @@ const useWithdrawal = () => {
   const { isFrameLoaded } = useConnectToFarcaster();
   const { provider: warpcastProvider, address: warpcastAddress } =
     useWarpcastWallet();
+  const { activeWallet } = usePrivyLinkedAccounts();
 
   const transferToken = async (
     toAddress: Address,
@@ -107,10 +109,55 @@ const useWithdrawal = () => {
     }
   };
 
-  const approveTransfer = async (amount: number) => {
+  const checkAllowance = async (): Promise<boolean> => {
     try {
-      // Convert amount to proper decimals (USDC uses 6 decimals)
-      const tokenAmount = parseUnits(amount.toString(), 6);
+      const publicClient = createPublicClient({
+        chain: defaultChain,
+        transport: http(),
+      });
+
+      // Read the current allowance from the USDC contract
+      const allowance = await publicClient.readContract({
+        address: TOKEN_ADDRESSES.USDC as Address,
+        abi: erc20Abi,
+        functionName: "allowance",
+        args: [
+          activeWallet?.address as `0x${string}`,
+          TOKEN_ADDRESSES.BETTING as Address,
+        ],
+      });
+
+      // Check if allowance is greater than 0 (already approved)
+      return BigInt(allowance) > BigInt(0);
+    } catch (error) {
+      console.error("Error checking allowance:", error);
+      // Default to false if check fails
+      return false;
+    }
+  };
+
+  const approveTransfer = async () => {
+    try {
+      // Get the current wallet address
+      let walletAddress: Address;
+
+      if (isFrameLoaded && warpcastAddress) {
+        walletAddress = warpcastAddress;
+      } else {
+        walletAddress = activeWallet?.address as `0x${string}`;
+      }
+
+      // Check if already approved using both methods
+      const isApprovedOnChain = await checkAllowance();
+
+      if (isApprovedOnChain) {
+        return null;
+      }
+
+      // Use max uint256 value for unlimited approval
+      const maxUint256 = BigInt(
+        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      );
 
       let hash;
 
@@ -118,7 +165,7 @@ const useWithdrawal = () => {
         const data = encodeFunctionData({
           abi: erc20Abi,
           functionName: "approve",
-          args: [TOKEN_ADDRESSES.BETTING as Address, tokenAmount],
+          args: [TOKEN_ADDRESSES.BETTING as Address, maxUint256],
         });
 
         hash = await warpcastProvider.request({
@@ -143,14 +190,14 @@ const useWithdrawal = () => {
 
         const uiOptions: SendTransactionModalUIOptions = {
           description: `Approve USDC for betting`,
-          buttonText: `Approve ${amount} USDC`,
+          buttonText: `Approve unlimited USDC`,
         };
 
-        // Encode the ERC20 approve function call
+        // Encode the ERC20 approve function call with unlimited amount
         const data = encodeFunctionData({
           abi: erc20Abi,
           functionName: "approve",
-          args: [TOKEN_ADDRESSES.BETTING as Address, tokenAmount],
+          args: [TOKEN_ADDRESSES.BETTING as Address, maxUint256],
         });
 
         hash = await client.sendTransaction(
@@ -174,7 +221,8 @@ const useWithdrawal = () => {
         });
 
         if (receipt.status === "success") {
-          showToast("Approval confirmed!", "success");
+          // Save approval to localStorage
+          showToast("Approved!", "success");
         } else {
           showToast("Something went wrong. Try again!", "error");
           throw new Error("Approval failed");
@@ -185,7 +233,6 @@ const useWithdrawal = () => {
 
       return hash;
     } catch (error) {
-      console.error("Approval error:", error);
       showToast("Failed to approve USDC", "error");
       throw error;
     }
@@ -194,6 +241,7 @@ const useWithdrawal = () => {
   return {
     transferToken,
     approveTransfer,
+    checkAllowance,
   };
 };
 

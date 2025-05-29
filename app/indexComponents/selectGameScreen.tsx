@@ -34,7 +34,7 @@ const SelectGameScreen = ({
       if (!code) return;
 
       setLoading(true);
-      await approveTransfer(Number(invitation?.stakeAmount));
+      await approveTransfer();
 
       await acceptBettingInvite(code);
     } catch (e) {
