@@ -9,24 +9,29 @@ import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import KPBackdrop from "@/components/backdrop";
 import KPButton from "../button";
-import { DropdownIcon } from "@/public/icons";
+import { CopyIcon, DropdownIcon } from "@/public/icons";
+import useTruncateText from "@/hooks/useTruncateText";
+import KPClickAnimation from "../click-animation";
+import useCopy from "@/hooks/useCopy";
 
 const KPProfileBadge = ({
   username,
   avatarUrl,
   variant = "primary",
 }: IKPProfileBadge) => {
-  const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
+  const { linkedTwitter, activeWallet } = usePrivyLinkedAccounts();
   const { logout } = usePrivy();
+  const { truncate } = useTruncateText();
+  const { handleCopy } = useCopy("Copied address");
   const {
-    appState: { balances },
+    appState: { balances, farcasterContext },
     navigate,
   } = useSystemFunctions();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
 
-  const isTwitter = !!linkedTwitter && !linkedFarcaster;
-  const iconSrc = linkedFarcaster
+  const isTwitter = !!linkedTwitter && !farcasterContext;
+  const iconSrc = farcasterContext
     ? "/images/farcaster.webp"
     : linkedTwitter
     ? "/images/x.webp"
@@ -84,24 +89,48 @@ const KPProfileBadge = ({
             className="size-5 lg:size-8 rounded-full object-cover"
             quality={80}
           />
-          <span
-            className={classNames("text-[9px] lg:text-[14px] leading-none", {
-              "text-primary-300": variant === "primary",
-              "text-white": variant === "secondary",
-            })}
-          >
-            @{username}
-          </span>
+          <div className="flex flex-col justify-start items-start gap-0.5">
+            <span
+              className={classNames(
+                "text-[9px] lg:text-[14px] leading-none font-semibold",
+                {
+                  "text-primary-300": variant === "primary",
+                  "text-white": variant === "secondary",
+                }
+              )}
+            >
+              @{username}
+            </span>
+
+            <KPClickAnimation
+              onClick={() => handleCopy(activeWallet || "")}
+              className="flex items-center gap-1.5"
+            >
+              <p
+                className={classNames(
+                  "text-[9px] lg:text-[11px] leading-none",
+                  {
+                    "text-primary-300": variant === "primary",
+                    "text-white": variant === "secondary",
+                  }
+                )}
+              >
+                {truncate(activeWallet || "")}
+              </p>
+
+              <CopyIcon size="16" color="grey" />
+            </KPClickAnimation>
+          </div>
         </div>
         <div
-          className={classNames({
+          className={classNames("pl-2 lg:pl-3", {
             "flex-shrink-0": variant === "primary",
             "flex items-center justify-center gap-2": variant === "secondary",
           })}
         >
           <Image
             src={iconSrc}
-            alt={linkedFarcaster ? "Farcaster" : "Twitter"}
+            alt={farcasterContext ? "Farcaster" : "Twitter"}
             width={200}
             height={200}
             quality={80}
