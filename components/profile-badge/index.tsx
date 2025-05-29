@@ -105,6 +105,7 @@ const KPProfileBadge = ({
             <KPClickAnimation
               onClick={() => handleCopy(activeWallet || "")}
               className="flex items-center gap-1.5"
+              stopPropagation
             >
               <p
                 className={classNames(

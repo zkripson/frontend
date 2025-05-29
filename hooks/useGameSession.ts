@@ -32,6 +32,14 @@ const loadingMessages: string[] = [
   "Deploying smart contract...",
 ];
 
+const shipConfigs = [
+  { name: "Carrier", length: 5 },
+  { name: "Battleship", length: 4 },
+  { name: "Cruiser", length: 3 },
+  { name: "Submarine", length: 3 },
+  { name: "Destroyer", length: 2 },
+];
+
 const calculateAvgTurnTime = (
   currentAvg: number,
   totalShots: number,
@@ -177,8 +185,8 @@ const useGameSession = (sessionId: string) => {
     useState<GameOverPointsSummary>();
   const [boardSubmitted, setBoardSubmitted] = useState(false);
 
-  const [turnTimeRemaining, setTurnTimeRemaining] = useState(15);
-  const [gameTimeRemaining, setGameTimeRemaining] = useState(180);
+  const [turnTimeRemaining, setTurnTimeRemaining] = useState(10);
+  const [gameTimeRemaining, setGameTimeRemaining] = useState(120);
   const audio = useAudio();
   const playSound = useCallback(
     (type: "hit" | "miss" | "place") => {
@@ -193,20 +201,70 @@ const useGameSession = (sessionId: string) => {
 
   const [gameOverProcessing, setGameOverProcessing] = useState(false);
 
+  useEffect(() => {
+    if (
+      gameStateLocal.ships.length === 0 &&
+      gameStateLocal.playerBoard.every((row) => row.every((cell) => cell === 0))
+    ) {
+      const board = Array(10)
+        .fill(0)
+        .map(() => Array(10).fill(0));
+      const newShips: Ship[] = [];
+      shipConfigs.forEach((config, idx) => {
+        const cells = findRandomShipPlacement(config.length, board);
+        if (cells) {
+          cells.forEach((cell) => {
+            board[cell.y][cell.x] = idx + 1;
+          });
+          newShips.push({
+            id: `ship-${config.name}`,
+            name: config.name,
+            length: config.length,
+            cells,
+          });
+        }
+      });
+      setGameStateLocal((prev) => ({
+        ...prev,
+        ships: newShips,
+        playerBoard: board,
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStateLocal.gameStatus]);
+
   // Helper to trigger the actual rematch reset
-  const triggerRematchReset = useCallback(() => {
+  const triggerRematchReset = () => {
+    // Create a fresh board and randomly place all ships
+    const board = Array(10)
+      .fill(0)
+      .map(() => Array(10).fill(0));
+    const newShips: Ship[] = [];
+    shipConfigs.forEach((config, idx) => {
+      const cells = findRandomShipPlacement(config.length, board);
+      if (cells) {
+        cells.forEach((cell) => {
+          board[cell.y][cell.x] = idx + 1;
+        });
+        newShips.push({
+          id: `ship-${config.name}-${Date.now()}-${Math.random()}`, // unique id
+          name: config.name,
+          length: config.length,
+          cells,
+        });
+      }
+    });
+
     setGameStateLocal((prev) => ({
       ...prev,
       gameStatus: "SETUP",
       winner: null,
       finalState: undefined,
-      playerBoard: Array(10)
-        .fill(0)
-        .map(() => Array(10).fill(0)),
+      playerBoard: board,
       enemyBoard: Array(10)
         .fill(0)
         .map(() => Array(10).fill(0)),
-      ships: [],
+      ships: newShips,
       sunkEnemyShips: [],
       playerStats: {},
       currentTurn: null,
@@ -214,21 +272,22 @@ const useGameSession = (sessionId: string) => {
       gameStartedAt: null,
     }));
 
-    setInventoryVisible(true); // Reset inventory panel to visible
-    setOverlaps([]); // Reset overlaps to empty
-    setGeneralMessage(null); // Clear any general message
-    setTurnTimeRemaining(15); // Reset turn timer
-    setGameTimeRemaining(180); // Reset game timer
+    setOverlaps([]);
+    setGeneralMessage(null);
+    setTurnTimeRemaining(10);
+    setGameTimeRemaining(120);
     setRematchReadyReceived(false);
     setDrawAudioDone(false);
-  }, []);
+    setBoardSubmitted(false);
+  };
 
   // Effect to check if both conditions are met
   useEffect(() => {
     if (rematchReadyReceived && drawAudioDone) {
       triggerRematchReset();
     }
-  }, [rematchReadyReceived, drawAudioDone, triggerRematchReset]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rematchReadyReceived, drawAudioDone]);
 
   // --- Timers and Effects ---
   const [turnTimer, setTurnTimer] = useState<NodeJS.Timeout | null>(null);
@@ -249,7 +308,7 @@ const useGameSession = (sessionId: string) => {
   useEffect(() => {
     const turnStartTime = gameStateLocal.turnStartedAt;
     if (turnStartTime && gameStateLocal.gameStatus === "ACTIVE") {
-      setTurnTimeRemaining(15);
+      setTurnTimeRemaining(10);
       const timer = setInterval(() => {
         setTurnTimeRemaining((prev) => {
           const newValue = Math.max(0, prev - 1);
@@ -370,7 +429,7 @@ const useGameSession = (sessionId: string) => {
       }));
 
       // Could also play a sound or show a notification here
-      // playSound("join") // if we had this sound effect
+      setGeneralMessage({ key: "opponent_joined", id: Date.now() });
     };
 
     // Handler for board submitted event
@@ -404,8 +463,8 @@ const useGameSession = (sessionId: string) => {
         turnStartedAt: data.turnStartedAt,
         gameStartedAt: data.turnStartedAt, // Use this for game timer
       }));
-      setTurnTimeRemaining(15); // Reset turn timer
-      setGameTimeRemaining(180); // Reset game timer
+      setTurnTimeRemaining(10); // Reset turn timer
+      setGameTimeRemaining(120); // Reset game timer
       setGeneralMessage({ key: "game-start", id: Date.now() });
     };
 
@@ -737,9 +796,7 @@ const useGameSession = (sessionId: string) => {
     const opponentAddress = gameStateLocal.players.find(
       (p) => p !== activeWallet
     );
-
     if (!opponentAddress || opponentAddress === activeWallet) return;
-
     if (opponentAddress) {
       getOpponentProfile(opponentAddress);
     }
@@ -781,10 +838,7 @@ const useGameSession = (sessionId: string) => {
           ships: gameStateLocal.ships,
         },
         {
-          onSuccess: () => {
-            setInventoryVisible(false);
-            setBoardSubmitted(true);
-          },
+          onSuccess: () => setBoardSubmitted(true),
         }
       );
     } catch (error) {
@@ -813,8 +867,6 @@ const useGameSession = (sessionId: string) => {
   const onHam = () => {}; // Placeholder, implement as needed
   const onTurnExpiry = () => {}; // Placeholder, implement as needed
 
-  // State for inventory panel visibility
-  const [inventoryVisible, setInventoryVisible] = useState(true);
   const shipsInPosition: Record<string, boolean> = {
     Carrier: !!gameStateLocal.ships.find((s) => s.name === "Carrier"),
     Battleship: !!gameStateLocal.ships.find((s) => s.name === "Battleship"),
@@ -822,14 +874,6 @@ const useGameSession = (sessionId: string) => {
     Submarine: !!gameStateLocal.ships.find((s) => s.name === "Submarine"),
     Destroyer: !!gameStateLocal.ships.find((s) => s.name === "Destroyer"),
   };
-
-  const shipConfigs = [
-    { name: "Carrier", length: 5 },
-    { name: "Battleship", length: 4 },
-    { name: "Cruiser", length: 3 },
-    { name: "Submarine", length: 3 },
-    { name: "Destroyer", length: 2 },
-  ];
 
   function findRandomShipPlacement(
     length: number,
@@ -855,58 +899,6 @@ const useGameSession = (sessionId: string) => {
     }
     return null;
   }
-
-  const onPlaceShip = (variant: string) => {
-    if (gameStateLocal.ships.find((s) => s.name === variant)) return;
-    const config = shipConfigs.find((s) => s.name === variant);
-    if (!config) return;
-    // Copy board
-    const board = gameStateLocal.playerBoard.map((row) => [...row]);
-    // Place the new ship
-    const cells = findRandomShipPlacement(config.length, board);
-    if (!cells) return;
-    const shipIndex = shipConfigs.findIndex((s) => s.name === variant) + 1;
-    cells.forEach((cell) => {
-      board[cell.y][cell.x] = shipIndex;
-    });
-    setGameStateLocal((prev) => ({
-      ...prev,
-      ships: [
-        ...prev.ships,
-        {
-          id: `ship-${variant}`,
-          name: variant,
-          length: config.length,
-          cells,
-        },
-      ],
-      playerBoard: board,
-    }));
-    playSound("place");
-  };
-
-  const onShuffle = () => {
-    const placedShips = gameStateLocal.ships;
-    const board = Array(10)
-      .fill(0)
-      .map(() => Array(10).fill(0));
-    const newShips: Ship[] = [];
-    for (const ship of placedShips) {
-      const cells = findRandomShipPlacement(ship.length, board);
-      if (!cells) continue;
-      const shipIndex = shipConfigs.findIndex((s) => s.name === ship.name) + 1;
-      cells.forEach((cell) => {
-        board[cell.y][cell.x] = shipIndex;
-      });
-      newShips.push({ ...ship, cells });
-    }
-    setGameStateLocal((prev) => ({
-      ...prev,
-      ships: newShips,
-      playerBoard: board,
-    }));
-    playSound("place");
-  };
 
   const onReady = () => {
     submitBoard();
@@ -1007,14 +999,22 @@ const useGameSession = (sessionId: string) => {
       ...prev,
       ships: prev.ships.map((ship) => {
         if (ship.id !== id) return ship;
-        // Flip orientation by swapping x/y deltas
-        const base = ship.cells[0];
-        const isHorizontal =
-          ship.cells.length > 1 && ship.cells[0].y === ship.cells[1].y;
-        const newCells = ship.cells.map((cell, idx) =>
-          isHorizontal
-            ? { x: base.x, y: base.y + idx }
-            : { x: base.x + idx, y: base.y }
+        const length = ship.cells.length;
+        const base = { ...ship.cells[0] };
+        const isHorizontal = length > 1 && ship.cells[0].y === ship.cells[1].y;
+        // Adjust base to keep ship in bounds after flip
+        if (isHorizontal) {
+          // Flipping to vertical
+          if (base.y + length > 10) base.y = 10 - length;
+        } else {
+          // Flipping to horizontal
+          if (base.x + length > 10) base.x = 10 - length;
+        }
+        const newCells = Array.from({ length }).map(
+          (_, idx) =>
+            isHorizontal
+              ? { x: base.x, y: base.y + idx } // to vertical
+              : { x: base.x + idx, y: base.y } // to horizontal
         );
         return { ...ship, cells: newCells };
       }),
@@ -1149,8 +1149,6 @@ const useGameSession = (sessionId: string) => {
     canPlaceShip,
     submitBoard,
     generateBoardCommitment,
-    onPlaceShip,
-    onShuffle,
     onReady,
     updateShipPosition,
     flipShip,
@@ -1161,8 +1159,6 @@ const useGameSession = (sessionId: string) => {
     yourTurn,
     turnStartedAt,
     gameCode,
-    inventoryVisible,
-    setInventoryVisible,
     shipsInPosition,
     shipConfigs,
     playerBoard,

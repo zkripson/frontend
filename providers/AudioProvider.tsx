@@ -3,167 +3,128 @@ import React, { createContext, useContext, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Howl, Howler } from "howler";
 
+const soundConfig = {
+  bg: { src: ["/sounds/bg-music.mp3"], loop: true, volume: 0 },
+  hit: { src: ["/sounds/hit.mp3"], volume: 1.0 },
+  miss: { src: ["/sounds/miss.mp3"], volume: 0.8 },
+  place: { src: ["/sounds/place.mp3"], volume: 0.1 },
+  timer: { src: ["/sounds/timer-ticks.mp3"], volume: 0.1 },
+  hit_voiceover: { src: ["/sounds/hit_voiceover.mp3"], volume: 0.7 },
+  player_missed_voiceover: {
+    src: ["/sounds/player_missed_voiceover.mp3"],
+    volume: 0.7,
+  },
+  opponent_hit_voiceover: {
+    src: ["/sounds/opponent_hit_voiceover.mp3"],
+    volume: 0.7,
+  },
+  missed_voiceover: { src: ["/sounds/missed_voiceover.mp3"], volume: 0.7 },
+  game_start_voiceover: {
+    src: ["/sounds/game_start_voiceover.mp3"],
+    volume: 0.7,
+  },
+  another_hit_voiceover: {
+    src: ["/sounds/another_hit_voiceover.mp3"],
+    volume: 0.7,
+  },
+  sunk_voiceover: { src: ["/sounds/sunk_voiceover.mp3"], volume: 0.7 },
+  sunk_carrier_voiceover: {
+    src: ["/sounds/sunk_carrier_voiceover.mp3"],
+    volume: 0.7,
+  },
+  sunk_battleship_voiceover: {
+    src: ["/sounds/sunk_battleship_voiceover.mp3"],
+    volume: 0.7,
+  },
+  sunk_cruiser_voiceover: {
+    src: ["/sounds/sunk_cruiser_voiceover.mp3"],
+    volume: 0.7,
+  },
+  sunk_submarine_voiceover: {
+    src: ["/sounds/sunk_submarine_voiceover.mp3"],
+    volume: 0.7,
+  },
+  sunk_destroyer_voiceover: {
+    src: ["/sounds/sunk_destroyer_voiceover.mp3"],
+    volume: 0.7,
+  },
+  opponent_sunk_voiceover: {
+    src: ["/sounds/opponent_sunk_voiceover.mp3"],
+    volume: 0.7,
+  },
+  opponent_sunk_carrier_voiceover: {
+    src: ["/sounds/opponent_sunk_carrier_voiceover.mp3"],
+    volume: 0.7,
+  },
+  opponent_sunk_battleship_voiceover: {
+    src: ["/sounds/opponent_sunk_battleship_voiceover.mp3"],
+    volume: 0.7,
+  },
+  opponent_sunk_cruiser_voiceover: {
+    src: ["/sounds/opponent_sunk_cruiser_voiceover.mp3"],
+    volume: 0.7,
+  },
+  opponent_sunk_submarine_voiceover: {
+    src: ["/sounds/opponent_sunk_submarine_voiceover.mp3"],
+    volume: 0.7,
+  },
+  opponent_sunk_destroyer_voiceover: {
+    src: ["/sounds/opponent_sunk_destroyer_voiceover.mp3"],
+    volume: 0.7,
+  },
+  game_over_voiceover: {
+    src: ["/sounds/game_over_voiceover.mp3"],
+    volume: 0.7,
+  },
+  waiting_voiceover: { src: ["/sounds/waiting_voiceover.mp3"], volume: 0.7 },
+  game_draw_restart_voiceover: {
+    src: ["/sounds/game_draw_restart_voiceover.mp3"],
+    volume: 0.7,
+  },
+  you_lost_voiceover: { src: ["/sounds/you_lost_voiceover.mp3"], volume: 0.7 },
+  you_won_voiceover: { src: ["/sounds/you_won_voiceover.mp3"], volume: 0.7 },
+  coins: { src: ["/sounds/coins.mp3"], volume: 0.7 },
+  opponent_joined_voiceover: {
+    src: ["/sounds/opponent_joined_voiceover.mp3"],
+    volume: 0.7,
+  },
+};
+
+type SoundKey = keyof typeof soundConfig;
+
 interface AudioContextValue {
   unlock: () => void;
-  play: (key: keyof typeof sounds) => void;
+  play: (key: SoundKey) => void;
   setVolume: (vol: number) => void;
   mute: () => void;
   unmute: () => void;
+  stop: (key: SoundKey) => void;
 }
 
 const AudioContext = createContext<AudioContextValue | null>(null);
-
-export const sounds = {
-  bg:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/bg-music.mp3"], loop: true, volume: 0 })
-      : undefined,
-  hit:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/hit.mp3"], volume: 1.0 })
-      : undefined,
-  miss:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/miss.mp3"], volume: 0.8 })
-      : undefined,
-  place:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/place.mp3"], volume: 0.1 })
-      : undefined,
-  timer:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/timer-ticks.mp3"], volume: 0.1 })
-      : undefined,
-  // Voiceovers and additional sounds
-  // miss_voiceover:
-  //   typeof window !== "undefined"
-  //     ? new Howl({ src: ["/sounds/miss_voiceover.mp3"], volume: 0.7 })
-  //     : undefined,
-  hit_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/hit_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  player_missed_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/player_missed_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  opponent_hit_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/opponent_hit_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  missed_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/missed_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  game_start_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/game_start_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  another_hit_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/another_hit_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  sunk_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/sunk_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  sunk_carrier_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/sunk_carrier_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  sunk_battleship_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({
-          src: ["/sounds/sunk_battleship_voiceover.mp3"],
-          volume: 0.7,
-        })
-      : undefined,
-  sunk_cruiser_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/sunk_cruiser_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  sunk_submarine_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/sunk_submarine_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  sunk_destroyer_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/sunk_destroyer_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  opponent_sunk_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/opponent_sunk_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  opponent_sunk_carrier_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({
-          src: ["/sounds/opponent_sunk_carrier_voiceover.mp3"],
-          volume: 0.7,
-        })
-      : undefined,
-  opponent_sunk_battleship_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({
-          src: ["/sounds/opponent_sunk_battleship_voiceover.mp3"],
-          volume: 0.7,
-        })
-      : undefined,
-  opponent_sunk_cruiser_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({
-          src: ["/sounds/opponent_sunk_cruiser_voiceover.mp3"],
-          volume: 0.7,
-        })
-      : undefined,
-  opponent_sunk_submarine_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({
-          src: ["/sounds/opponent_sunk_submarine_voiceover.mp3"],
-          volume: 0.7,
-        })
-      : undefined,
-  opponent_sunk_destroyer_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({
-          src: ["/sounds/opponent_sunk_destroyer_voiceover.mp3"],
-          volume: 0.7,
-        })
-      : undefined,
-  game_over_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/game_over_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  waiting_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/waiting_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  game_draw_restart_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({
-          src: ["/sounds/game_draw_restart_voiceover.mp3"],
-          volume: 0.7,
-        })
-      : undefined,
-  you_lost_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/you_lost_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  you_won_voiceover:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/you_won_voiceover.mp3"], volume: 0.7 })
-      : undefined,
-  coins:
-    typeof window !== "undefined"
-      ? new Howl({ src: ["/sounds/coins.mp3"], volume: 0.7 })
-      : undefined,
-};
 
 export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const pathname = usePathname();
   const unlocked = useRef(false);
+  const soundsRef = useRef<{ [key: string]: Howl }>({});
 
+  // Instantiate all sounds once on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const newSounds: { [key: string]: Howl } = {};
+      Object.entries(soundConfig).forEach(([key, config]) => {
+        newSounds[key] = new Howl(config);
+      });
+      soundsRef.current = newSounds;
+    }
+    return () => {
+      Object.values(soundsRef.current).forEach((howl) => howl?.unload());
+    };
+  }, []);
+
+  // Play/fade music based on route
   useEffect(() => {
     const isSessionPage = /^\/[0-9a-fA-F-]{36}$/.test(pathname || "");
     if (isSessionPage) {
@@ -173,6 +134,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [pathname]);
 
+  // Resume audio context on user interaction
   useEffect(() => {
     const resumeOnInteract = () => {
       const isSessionPage = /^\/[0-9a-fA-F-]{36}$/.test(pathname || "");
@@ -194,29 +156,30 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [pathname]);
 
+  // Stop bg music on unmount
   useEffect(() => {
     return () => {
-      if (unlocked.current && sounds.bg) sounds.bg.stop();
+      if (unlocked.current && soundsRef.current.bg) soundsRef.current.bg.stop();
     };
   }, []);
 
   const unlock = () => {
     if (unlocked.current) return;
     if (Howler.ctx.state === "suspended") Howler.ctx.resume();
-    if (sounds.bg) {
-      sounds.bg.volume(0);
-      sounds.bg.play();
-      sounds.bg.fade(0, 0.08, 3000);
+    if (soundsRef.current.bg) {
+      soundsRef.current.bg.volume(0);
+      soundsRef.current.bg.play();
+      soundsRef.current.bg.fade(0, 0.08, 3000);
     }
     unlocked.current = true;
   };
 
   const fadeOut = () => {
     if (!unlocked.current) return;
-    if (sounds.bg) {
-      sounds.bg.fade(sounds.bg.volume(), 0, 2000);
+    if (soundsRef.current.bg) {
+      soundsRef.current.bg.fade(soundsRef.current.bg.volume(), 0, 2000);
       setTimeout(() => {
-        if (sounds.bg) sounds.bg.stop();
+        if (soundsRef.current.bg) soundsRef.current.bg.stop();
         unlocked.current = false;
       }, 2000);
     }
@@ -225,13 +188,17 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({
   const value: AudioContextValue = {
     unlock,
     play: (key) => {
-      if (typeof window === "undefined" || !sounds[key]) return;
+      if (typeof window === "undefined" || !soundsRef.current[key]) return;
       if (Howler.ctx.state === "suspended") Howler.ctx.resume();
-      sounds[key].play();
+      soundsRef.current[key].play();
     },
     setVolume: Howler.volume.bind(Howler),
     mute: () => Howler.mute(true),
     unmute: () => Howler.mute(false),
+    stop: (key) => {
+      if (typeof window === "undefined" || !soundsRef.current[key]) return;
+      soundsRef.current[key].stop();
+    },
   };
 
   return (
