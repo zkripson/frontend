@@ -73,7 +73,14 @@ const KPGameDetails = ({ invitation, isSmall }: IKPGameDetails) => {
             isSmall ? "text-xs" : "text-sm lg:text-base"
           )}
         >
-          {creator}
+          {opponentProfile === undefined ? (
+            <span
+              className="inline-block bg-primary-700/40 animate-pulse rounded w-20 h-[1.25em] align-middle"
+              style={{ minWidth: isSmall ? 40 : 80 }}
+            />
+          ) : (
+            creator
+          )}
         </span>
       </div>
 
