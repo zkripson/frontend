@@ -200,6 +200,10 @@ export function useGameWebSocket(sessionId: string) {
   const { activeWallet } = usePrivyLinkedAccounts();
   const [isConnected, setIsConnected] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const retryCountRef = useRef<number>(0);
+  const maxRetries = 3;
+  const retryDelay = 3000; // 3 seconds
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const wsServiceRef = useRef<GameWebSocketService | null>(null);
 
@@ -209,7 +213,7 @@ export function useGameWebSocket(sessionId: string) {
 
     const playerAddress = activeWallet.address;
     const baseUrl = isDevEnv
-      ? "https://zk-battleship-backend.nj-345.workers.dev"
+      ? "https://api.bship.fun"
       : "https://api.bship.fun";
 
     if (!wsServiceRef.current) {
@@ -223,6 +227,7 @@ export function useGameWebSocket(sessionId: string) {
       wsServiceRef.current.on("open", () => {
         setIsConnected(true);
         setConnectionError(null);
+        retryCountRef.current = 0; // Reset retry count on successful connection
       });
 
       wsServiceRef.current.on("close", () => {
@@ -230,10 +235,26 @@ export function useGameWebSocket(sessionId: string) {
       });
 
       wsServiceRef.current.on("error", (error) => {
-        setConnectionError("Game connection error. Reconnecting...");
-        // Attempt to reconnect when an error occurs
-        if (wsServiceRef.current) {
-          wsServiceRef.current.connect();
+        setConnectionError(`Game connection error. Reconnecting...`);
+
+        // Attempt to reconnect when an error occurs, with retry limits
+        if (wsServiceRef.current && retryCountRef.current < maxRetries) {
+          // Clear any existing timeout
+          if (retryTimeoutRef.current) {
+            clearTimeout(retryTimeoutRef.current);
+          }
+
+          // Set a timeout to reconnect after delay
+          retryTimeoutRef.current = setTimeout(() => {
+            retryCountRef.current += 1;
+            // console.log(`Reconnection attempt ${retryCountRef.current}/${maxRetries}`);
+
+            if (wsServiceRef.current) {
+              wsServiceRef.current.connect();
+            }
+
+            retryTimeoutRef.current = null;
+          }, retryDelay);
         }
       });
     }
@@ -243,6 +264,10 @@ export function useGameWebSocket(sessionId: string) {
 
     // Cleanup function to disconnect when the component unmounts
     return () => {
+      if (retryTimeoutRef.current) {
+        clearTimeout(retryTimeoutRef.current);
+      }
+
       if (wsServiceRef.current) {
         wsServiceRef.current.disconnect();
         wsServiceRef.current = null;
