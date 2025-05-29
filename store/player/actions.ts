@@ -73,6 +73,9 @@ export const usePlayerActions = () => {
     callbacks?: CallbackProps
   ) => {
     try {
+      if (!activeWallet || !address) return;
+      if (address.toLowerCase() === activeWallet.toLowerCase()) return; // Prevent self as opponent
+
       dispatch(setGetOpponentProfileLoading(true));
       const profile = await playerApi.getProfile(address);
       dispatch(setOpponentProfile(profile));

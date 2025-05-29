@@ -29,6 +29,7 @@ const messages = {
   },
   "opponent-hit": "OPPONENT HIT YOUR SHIP",
   "player-missed": "YOU MISSED!",
+  opponent_joined: "opponent joined!",
 } as const;
 
 export type GeneralMessageKey = keyof typeof messages;
@@ -61,6 +62,7 @@ function resolveMessageAndVoiceover(
       "opponent_sunk_cruiser_voiceover",
       "opponent_sunk_submarine_voiceover",
       "opponent_sunk_destroyer_voiceover",
+      "opponent_joined_voiceover",
     ] as const;
     let voiceoverKey: string | undefined = undefined;
     if (shipName) {
@@ -155,10 +157,10 @@ export default function General({
         "another_hit_voiceover",
         "game_over_voiceover",
         "waiting_voiceover",
-        // Patch: add all other voiceover keys from AudioProvider
         "missed_voiceover",
         "player_missed_voiceover",
         "opponent_hit_voiceover",
+        "opponent_joined_voiceover",
       ] as const;
       if (
         voiceoverKey &&
@@ -168,7 +170,7 @@ export default function General({
       ) {
         try {
           // Diagnostic logging for debugging audio playback
-          console.log("[General] Playing voiceover:", voiceoverKey);
+          // console.log("[General] Playing voiceover:", voiceoverKey);
           audio.play(voiceoverKey as (typeof allowedVoiceovers)[number]);
         } catch (err) {
           console.error("[General] Error playing voiceover", voiceoverKey, err);

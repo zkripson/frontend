@@ -2,8 +2,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useAudio } from "@/providers/AudioProvider";
 import { Howl } from "howler";
-// Get the timer sound instance for direct control
-import { sounds } from "@/providers/AudioProvider";
 
 interface KPTimerProps {
   turnStartedAt?: number;
@@ -52,8 +50,7 @@ const KPTimer: React.FC<KPTimerProps> = ({
       setRemaining(0);
       gameOverRef.current = true;
       expiredRef.current = true;
-      if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-        sounds.timer.stop();
+      audio.stop("timer");
       if (timerSoundTimeout) clearTimeout(timerSoundTimeout);
       if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     };
@@ -62,8 +59,7 @@ const KPTimer: React.FC<KPTimerProps> = ({
       setRemaining(GAME_DURATION);
       expiredRef.current = false;
       playedTimerRef.current = false;
-      if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-        sounds.timer.stop();
+      audio.stop("timer");
       if (timerSoundTimeout) clearTimeout(timerSoundTimeout);
       gameStart = Date.now();
       lastGameRem = GAME_DURATION;
@@ -77,12 +73,7 @@ const KPTimer: React.FC<KPTimerProps> = ({
           audio.play("timer");
           playedTimerRef.current = true;
           timerSoundTimeout = setTimeout(() => {
-            if (
-              sounds &&
-              sounds.timer &&
-              typeof sounds.timer.stop === "function"
-            )
-              sounds.timer.stop();
+            audio.stop("timer");
             playedTimerRef.current = false;
           }, 5000);
         }
@@ -95,8 +86,7 @@ const KPTimer: React.FC<KPTimerProps> = ({
       gameTimerRef.current = setInterval(update, 200);
       return () => {
         if (gameTimerRef.current) clearInterval(gameTimerRef.current);
-        if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-          sounds.timer.stop();
+        audio.stop("timer");
         if (timerSoundTimeout) clearTimeout(timerSoundTimeout);
       };
     }
@@ -106,8 +96,7 @@ const KPTimer: React.FC<KPTimerProps> = ({
       setRemaining(turnDuration);
       expiredRef.current = false;
       playedTimerRef.current = false;
-      if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-        sounds.timer.stop();
+      audio.stop("timer");
       if (timerSoundTimeout) clearTimeout(timerSoundTimeout);
       gameStart = Date.now();
       lastGameRem = GAME_DURATION;
@@ -123,16 +112,14 @@ const KPTimer: React.FC<KPTimerProps> = ({
       }, 200);
       return () => {
         if (gameTimerRef.current) clearInterval(gameTimerRef.current);
-        if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-          sounds.timer.stop();
+        audio.stop("timer");
         if (timerSoundTimeout) clearTimeout(timerSoundTimeout);
       };
     }
 
     expiredRef.current = false;
     playedTimerRef.current = false;
-    if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-      sounds.timer.stop();
+    audio.stop("timer");
     if (timerSoundTimeout) clearTimeout(timerSoundTimeout);
     if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     const turnStart = turnStartedAt;
@@ -152,15 +139,13 @@ const KPTimer: React.FC<KPTimerProps> = ({
         audio.play("timer");
         playedTimerRef.current = true;
         timerSoundTimeout = setTimeout(() => {
-          if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-            sounds.timer.stop();
+          audio.stop("timer");
           playedTimerRef.current = false;
         }, 5000);
       }
       if (rem <= 0 && !expiredRef.current) {
         expiredRef.current = true;
-        if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-          sounds.timer.stop();
+        audio.stop("timer");
         if (timerSoundTimeout) clearTimeout(timerSoundTimeout);
         onExpire?.();
       }
@@ -179,8 +164,7 @@ const KPTimer: React.FC<KPTimerProps> = ({
     return () => {
       clearInterval(iv);
       if (gameTimerRef.current) clearInterval(gameTimerRef.current);
-      if (sounds && sounds.timer && typeof sounds.timer.stop === "function")
-        sounds.timer.stop();
+      audio.stop("timer");
       if (timerSoundTimeout) clearTimeout(timerSoundTimeout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

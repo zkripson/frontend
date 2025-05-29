@@ -9,7 +9,6 @@ import useGameSession from "@/hooks/useGameSession";
 import { resetOpponentState } from "@/store/player";
 import { LoadingOverlay } from "./components/LoadingOverlay";
 import { GameHeader } from "./components/GameHeader";
-import { SetupPanel } from "./components/SetupPanel";
 import GameBoardContainer from "./components/GameBoardContainer";
 import GameFooter from "./components/GameFooter";
 import VictoryStatus from "./components/VictoryStatus";
@@ -26,8 +25,6 @@ const GameSession = () => {
     loadingDone,
     generalMessage,
     makeShot,
-    onPlaceShip,
-    onShuffle,
     onReady,
     updateShipPosition,
     flipShip,
@@ -37,9 +34,6 @@ const GameSession = () => {
     yourTurn,
     turnStartedAt,
     gameCode,
-    inventoryVisible,
-    setInventoryVisible,
-    shipsInPosition,
     playerBoard,
     opponentBoard,
     placedShips,
@@ -91,25 +85,10 @@ const GameSession = () => {
 
           <GameHeader
             mode={mode}
-            yourTurn={yourTurn}
             turnStartedAt={turnStartedAt}
             gameCode={gameCode}
             onTurnExpiry={onTurnExpiry}
             gameTimeRemaining={gameTimeRemaining}
-            inventoryVisible={inventoryVisible}
-            setInventoryVisible={setInventoryVisible}
-          />
-
-          <SetupPanel
-            inventoryVisible={inventoryVisible}
-            setInventoryVisible={() => setInventoryVisible(false)}
-            shipsInPosition={shipsInPosition}
-            onPlaceShip={onPlaceShip}
-            onShuffle={onShuffle}
-            onReady={onReady}
-            disableReadyButton={disableReadyButton}
-            mode={mode}
-            waitingForOpponent={gameStateLocal.players.length < 2}
           />
 
           <GameBoardContainer
@@ -124,7 +103,6 @@ const GameSession = () => {
             handleShoot={makeShot}
             generalMessage={generalMessage}
             disableReadyButton={disableReadyButton}
-            inventoryVisible={inventoryVisible}
             onReady={onReady}
             onFireShot={makeShot}
             waitingForOpponent={gameStateLocal.players.length < 2}

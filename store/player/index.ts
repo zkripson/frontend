@@ -141,6 +141,14 @@ const playerSlice = createSlice({
       state.pointsStats = { ...action.payload };
     },
     setOpponentProfile: (state, action: PayloadAction<PlayerProfile>) => {
+      if (
+        state.playerProfile &&
+        action.payload.address.toLowerCase() ===
+          state.playerProfile.address.toLowerCase()
+      ) {
+        // Don't set opponentProfile to self
+        return;
+      }
       state.opponentProfile = { ...action.payload };
     },
 

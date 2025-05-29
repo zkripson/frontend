@@ -22,7 +22,6 @@ interface GameBoardContainerProps {
     shipName?: string;
   } | null;
   disableReadyButton: boolean;
-  inventoryVisible: boolean;
   onReady: () => void;
   onFireShot: (x: number, y: number) => void;
   opponentShips?: ShipType[];
@@ -43,7 +42,6 @@ export function GameBoardContainer({
   handleShoot,
   generalMessage,
   disableReadyButton,
-  inventoryVisible,
   onReady,
   onFireShot,
   opponentShips = [],
@@ -77,7 +75,7 @@ export function GameBoardContainer({
     const setupFeedbackArray = [
       <KPClickAnimation
         key="ready-btn"
-        disabled={disableReadyButton || inventoryVisible}
+        disabled={disableReadyButton}
         className="flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]"
         onClick={onReady}
         loading={loadingSubmitBoardCommitment}
@@ -86,12 +84,13 @@ export function GameBoardContainer({
           {waitingForOpponent ? "Waiting for opponent" : "Ready"}
         </span>
       </KPClickAnimation>,
-      <General
-        key="waiting-feedback"
-        messageKey={generalMessage?.key ?? null}
-        uniqueId={generalMessage?.id}
-        shipName={generalMessage?.shipName}
-      />,
+      <div className="bp1215:hidden" key="waiting-feedback">
+        <General
+          messageKey={generalMessage?.key ?? null}
+          uniqueId={generalMessage?.id}
+          shipName={generalMessage?.shipName}
+        />
+      </div>,
     ];
 
     return (
@@ -106,17 +105,40 @@ export function GameBoardContainer({
           onShoot={handleShoot}
           boardSubmitted={boardSubmitted}
         />
-        <div className="bp1215:hidden w-full absolute top-[103%] left-0">
+        <div className="w-full absolute top-[103%] left-0">
           <AnimatePresence mode="popLayout">
             <motion.div
-              key={generalMessage ? "waiting-feedback" : "ready-btn"}
+              key={
+                generalMessage?.key === "waiting"
+                  ? "waiting-feedback"
+                  : "ready-btn"
+              }
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="w-full flex items-center justify-center"
             >
-              {setupFeedbackArray[+Boolean(generalMessage)]}
+              {generalMessage?.key !== "waiting" && (
+                <KPClickAnimation
+                  key="ready-btn"
+                  disabled={disableReadyButton}
+                  className="flex justify-center items-center border rounded-[4px] w-full h-[38px] pt-2 bg-primary-200 border-primary-300 text-white cursor-pointer transition-all duration-500 shadow-[inset_0px_2px_0px_0px_#632918]"
+                  onClick={onReady}
+                  loading={loadingSubmitBoardCommitment}
+                >
+                  <span className="uppercase text-[20px] leading-none tracking-[2%] font-MachineStd">
+                    {waitingForOpponent ? "Waiting for opponent" : "Ready"}
+                  </span>
+                </KPClickAnimation>
+              )}
+              <div className="bp1215:hidden" key="waiting-feedback">
+                <General
+                  messageKey={generalMessage?.key ?? null}
+                  uniqueId={generalMessage?.id}
+                  shipName={generalMessage?.shipName}
+                />
+              </div>
             </motion.div>
           </AnimatePresence>
         </div>
