@@ -10,6 +10,7 @@ import {
   GameOverPointsSummary,
   PointsAwardedMessage,
 } from "@/hooks/useGameWebSocket";
+import RematchCountdown from "./rematch-countdown";
 
 const titles = {
   win: "You Win!",
@@ -134,6 +135,8 @@ const VictoryStatus = ({
           ))}
         </div>
       </div>
+
+      {status === "draw" && <RematchCountdown />}
 
       {status !== "draw" && (
         <KPTokenProgressCard
