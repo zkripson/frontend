@@ -213,7 +213,7 @@ export function useGameWebSocket(sessionId: string) {
 
     const playerAddress = activeWallet.address;
     const baseUrl = isDevEnv
-      ? "https://api.bship.fun"
+      ? "https://zk-battleship-backend.nj-345.workers.dev"
       : "https://api.bship.fun";
 
     if (!wsServiceRef.current) {
