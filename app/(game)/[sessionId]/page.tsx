@@ -129,7 +129,6 @@ const GameSession = () => {
         gameOverProcessing={gameOverProcessing}
         show={showVictory || gameOverProcessing}
         status={victoryStatus}
-        onPlayAgain={handlePlayAgain}
         onHome={handlePlayAgain}
         playerStats={
           gameStateLocal.playerStats?.[activeWallet || ""] || {

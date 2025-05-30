@@ -1,4 +1,4 @@
-import { Address } from 'viem';
+import { Address } from "viem";
 
 // Player profile types
 export interface PlayerPreferences {
@@ -126,6 +126,7 @@ export interface CreateProfileRequest {
   username: string;
   avatar: string;
   preferences: PlayerPreferences;
+  channel: "twitter" | "farcaster";
 }
 
 export interface CreateProfileResponse {

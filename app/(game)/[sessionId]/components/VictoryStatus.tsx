@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { AnimatePresence, motion } from "framer-motion";
 import classNames from "classnames";
 import CountUp from "react-countup";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { sdk } from "@farcaster/frame-sdk";
 
 import { KPDialougue, KPTokenProgressCard } from "@/components";
 import {
@@ -11,6 +13,8 @@ import {
   PointsAwardedMessage,
 } from "@/hooks/useGameWebSocket";
 import RematchCountdown from "./rematch-countdown";
+import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 const titles = {
   win: "You Win!",
@@ -52,7 +56,6 @@ interface VictoryStatusProps {
 
 const VictoryStatus = ({
   status = "win",
-  onPlayAgain,
   onHome,
   show,
   playerStats,
@@ -61,6 +64,12 @@ const VictoryStatus = ({
   pointsAwarded = [],
   bettingPayouts,
 }: VictoryStatusProps) => {
+  const { isFrameLoaded } = useConnectToFarcaster();
+  const {
+    playerState: { opponentProfile },
+  } = useSystemFunctions();
+  const [isSharing, setIsSharing] = useState(false);
+
   if (status !== "win" && status !== "loss" && status !== "draw") {
     console.warn("VictoryStatus got unexpected status:", status);
     status = "win";
@@ -68,6 +77,109 @@ const VictoryStatus = ({
 
   // Ref to the scrolling container
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const shareToFarcaster = async (
+    accuracy: string,
+    avgTurnTime: string,
+    totalPoints: number,
+    gameUrl: string
+  ) => {
+    try {
+      let message = "";
+
+      if (status === "win") {
+        message = `🔥 Just demolished my opponent in Speed Battle! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy in just ${avgTurnTime}s per turn! Can you top that?`;
+        if (bettingPayouts?.winner?.amount) {
+          message += `\n\n💰 Walked away with ${bettingPayouts.winner.amount} USDC! Easy money.`;
+        }
+        if (totalPoints > 0) {
+          message += `\n\n🏆 Earned ${totalPoints} ribbons toward my next level!`;
+        }
+      } else if (status === "loss") {
+        message = `Just had an epic Speed Battle match! Sunk ${playerStats.shipsSunk} ships with ${accuracy} accuracy. My quickest shots were ${avgTurnTime}s! Next time I'm winning for sure.`;
+        if (totalPoints > 0) {
+          message += `\n\n🎮 Still earned ${totalPoints} ribbons for playing!`;
+        }
+      }
+
+      const messageWithUrl =
+        message + "\n\nJoin me for a game at " + gameUrl + " 🚢";
+
+      const result = await sdk.actions.composeCast({
+        text: messageWithUrl,
+        embeds: [gameUrl],
+      });
+
+      if (result?.cast) {
+        console.log("Cast shared successfully:", result.cast.hash);
+        onHome && onHome();
+      }
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  const shareToTwitter = async (accuracy: string, gameUrl: string) => {
+    try {
+      let twitterText = "";
+      const urlLength = 23;
+      const spacerLength = 1;
+      const maxTextLength = 280 - urlLength - spacerLength;
+
+      if (status === "win") {
+        twitterText = `🔥 Dominated in Speed Battle! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy!`;
+
+        if (
+          bettingPayouts?.winner?.amount &&
+          twitterText.length < maxTextLength - 30
+        ) {
+          twitterText += ` Won ${bettingPayouts.winner.amount} USDC! 💰`;
+        }
+      } else {
+        twitterText = `Just had an epic Speed Battle match! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy!`;
+      }
+
+      if (twitterText.length > maxTextLength) {
+        twitterText = twitterText.substring(0, maxTextLength - 1) + "…";
+      }
+
+      const twitterMessage = encodeURIComponent(twitterText);
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${twitterMessage}&url=${encodeURIComponent(
+        gameUrl
+      )}`;
+
+      window.open(twitterUrl, "_blank", "noopener,noreferrer");
+
+      setTimeout(() => {
+        onHome && onHome();
+      }, 500);
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  const share = async () => {
+    try {
+      setIsSharing(true);
+
+      const accuracy = playerStats.accuracy ? `${playerStats.accuracy}%` : "0%";
+      const avgTurnTime = (playerStats.avgTurnTime / 1000).toFixed(1);
+      const totalPoints =
+        gameOverPointsSummary?.[playerStats.address]?.total || 0;
+      const gameUrl = "https://app.speedbattle.fun";
+
+      // Share to appropriate platform
+      if (isFrameLoaded) {
+        shareToFarcaster(accuracy, avgTurnTime, totalPoints, gameUrl);
+      } else {
+        shareToTwitter(accuracy, gameUrl);
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   // Scroll to bottom on new points
   useEffect(() => {
@@ -145,38 +257,6 @@ const VictoryStatus = ({
           nextLevel={3}
         />
       )}
-
-      {/* {gameOverPointsSummary && status !== "draw" && (
-        <div className="flex flex-col gap-1 items-center mt-2 p-2 rounded bg-primary-950/60 border border-primary-800 max-w-xs mx-auto">
-          <h3 className="text-[16px] font-bold text-primary-50 mb-1">
-            Points Summary
-          </h3>
-          <div className="flex items-center gap-2 text-[13px] text-primary-50">
-            <span className="font-semibold text-primary-200">Total:</span>
-            <span className="font-bold text-primary-50">{totalEarned}</span>
-          </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center text-[11px] text-primary-50 mt-1">
-            {gameOverPointsSummary[playerStats.address]?.breakdown.map(
-              (item, idx) => (
-                <div
-                  key={item.category + idx}
-                  className="flex flex-col items-center min-w-[60px] px-1"
-                >
-                  <span
-                    className="font-semibold capitalize text-primary-200 truncate max-w-[60px]"
-                    title={item.reason}
-                  >
-                    {item.category.replace(/_/g, " ").toLowerCase()}
-                  </span>
-                  <span className="font-bold text-primary-50">
-                    {item.points > 0 ? `+${item.points}` : item.points}
-                  </span>
-                </div>
-              )
-            )}
-          </div>
-        </div>
-      )} */}
     </div>
   );
 
@@ -228,19 +308,20 @@ const VictoryStatus = ({
         >
           <KPDialougue
             primaryCta={{
-              title: "Replay",
-              icon: "replay",
-              onClick: onPlayAgain,
+              title: isSharing ? "Sharing..." : "Share",
+              icon: "share",
+              onClick: share,
               iconPosition: "right",
               hide: status === "draw",
-              disabled: gameOverProcessing,
+              disabled: gameOverProcessing || isSharing,
+              loading: isSharing,
             }}
             secondaryCta={{
               title: "Back Home",
               icon: "home",
               variant: "tertiary",
               onClick: onHome,
-              disabled: gameOverProcessing,
+              disabled: gameOverProcessing || isSharing,
               hide: status === "draw",
             }}
           >
