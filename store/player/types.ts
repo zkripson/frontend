@@ -33,6 +33,7 @@ export interface PlayerProfile {
   losses: number;
   gameHistory?: GameHistoryItem[];
   preferences: PlayerPreferences;
+  channel?: string;
 }
 
 export interface OngoingSession {

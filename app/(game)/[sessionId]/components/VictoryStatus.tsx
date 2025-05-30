@@ -85,18 +85,35 @@ const VictoryStatus = ({
     gameUrl: string
   ) => {
     try {
-      let message = "";
+      let opponentReference = "my opponent";
+      if (
+        opponentProfile?.username &&
+        opponentProfile?.channel === "farcaster"
+      ) {
+        // Use Farcaster mention format for Farcaster users
+        opponentReference = `@${opponentProfile.username}`;
+      } else if (opponentProfile?.username) {
+        // Just use the username without @ for non-Farcaster users
+        opponentReference = opponentProfile.username;
+      }
 
+      let message = "";
       if (status === "win") {
-        message = `🔥 Just demolished my opponent in Speed Battle! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy in just ${avgTurnTime}s per turn! Can you top that?`;
-        if (bettingPayouts?.winner?.amount) {
-          message += `\n\n💰 Walked away with ${bettingPayouts.winner.amount} USDC! Easy money.`;
+        message = `🔥 Just demolished ${opponentReference} in Speed Battle! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy in just ${avgTurnTime}s per turn! Can you top that?`;
+        if (
+          bettingPayouts?.winner?.amount &&
+          bettingPayouts?.winner?.amount !== "0"
+        ) {
+          const bettingAmount = Number(
+            bettingPayouts.winner.amount
+          ).toLocaleString();
+          message += `\n\n💰 Walked away with ${bettingAmount} USDC! Easy money.`;
         }
         if (totalPoints > 0) {
           message += `\n\n🏆 Earned ${totalPoints} ribbons toward my next level!`;
         }
       } else if (status === "loss") {
-        message = `Just had an epic Speed Battle match! Sunk ${playerStats.shipsSunk} ships with ${accuracy} accuracy. My quickest shots were ${avgTurnTime}s! Next time I'm winning for sure.`;
+        message = `Just had an epic Speed Battle match against ${opponentReference}! Sunk ${playerStats.shipsSunk} ships with ${accuracy} accuracy. My quickest shots were ${avgTurnTime}s! Next time I'm winning for sure.`;
         if (totalPoints > 0) {
           message += `\n\n🎮 Still earned ${totalPoints} ribbons for playing!`;
         }
@@ -121,24 +138,43 @@ const VictoryStatus = ({
 
   const shareToTwitter = async (accuracy: string, gameUrl: string) => {
     try {
-      let twitterText = "";
-      const urlLength = 23;
-      const spacerLength = 1;
-      const maxTextLength = 280 - urlLength - spacerLength;
-
-      if (status === "win") {
-        twitterText = `🔥 Dominated in Speed Battle! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy!`;
-
-        if (
-          bettingPayouts?.winner?.amount &&
-          twitterText.length < maxTextLength - 30
-        ) {
-          twitterText += ` Won ${bettingPayouts.winner.amount} USDC! 💰`;
+      let opponentReference = "";
+      if (opponentProfile?.username) {
+        // For Twitter, add the @ mention if they have a Twitter channel
+        if (opponentProfile?.channel === "twitter") {
+          opponentReference = ` against @${opponentProfile.username}`;
+        } else {
+          opponentReference = ` against ${opponentProfile.username}`;
         }
-      } else {
-        twitterText = `Just had an epic Speed Battle match! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy!`;
       }
 
+      // Calculate available character space
+      const urlLength = 23; // Twitter counts all URLs as 23 characters
+      const spacerLength = 1; // Space between text and URL
+      const maxTextLength = 280 - urlLength - spacerLength;
+
+      let twitterText = "";
+      if (status === "win") {
+        // Create base message - keep it short for Twitter
+        twitterText = `🔥 Dominated${opponentReference} in Speed Battle! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy!`;
+
+        // Add USDC info if space allows
+        if (
+          bettingPayouts?.winner?.amount &&
+          bettingPayouts?.winner?.amount !== "0" &&
+          twitterText.length < maxTextLength - 30
+        ) {
+          const bettingAmount = Number(
+            bettingPayouts.winner.amount
+          ).toLocaleString();
+          twitterText += ` Won ${bettingAmount} USDC! 💰`;
+        }
+      } else {
+        // Loss message
+        twitterText = `Just had an epic Speed Battle match${opponentReference}! ${playerStats.shipsSunk} ships sunk with ${accuracy} accuracy!`;
+      }
+
+      // Ensure we don't exceed Twitter's limit
       if (twitterText.length > maxTextLength) {
         twitterText = twitterText.substring(0, maxTextLength - 1) + "…";
       }
@@ -181,6 +217,10 @@ const VictoryStatus = ({
     }
   };
 
+  const stats = formatStats(playerStats);
+  const totalEarned = gameOverPointsSummary?.[playerStats.address]?.total;
+  const payout = bettingPayouts?.winner?.amount;
+
   // Scroll to bottom on new points
   useEffect(() => {
     const container = scrollRef.current;
@@ -188,10 +228,6 @@ const VictoryStatus = ({
       container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
     }
   }, [pointsAwarded]);
-
-  const stats = formatStats(playerStats);
-  const totalEarned = gameOverPointsSummary?.[playerStats.address]?.total;
-  const payout = bettingPayouts?.winner?.amount;
 
   const mainContent = (
     <div className="flex flex-col gap-6 max-sm:gap-3 w-full">
