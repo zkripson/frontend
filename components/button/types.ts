@@ -17,4 +17,4 @@ interface IKPButton {
   small?: boolean;
 }
 
-type Icons = "farcaster" | "copy" | "arrow" | "x" | "home" | "replay";
+type Icons = "farcaster" | "copy" | "arrow" | "x" | "home" | "replay" | "share";
