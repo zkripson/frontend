@@ -19,7 +19,7 @@ export default function RootApp({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const {} = useConnectToFarcaster();
+  const { isFrameLoaded } = useConnectToFarcaster();
   const { user, ready, authenticated } = usePrivy();
   const { navigate, appState } = useSystemFunctions();
   const { getOngoingSessions, createProfile } = usePlayerActions();
@@ -78,6 +78,7 @@ export default function RootApp({
           soundEnabled: true,
           theme: "dark",
         },
+        channel: isFrameLoaded ? "farcaster" : "twitter",
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
