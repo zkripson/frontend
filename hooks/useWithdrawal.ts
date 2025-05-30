@@ -190,7 +190,7 @@ const useWithdrawal = () => {
 
         const uiOptions: SendTransactionModalUIOptions = {
           description: `Approve USDC for betting`,
-          buttonText: `Approve unlimited USDC`,
+          buttonText: `Approve`,
         };
 
         // Encode the ERC20 approve function call with unlimited amount
