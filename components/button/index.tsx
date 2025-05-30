@@ -4,7 +4,13 @@ import classNames from "classnames";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-import { ArrowRightIcon, CopyIcon, RedoIcon, Homeicon } from "@/public/icons";
+import {
+  ArrowRightIcon,
+  CopyIcon,
+  RedoIcon,
+  Homeicon,
+  ShareIcon,
+} from "@/public/icons";
 import { useAudio } from "@/providers/AudioProvider";
 import KPLoader from "../loader";
 
@@ -33,6 +39,7 @@ const icons = {
   arrow: <ArrowRightIcon className="max-sm:size-6" />,
   home: <Homeicon />,
   replay: <RedoIcon />,
+  share: <ShareIcon />,
 };
 
 const KPButton = ({
