@@ -9,16 +9,16 @@ const stakeOptions: {
 ];
 
 const gameTips = [
-  "Mark cells adjacent to each miss—ships can’t touch, so you can safely eliminate them.",
-  "Fire in a checkerboard pattern to cover the grid efficiently without wasted shots.",
-  "Target edge and corner cells early; large ships often occupy perimeter spaces.",
-  "After a hit, check only inline adjacent cells—ships run straight lines only.",
-  "Focus on sinking a hit ship completely before resuming your grid search.",
-  "Space your ships evenly; avoid clusters that opponents can easily target.",
-  "Remember ship lengths—plan your shots to match sizes of 5, 4, 3, and 2 cells.",
-  "Switch firing patterns mid-game to prevent opponents from predicting your strategy.",
-  "Use corner shots for small ships—two-cell submarines can hide near edges.",
-  "Keep track of misses and hits on a separate grid to refine your target zones.",
+  "After you sink a ship, mark nearby squares empty. Ships can’t touch, so they can’t be there.",
+  "Shoot every other square like a checkerboard to find ships faster.",
+  "Shoot edges and corners first. Big ships often sit at the border.",
+  "After you hit, shoot up, down, left, or right next to it to sink the ship.",
+  "Finish sinking a ship before hunting others or you’ll lose track.",
+  "Keep your ships apart. Clumped ships are easy to find.",
+  "Remember your fleet: one size-5, one size-4, two size-3, and one size-2 ship.",
+  "Halfway through, change your shot pattern so you’re not predictable.",
+  "2-square ships can hide in corners. Don’t skip shooting there.",
+  "Use hit/miss marks to keep track and plan your next shot.",
 ];
 
 export { gameTips, stakeOptions };

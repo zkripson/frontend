@@ -6,13 +6,11 @@ import useWithdrawal from "@/hooks/useWithdrawal";
 import useMatchmaking from "@/hooks/useMatchmaking";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import { useMatchMakingActions } from "@/store/matchmaking/actions";
-import { resetMatchmakingState } from "@/store/matchmaking";
 import { usePlayerActions } from "@/store/player/actions";
 import QuickGameSelect from "./QuickGameSelect";
 import QuickGameSearching from "./QuickGameSearching";
 import QuickGameFound from "./QuickGameFound";
 import { ctaConfig } from "./quickGameHelpers";
-import { gameTips } from "./quickGameConfig";
 
 const mapStakeValueToLevel = (stake: StakeValue): StakeLevel => {
   if (stake === "free") return "free";
@@ -24,9 +22,7 @@ const mapStakeValueToLevel = (stake: StakeValue): StakeLevel => {
 export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
   const [phase, setPhase] = useState<QuickGamePhase>("select");
   const [stake, setStake] = useState<StakeValue>("free");
-
-  const [tipIndex, setTipIndex] = useState(0);
-
+  const [countdown, setCountdown] = useState<number | null>(null);
   const [approvingTransfer, setApprovingTransfer] = useState(false);
 
   const {
@@ -39,8 +35,6 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
   const { joinMatchPool } = useMatchMakingActions();
   const { getOngoingSessions } = usePlayerActions();
 
-  const [countdown, setCountdown] = useState<number | null>(null);
-
   const { cancel } = useMatchmaking({
     enabled: phase === "searching",
 
@@ -49,7 +43,7 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
       setCountdown(null);
     },
 
-    onCreated: (msg) => {
+    onCreated: () => {
       setPhase("found");
       setCountdown(3);
     },
@@ -59,7 +53,6 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
     },
 
     onTimeout: () => {
-      dispatch(resetMatchmakingState());
       setPhase("select");
       setCountdown(null);
     },
@@ -89,7 +82,6 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
 
   const handleCancel = () => {
     cancel(); // WS + leave pool
-    dispatch(resetMatchmakingState()); // clear Redux
     setCountdown(null); // clear countdown
     setPhase("select");
   };
@@ -124,18 +116,9 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
   // render the three UIs
   const phasesMap: Record<QuickGamePhase, JSX.Element> = {
     select: <QuickGameSelect setStake={setStake} stake={stake} />,
-    searching: (
-      <QuickGameSearching tip={gameTips[tipIndex]} tipIndex={tipIndex} />
-    ),
+    searching: <QuickGameSearching />,
     found: <QuickGameFound countdown={countdown} />,
   };
-
-  useEffect(() => {
-    const iv = setInterval(() => {
-      setTipIndex((i) => (i + 1) % gameTips.length);
-    }, 8000);
-    return () => clearInterval(iv);
-  }, []);
 
   useEffect(() => {
     if (countdown === null) return;
@@ -149,14 +132,6 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countdown, matchmaking?.sessionId]);
-
-  // Reset matchmaking state whenever this screen unmounts
-  useEffect(() => {
-    return () => {
-      dispatch(resetMatchmakingState());
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <KPDialougue
