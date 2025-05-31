@@ -68,7 +68,7 @@ const MockPoints = () => {
     <KPClickAnimation
       onClick={() => navigate.push("/rewards")}
       className={classNames(
-        "rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer mt-12 lg:mt-20 shadow-lg shadow-primary-100/50"
+        "rounded-lg px-4 md:px-5 py-2 flex justify-between items-center bg-primary-50 cursor-pointer max-[390px]:-mt-1 max-sm:mt-2 mt-10 shadow-lg shadow-primary-100/50"
       )}
     >
       <div className="flex items-center gap-6 lg:gap-8">
