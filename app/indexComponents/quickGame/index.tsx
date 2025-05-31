@@ -51,7 +51,7 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
 
     onCreated: (msg) => {
       setPhase("found");
-      setCountdown(5);
+      setCountdown(3);
     },
 
     onFailed: () => {
@@ -65,34 +65,6 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
     },
   });
 
-  useEffect(() => {
-    const iv = setInterval(() => {
-      setTipIndex((i) => (i + 1) % gameTips.length);
-    }, 8000);
-    return () => clearInterval(iv);
-  }, []);
-
-  useEffect(() => {
-    if (countdown === null) return;
-    if (countdown > 0) {
-      const t = setTimeout(() => setCountdown((c) => (c ?? 0) - 1), 1000);
-      return () => clearTimeout(t);
-    }
-
-    if (matchmaking?.sessionId) {
-      navigate.push(`/${matchmaking.sessionId}`);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown, matchmaking?.sessionId]);
-
-  // Reset matchmaking state whenever this screen unmounts
-  useEffect(() => {
-    return () => {
-      dispatch(resetMatchmakingState());
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const handleSelectNext = async () => {
     try {
       setApprovingTransfer(true);
@@ -102,7 +74,7 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
         onSuccess: (response: JoinMatchPoolResponse) => {
           if (response?.status === "matched") {
             setPhase("found");
-            setCountdown(5);
+            setCountdown(3);
             // Update ongoing sessions
             getOngoingSessions();
           } else {
@@ -157,6 +129,34 @@ export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
     ),
     found: <QuickGameFound countdown={countdown} />,
   };
+
+  useEffect(() => {
+    const iv = setInterval(() => {
+      setTipIndex((i) => (i + 1) % gameTips.length);
+    }, 8000);
+    return () => clearInterval(iv);
+  }, []);
+
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown > 0) {
+      const t = setTimeout(() => setCountdown((c) => (c ?? 0) - 1), 1000);
+      return () => clearTimeout(t);
+    }
+
+    if (matchmaking?.sessionId) {
+      navigate.push(`/${matchmaking.sessionId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown, matchmaking?.sessionId]);
+
+  // Reset matchmaking state whenever this screen unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(resetMatchmakingState());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <KPDialougue
