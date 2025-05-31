@@ -58,7 +58,7 @@ const SelectGameScreen = ({ phase, setPhase }: SelectGameScreenProps) => {
     {
       id: "quick",
       name: "Quick Match",
-      description: "Get matched with random players",
+      description: "Get matched with a random player",
       action: () => setPhase("quick"),
       disabled: true,
     },

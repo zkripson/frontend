@@ -45,7 +45,6 @@ export const usePlayerActions = () => {
       getPlayerRewards();
       return response;
     } catch (err) {
-      console.log(err);
       callbacks?.onError?.(err);
     } finally {
       dispatch(setCreateProfileLoading(false));
