@@ -121,7 +121,8 @@ export default function useMatchmaking({
     wsRef.current?.disconnect();
     leaveMatchPool();
     setStatus("idle");
-  }, [leaveMatchPool]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     status,
