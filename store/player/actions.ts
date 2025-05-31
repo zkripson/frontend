@@ -23,15 +23,17 @@ import {
   setGetOpponentProfileLoading,
 } from "./index";
 import { CreateProfileRequest, UpdateProfileRequest } from "./types";
-import useAppActions from "../app/actions";
 import { CallbackProps } from "..";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
+import useConnectToFarcaster from "@/hooks/useConnectToFarcaster";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
 
 export const usePlayerActions = () => {
   const dispatch = useDispatch();
-  const { activeWallet } = usePrivyLinkedAccounts();
+  const { activeWallet, linkedTwitter } = usePrivyLinkedAccounts();
+  const { isFrameLoaded } = useConnectToFarcaster();
+  const { appState } = useSystemFunctions();
 
-  // Profile actions
   const createProfile = async (
     data: CreateProfileRequest,
     callbacks?: CallbackProps
@@ -58,11 +60,38 @@ export const usePlayerActions = () => {
 
       dispatch(setGetProfileLoading(true));
       const profile = await playerApi.getProfile(activeWallet);
+
+      if (profile && profile.username && !profile.channel) {
+        updateProfile({
+          channel: isFrameLoaded ? "farcaster" : "twitter",
+        });
+      }
       dispatch(setPlayerProfile(profile));
       callbacks?.onSuccess?.(profile);
       return profile;
     } catch (err) {
       callbacks?.onError?.(err);
+
+      const username =
+        appState?.farcasterContext?.username || linkedTwitter?.username || "";
+      const avatar =
+        appState?.farcasterContext?.pfpUrl ||
+        linkedTwitter?.profilePictureUrl ||
+        "";
+
+      createProfile({
+        address: activeWallet!,
+        avatar,
+        username,
+        preferences: {
+          animationsEnabled: true,
+          autoSubmitOnHit: true,
+          notifications: true,
+          soundEnabled: true,
+          theme: "dark",
+        },
+        channel: isFrameLoaded ? "farcaster" : "twitter",
+      });
     } finally {
       dispatch(setGetProfileLoading(false));
     }

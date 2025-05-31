@@ -33,6 +33,7 @@ export interface PlayerProfile {
   losses: number;
   gameHistory?: GameHistoryItem[];
   preferences: PlayerPreferences;
+  channel?: "twitter" | "farcaster";
 }
 
 export interface OngoingSession {
@@ -139,6 +140,7 @@ export interface UpdateProfileRequest {
   username?: string;
   avatar?: string;
   preferences?: Partial<PlayerPreferences>;
+  channel?: "twitter" | "farcaster";
 }
 
 export interface UpdateProfileResponse {

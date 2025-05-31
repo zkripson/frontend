@@ -19,12 +19,10 @@ export default function RootApp({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { isFrameLoaded } = useConnectToFarcaster();
   const { user, ready, authenticated } = usePrivy();
-  const { navigate, appState } = useSystemFunctions();
-  const { getOngoingSessions, createProfile } = usePlayerActions();
-  const { activeWallet, linkedFarcaster, linkedTwitter } =
-    usePrivyLinkedAccounts();
+  const { navigate } = useSystemFunctions();
+  const { getOngoingSessions, createProfile, getProfile } = usePlayerActions();
+  const { activeWallet } = usePrivyLinkedAccounts();
   const { loginToFarcasterFrame } = useConnectToFarcaster();
 
   const [isReady, setIsReady] = useState(false);
@@ -55,34 +53,9 @@ export default function RootApp({
   // On initial load, fetch ongoing sessions once
   useEffect(() => {
     getOngoingSessions();
+    getProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeWallet]);
-
-  useEffect(() => {
-    if (activeWallet && (linkedFarcaster || linkedTwitter)) {
-      const username =
-        appState?.farcasterContext?.username || linkedTwitter?.username || "";
-      const avatar =
-        appState?.farcasterContext?.pfpUrl ||
-        linkedTwitter?.profilePictureUrl ||
-        "";
-
-      createProfile({
-        address: activeWallet,
-        avatar,
-        username,
-        preferences: {
-          animationsEnabled: true,
-          autoSubmitOnHit: true,
-          notifications: true,
-          soundEnabled: true,
-          theme: "dark",
-        },
-        channel: isFrameLoaded ? "farcaster" : "twitter",
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeWallet, linkedFarcaster, linkedTwitter]);
 
   return (
     <>
