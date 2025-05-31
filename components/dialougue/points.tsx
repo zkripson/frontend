@@ -1,7 +1,8 @@
-import { ArrowRightAltIcon, StarIcon } from "@/public/icons";
-import KPClickAnimation from "../click-animation";
-import useSystemFunctions from "@/hooks/useSystemFunctions";
 import classNames from "classnames";
+
+import { ArrowRightAltIcon, StarIcon } from "@/public/icons";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
+import KPClickAnimation from "../click-animation";
 
 const Points = () => {
   const {

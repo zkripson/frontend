@@ -1,11 +1,6 @@
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 
-interface QuickGameSearchingProps {
-  tip: string;
-  tipIndex: number;
-}
-
 const QuickGameSearching = ({ tip, tipIndex }: QuickGameSearchingProps) => (
   <div className="flex flex-col items-center max-sm:gap-6 gap-10 w-full max-sm:mt-0 mt-20">
     <div className="flex flex-col gap-4 items-center">

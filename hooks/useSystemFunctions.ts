@@ -22,6 +22,7 @@ const useSystemFunctions = () => {
   const inviteState = useAppSelector((state) => state.invite);
   const playerState = useAppSelector((state) => state.player);
   const adminState = useAppSelector((state) => state.admin);
+  const matchmakingState = useAppSelector((state) => state.matchmaking);
 
   return {
     // functions
@@ -37,6 +38,7 @@ const useSystemFunctions = () => {
     inviteState,
     playerState,
     adminState,
+    matchmakingState,
   };
 };
 

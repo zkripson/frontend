@@ -4,24 +4,65 @@ import { motion, AnimatePresence } from "framer-motion";
 import { KPDialougue } from "@/components";
 import useWithdrawal from "@/hooks/useWithdrawal";
 import useMatchmaking from "@/hooks/useMatchmaking";
+import useSystemFunctions from "@/hooks/useSystemFunctions";
+import { useMatchMakingActions } from "@/store/matchmaking/actions";
+import { resetMatchmakingState } from "@/store/matchmaking";
+import { usePlayerActions } from "@/store/player/actions";
 import QuickGameSelect from "./QuickGameSelect";
 import QuickGameSearching from "./QuickGameSearching";
 import QuickGameFound from "./QuickGameFound";
 import { ctaConfig } from "./quickGameHelpers";
 import { gameTips } from "./quickGameConfig";
 
-const QuickGameScreen = ({ setParentPhase }: QuickGameProps) => {
+const mapStakeValueToLevel = (stake: StakeValue): StakeLevel => {
+  if (stake === "free") return "free";
+  if (stake === "2") return "low";
+  if (stake === "5") return "medium";
+  return "free";
+};
+
+export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {
   const [phase, setPhase] = useState<QuickGamePhase>("select");
   const [stake, setStake] = useState<StakeValue>("free");
+
   const [tipIndex, setTipIndex] = useState(0);
+
   const [approvingTransfer, setApprovingTransfer] = useState(false);
 
+  const {
+    navigate,
+    dispatch,
+    matchmakingState: { matchmaking },
+  } = useSystemFunctions();
+
   const { approveTransfer } = useWithdrawal();
+  const { joinMatchPool } = useMatchMakingActions();
+  const { getOngoingSessions } = usePlayerActions();
+
+  const [countdown, setCountdown] = useState<number | null>(null);
 
   const { cancel } = useMatchmaking({
-    stake,
     enabled: phase === "searching",
-    onFound: () => setPhase("found"),
+
+    onFound: () => {
+      setPhase("found");
+      setCountdown(null);
+    },
+
+    onCreated: (msg) => {
+      setPhase("found");
+      setCountdown(5);
+    },
+
+    onFailed: () => {
+      setPhase("searching");
+    },
+
+    onTimeout: () => {
+      dispatch(resetMatchmakingState());
+      setPhase("select");
+      setCountdown(null);
+    },
   });
 
   useEffect(() => {
@@ -31,48 +72,90 @@ const QuickGameScreen = ({ setParentPhase }: QuickGameProps) => {
     return () => clearInterval(iv);
   }, []);
 
-  /** CTA handlers */
+  useEffect(() => {
+    if (countdown === null) return;
+    if (countdown > 0) {
+      const t = setTimeout(() => setCountdown((c) => (c ?? 0) - 1), 1000);
+      return () => clearTimeout(t);
+    }
+
+    if (matchmaking?.sessionId) {
+      navigate.push(`/${matchmaking.sessionId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown, matchmaking?.sessionId]);
+
+  // Reset matchmaking state whenever this screen unmounts
+  useEffect(() => {
+    return () => {
+      dispatch(resetMatchmakingState());
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSelectNext = async () => {
     try {
       setApprovingTransfer(true);
       await approveTransfer();
-      setPhase("searching");
-    } catch (err) {
-      console.error(err);
+      const stakeLevel = mapStakeValueToLevel(stake);
+      await joinMatchPool(stakeLevel, {
+        onSuccess: (response: JoinMatchPoolResponse) => {
+          if (response?.status === "matched") {
+            setPhase("found");
+            setCountdown(5);
+            // Update ongoing sessions
+            getOngoingSessions();
+          } else {
+            setPhase("searching");
+          }
+        },
+      });
     } finally {
       setApprovingTransfer(false);
     }
   };
 
   const handleCancel = () => {
-    cancel();
+    cancel(); // WS + leave pool
+    dispatch(resetMatchmakingState()); // clear Redux
+    setCountdown(null); // clear countdown
     setPhase("select");
-  };
-
-  const handleFoundNext = () => {
-    // TODO: perform other actions like routing to game session page
   };
 
   const primaryCta: IKPButton = useMemo(() => {
     const base = ctaConfig[phase];
-    let onClick: () => void;
-    let loading = false;
+
     if (phase === "select") {
-      onClick = handleSelectNext;
-      loading = approvingTransfer;
-    } else if (phase === "searching") onClick = handleCancel;
-    /* found */ else onClick = handleFoundNext;
+      return {
+        ...base,
+        onClick: handleSelectNext,
+        loading: approvingTransfer,
+      };
+    }
 
-    return { ...base, onClick, loading };
+    if (phase === "searching") {
+      return {
+        ...base,
+        onClick: handleCancel,
+      };
+    }
+
+    return {
+      ...base,
+      hide: true,
+      onClick: () => {},
+      disabled: true,
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, approvingTransfer]);
+  }, [phase, approvingTransfer, stake]);
 
-  const phases: Record<QuickGamePhase, JSX.Element> = {
+  // render the three UIs
+  const phasesMap: Record<QuickGamePhase, JSX.Element> = {
     select: <QuickGameSelect setStake={setStake} stake={stake} />,
     searching: (
       <QuickGameSearching tip={gameTips[tipIndex]} tipIndex={tipIndex} />
     ),
-    found: <QuickGameFound />,
+    found: <QuickGameFound countdown={countdown} />,
   };
 
   return (
@@ -91,12 +174,10 @@ const QuickGameScreen = ({ setParentPhase }: QuickGameProps) => {
             exit={{ opacity: 0 }}
             className="w-full"
           >
-            {phases[phase]}
+            {phasesMap[phase]}
           </motion.div>
         </AnimatePresence>
       </div>
     </KPDialougue>
   );
-};
-
-export default QuickGameScreen;
+}
