@@ -34,9 +34,7 @@ export class GameWebSocketService {
     const wsUrl = `${this.backendUrl.replace(
       "http",
       "ws"
-    )}/api/game-updates?sessionId=${this.sessionId}&address=${
-      this.playerAddress
-    }`;
+    )}game-updates?sessionId=${this.sessionId}&address=${this.playerAddress}`;
 
     this.ws = new WebSocket(wsUrl);
 

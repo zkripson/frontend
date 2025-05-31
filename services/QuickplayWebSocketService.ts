@@ -35,10 +35,9 @@ export class QuickplayWebSocketService {
       return;
     }
 
-    const wsUrl = `${this.backendUrl.replace(
-      /^http/,
-      "ws"
-    )}/api/quickplay?address=${this.address}`;
+    const wsUrl = `${this.backendUrl.replace(/^http/, "ws")}quickplay?address=${
+      this.address
+    }`;
     this.ws = new WebSocket(wsUrl);
 
     this.setupEventHandlers();

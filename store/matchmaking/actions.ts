@@ -34,9 +34,25 @@ export const useMatchMakingActions = () => {
 
       return response;
     } catch (err: any) {
-      console.error("joinMatchPool error:", err);
-      // show error toast
-      showToast(err?.message || "Failed to join matchmaking pool", "error");
+      const error: string =
+        err?.response?.data?.error || "Something went wrong!";
+      if (
+        error
+          .toLowerCase()
+          .includes("player is already in the matchmaking pool")
+      ) {
+        const status = err?.response?.data?.status;
+        const joinedAt = err?.response?.data?.joinedAt;
+        const data = {
+          status,
+          joinedAt,
+        };
+        dispatch(setMatchMaking(data));
+        callbacks?.onSuccess?.(data);
+        return data;
+      }
+
+      showToast("Something went wrong!", "error");
       callbacks?.onError?.(err);
     } finally {
       dispatch(setMatchMakingLoading(false));
@@ -58,7 +74,6 @@ export const useMatchMakingActions = () => {
 
       return response;
     } catch (err) {
-      console.log(err);
       callbacks?.onError?.(err);
     } finally {
       dispatch(setMatchMakingLoading(false));

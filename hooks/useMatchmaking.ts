@@ -7,7 +7,6 @@ import {
   QuickplayMessage,
 } from "@/services/QuickplayWebSocketService";
 import useAppActions from "@/store/app/actions";
-import { isDevEnv } from "@/providers/PrivyProvider";
 import { usePlayerActions } from "@/store/player/actions";
 import usePrivyLinkedAccounts from "./usePrivyLinkedAccounts";
 import useSystemFunctions from "./useSystemFunctions";
@@ -49,16 +48,15 @@ export default function useMatchmaking({
 
     setStatus("searching");
 
-    const baseUrl = isDevEnv
-      ? "https://zk-battleship-backend.nj-345.workers.dev"
-      : "https://api.bship.fun";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
-    const svc = new QuickplayWebSocketService(baseUrl, activeWallet);
+    const svc = new QuickplayWebSocketService(baseUrl!, activeWallet);
 
     wsRef.current = svc;
 
     // 1) opponent found → backend starting session creation
     svc.on("match_found", (msg) => {
+      console.log(msg);
       dispatch(
         setMatchMaking({
           status: msg.status,
@@ -71,6 +69,7 @@ export default function useMatchmaking({
 
     // 2) session created → safe to route
     svc.on("match_created", (msg) => {
+      console.log(msg);
       dispatch(
         setMatchMaking({
           status: msg.status,
@@ -86,6 +85,7 @@ export default function useMatchmaking({
 
     // 3) match failed → toast + back to searching
     svc.on("match_failed", (msg) => {
+      console.log(msg);
       showToast(msg.message, "error");
       onFailed?.(msg);
       setStatus("searching");
@@ -93,7 +93,8 @@ export default function useMatchmaking({
 
     // 4) timeout → toast + back to select
     svc.on("timeout", (msg) => {
-      showToast(msg.message, "error");
+      console.log(msg);
+      showToast("Could not find a match. Please try again.", "error");
       onTimeout?.(msg);
       svc.disconnect();
       leaveMatchPool();
@@ -102,9 +103,10 @@ export default function useMatchmaking({
 
     // generic connection errors
     svc.on("error", (errMsg) => {
+      console.log(errMsg);
       setStatus("error");
       setError(errMsg);
-      showToast("Connection error. Please try again.", "error");
+      showToast("An error occurred. Please try again.", "error");
     });
 
     svc.connect();
