@@ -86,7 +86,10 @@ export default function useMatchmaking({
     // 3) match failed → toast + back to searching
     svc.on("match_failed", (msg) => {
       console.log(msg);
-      showToast(msg.message, "error");
+      showToast(
+        "Unable to create the match. Searching for another player.",
+        "error"
+      );
       onFailed?.(msg);
       setStatus("searching");
     });
