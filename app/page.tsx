@@ -5,16 +5,15 @@ import SelectGameScreen from "./indexComponents/selectGameScreen";
 import StakeScreen from "./indexComponents/StakeScreen";
 import ShareInviteScreen from "./indexComponents/shareInviteScreen";
 import Wrapper from "./indexComponents/wrapper";
+import QuickGameScreen from "./indexComponents/quickGame";
 
 export default function HomePage() {
-  const [phase, setPhase] = useState<"select" | "stake" | "create">("select");
+  const [phase, setPhase] = useState<NewGameStep>("select");
 
   const screens: Partial<Record<NewGameStep, JSX.Element>> & {
     stake?: JSX.Element;
   } = {
-    select: (
-      <SelectGameScreen nextScreen={() => setPhase("stake")} phase={phase} />
-    ),
+    select: <SelectGameScreen setPhase={setPhase} phase={phase} />,
     stake: (
       <StakeScreen
         onBack={() => setPhase("select")}
@@ -22,6 +21,7 @@ export default function HomePage() {
       />
     ),
     create: <ShareInviteScreen onBack={() => setPhase("select")} />,
+    quick: <QuickGameScreen setParentPhase={setPhase} />,
   };
 
   return (

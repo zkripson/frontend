@@ -9,13 +9,7 @@ import { useAudio } from "@/providers/AudioProvider";
 import useWithdrawal from "@/hooks/useWithdrawal";
 import { setInvitation } from "@/store/invite";
 
-const SelectGameScreen = ({
-  nextScreen,
-  phase,
-}: {
-  nextScreen: () => void;
-  phase: "select" | "stake" | "create";
-}) => {
+const SelectGameScreen = ({ phase, setPhase }: SelectGameScreenProps) => {
   const {
     inviteState: { loadingInviteAcceptance, invitation, invitationLoading },
     dispatch,
@@ -48,7 +42,7 @@ const SelectGameScreen = ({
       id: "create",
       name: "Create Invite",
       description: "Generate a link to share with friends",
-      action: nextScreen,
+      action: () => setPhase("stake"),
       disabled: false,
     },
     {
@@ -61,14 +55,13 @@ const SelectGameScreen = ({
       },
       disabled: false,
     },
-    // {
-    //   id: "quick",
-    //   name: "Quick Match",
-    //   description: "Get matched with random players",
-    //   action: () => {},
-    //   disabled: true,
-    //   status: "coming soon",
-    // },
+    {
+      id: "quick",
+      name: "Quick Match",
+      description: "Get matched with random players",
+      action: () => setPhase("quick"),
+      disabled: true,
+    },
   ];
 
   const selects = [
