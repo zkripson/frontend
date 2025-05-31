@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
 import { useMatchMakingActions } from "@/store/matchmaking/actions";
-import { setMatchMaking } from "@/store/matchmaking";
+import { resetMatchmakingState, setMatchMaking } from "@/store/matchmaking";
 import {
   QuickplayWebSocketService,
   QuickplayMessage,
@@ -56,7 +56,6 @@ export default function useMatchmaking({
 
     // 1) opponent found → backend starting session creation
     svc.on("match_found", (msg) => {
-      console.log(msg);
       dispatch(
         setMatchMaking({
           status: msg.status,
@@ -69,7 +68,6 @@ export default function useMatchmaking({
 
     // 2) session created → safe to route
     svc.on("match_created", (msg) => {
-      console.log(msg);
       dispatch(
         setMatchMaking({
           status: msg.status,
@@ -85,28 +83,28 @@ export default function useMatchmaking({
 
     // 3) match failed → toast + back to searching
     svc.on("match_failed", (msg) => {
-      console.log(msg);
       showToast(
         "Unable to create the match. Searching for another player.",
         "error"
       );
+      dispatch(resetMatchmakingState());
+
       onFailed?.(msg);
       setStatus("searching");
     });
 
     // 4) timeout → toast + back to select
     svc.on("timeout", (msg) => {
-      console.log(msg);
       showToast("Could not find a match. Please try again.", "error");
+      dispatch(resetMatchmakingState());
+
       onTimeout?.(msg);
       svc.disconnect();
-      leaveMatchPool();
       setStatus("idle");
     });
 
     // generic connection errors
     svc.on("error", (errMsg) => {
-      console.log(errMsg);
       setStatus("error");
       setError(errMsg);
       showToast("An error occurred. Please try again.", "error");
@@ -115,7 +113,7 @@ export default function useMatchmaking({
     svc.connect();
     return () => {
       svc.disconnect();
-      leaveMatchPool();
+      dispatch(resetMatchmakingState());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enabled, activeWallet]);
@@ -123,6 +121,7 @@ export default function useMatchmaking({
   const cancel = useCallback(() => {
     wsRef.current?.disconnect();
     leaveMatchPool();
+    dispatch(resetMatchmakingState()); // clear Redux
     setStatus("idle");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
