@@ -33,7 +33,6 @@ const GameSession = () => {
     mode,
     yourTurn,
     turnStartedAt,
-    gameCode,
     playerBoard,
     opponentBoard,
     placedShips,
@@ -86,7 +85,6 @@ const GameSession = () => {
           <GameHeader
             mode={mode}
             turnStartedAt={turnStartedAt}
-            gameCode={gameCode}
             onTurnExpiry={onTurnExpiry}
             gameTimeRemaining={gameTimeRemaining}
           />

@@ -44,6 +44,7 @@ export interface OngoingSession {
   opponent: string | null;
   isBettingGame: boolean;
   stakeAmount: string | null;
+  inviteCode: string | null;
 }
 
 export interface ClaimHistoryItem {
