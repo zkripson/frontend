@@ -31,10 +31,10 @@ const SelectGameScreen = ({
 
   const onSubmit = async () => {
     try {
-      if (!code) return;
+      if (!code || !invitation?.stakeAmount) return;
 
       setLoading(true);
-      await approveTransfer();
+      await approveTransfer(Number(invitation.stakeAmount));
 
       await acceptBettingInvite(code);
     } catch (e) {

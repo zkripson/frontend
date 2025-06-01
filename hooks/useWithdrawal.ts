@@ -136,7 +136,7 @@ const useWithdrawal = () => {
     }
   };
 
-  const approveTransfer = async () => {
+  const approveTransfer = async (amount: number) => {
     try {
       // Get the current wallet address
       let walletAddress: Address;
@@ -147,17 +147,8 @@ const useWithdrawal = () => {
         walletAddress = activeWallet as `0x${string}`;
       }
 
-      // Check if already approved using both methods
-      const isApprovedOnChain = await checkAllowance();
-
-      if (isApprovedOnChain) {
-        return null;
-      }
-
-      // Use max uint256 value for unlimited approval
-      const maxUint256 = BigInt(
-        "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      );
+      // Calculate approval amount - use exact amount if provided, otherwise unlimited approval
+      const approvalAmount = parseUnits(amount.toString(), 6);
 
       let hash;
 
@@ -165,7 +156,7 @@ const useWithdrawal = () => {
         const data = encodeFunctionData({
           abi: erc20Abi,
           functionName: "approve",
-          args: [TOKEN_ADDRESSES.BETTING as Address, maxUint256],
+          args: [TOKEN_ADDRESSES.BETTING as Address, approvalAmount],
         });
 
         hash = await warpcastProvider.request({
@@ -193,11 +184,11 @@ const useWithdrawal = () => {
           buttonText: `Approve`,
         };
 
-        // Encode the ERC20 approve function call with unlimited amount
+        // Encode the ERC20 approve function call with the calculated amount
         const data = encodeFunctionData({
           abi: erc20Abi,
           functionName: "approve",
-          args: [TOKEN_ADDRESSES.BETTING as Address, maxUint256],
+          args: [TOKEN_ADDRESSES.BETTING as Address, approvalAmount],
         });
 
         hash = await client.sendTransaction(
