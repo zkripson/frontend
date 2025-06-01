@@ -52,7 +52,8 @@ const ContentSecurityPolicy = `
     https://auth.privy.io
     https://auth.privy.io/api/v2/farcaster/init
     https://api.bship.fun
-    wss://api.bship.fun/api/game-updates;
+    wss://api.bship.fun/api/game-updates
+    https://zk-battleship-backend-dev.nj-345.workers.dev;
 
   
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;

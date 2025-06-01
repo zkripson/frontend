@@ -123,6 +123,7 @@ const useInviteActions = () => {
 
       dispatch(setBettingAcceptance(response));
       showToast("Invite Accepted", "success");
+      localStorage.removeItem("gameCode");
       navigate.push(`/${response.sessionId}`);
       callback?.onSuccess?.(response);
     } catch (err) {

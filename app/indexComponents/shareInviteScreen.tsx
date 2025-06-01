@@ -31,6 +31,8 @@ const ShareInviteScreen = ({ onBack }: { onBack: () => void }) => {
   const next = () => {
     if (!bettingCreation) return;
 
+    localStorage.setItem("gameCode", bettingCreation?.code!);
+
     navigate.push(`/${bettingCreation?.sessionId}`);
   };
 

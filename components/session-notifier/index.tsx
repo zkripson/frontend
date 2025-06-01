@@ -30,6 +30,9 @@ const KPOngoingSessionsNotifier = () => {
 
   const handleIndicatorClick = () => {
     if (sessions.length === 1) {
+      if (sessions[0].inviteCode) {
+        localStorage.setItem("gameCode", sessions[0].inviteCode);
+      }
       navigate.push(`/${sessions[0].sessionId}`);
     } else {
       setIsOpen(true);
@@ -95,7 +98,12 @@ const KPOngoingSessionsNotifier = () => {
                     key={session.sessionId}
                     href={`/${session.sessionId}`}
                     className="block p-4 max-sm:p-2.5 bg-white/25 backdrop-blur-md border border-primary-450 border-dashed rounded-2xl hover:shadow-lg transition-shadow"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => {
+                      if (session.inviteCode) {
+                        localStorage.setItem("gameCode", session.inviteCode);
+                      }
+                      setIsOpen(false);
+                    }}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">

@@ -11,7 +11,6 @@ import useSystemFunctions from "@/hooks/useSystemFunctions";
 interface GameHeaderProps {
   mode: "setup" | "game";
   turnStartedAt?: number;
-  gameCode?: string;
   onTurnExpiry?: () => void;
   gameTimeRemaining?: number;
 }
@@ -19,7 +18,6 @@ interface GameHeaderProps {
 export function GameHeader({
   mode,
   turnStartedAt,
-  gameCode,
   onTurnExpiry,
   gameTimeRemaining,
 }: GameHeaderProps) {
@@ -27,6 +25,8 @@ export function GameHeader({
   const { showToast } = useAppActions();
   const audio = useAudio();
   const { appState } = useSystemFunctions();
+
+  const [gameCode, setGameCode] = useState<string | null>(null);
 
   // Mute toggle state
   const [muted, setMuted] = useState(() => {
@@ -46,7 +46,7 @@ export function GameHeader({
     linkedTwitter?.profilePictureUrl ||
     undefined;
 
-  const handleShareInvite = () => {
+  const handleShareInvite = async () => {
     if (navigator.share) {
       const domain = window.location.origin;
 
@@ -79,6 +79,14 @@ export function GameHeader({
       }
     }
   };
+
+  useEffect(() => {
+    const gameCode = localStorage.getItem("gameCode");
+
+    if (gameCode) {
+      setGameCode(gameCode);
+    }
+  }, []);
 
   return (
     <div className="fixed top-[2.2%] lg:top-[3%] xl:top-[5%] left-0 flex lg:items-center justify-between w-full px-4 lg:px-12 z-[9999] pointer-events-none">

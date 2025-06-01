@@ -863,7 +863,6 @@ const useGameSession = (sessionId: string) => {
     gameStateLocal.gameStatus === "ACTIVE" ? "game" : "setup";
   const yourTurn = activeWallet === gameStateLocal.currentTurn;
   const turnStartedAt = gameStateLocal.turnStartedAt ?? undefined;
-  const gameCode = gameStateLocal.sessionId ?? undefined;
   const onHam = () => {}; // Placeholder, implement as needed
   const onTurnExpiry = () => {}; // Placeholder, implement as needed
 
@@ -1158,7 +1157,6 @@ const useGameSession = (sessionId: string) => {
     mode,
     yourTurn,
     turnStartedAt,
-    gameCode,
     shipsInPosition,
     shipConfigs,
     playerBoard,
