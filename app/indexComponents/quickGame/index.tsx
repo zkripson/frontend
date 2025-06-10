@@ -13,10 +13,10 @@ import QuickGameFound from "./QuickGameFound";
 import { ctaConfig } from "./quickGameHelpers";
 
 const mapStakeValueToLevel = (stake: StakeValue): StakeLevel => {
-  if (stake === "free") return "free";
-  if (stake === "2") return "low";
-  if (stake === "5") return "medium";
-  return "free";
+  if (stake === "free") return "FREE";
+  if (stake === "2") return "LOW";
+  if (stake === "5") return "MEDIUM";
+  return "FREE";
 };
 
 export default function QuickGameScreen({ setParentPhase }: QuickGameProps) {

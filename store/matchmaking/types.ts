@@ -1,4 +1,4 @@
-type StakeLevel = "free" | "low" | "medium";
+type StakeLevel = "FREE" | "LOW" | "MEDIUM";
 
 type JoinMatchPool = {
   address: string;
@@ -13,6 +13,7 @@ type JoinMatchPoolResponse = {
   isBettingGame?: boolean;
   joinedAt?: number;
   message?: string;
+  queuePosition?: number;
 };
 
 type LeaveMatchPool = {

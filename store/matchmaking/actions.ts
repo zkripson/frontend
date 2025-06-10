@@ -25,7 +25,6 @@ export const useMatchMakingActions = () => {
       const data: JoinMatchPool = {
         address: activeWallet,
         stakeLevel,
-        channel,
       };
 
       const response = await matchmakingApi.joinMatchPool(data);
