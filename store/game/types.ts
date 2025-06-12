@@ -36,7 +36,7 @@ type BoardCommitmentResponse = {
   gameStatus: string;
 };
 
-export type Ship = {
+type Ship = {
   id: string;
   length: number;
   name: string;
