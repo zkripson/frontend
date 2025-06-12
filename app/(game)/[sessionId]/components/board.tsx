@@ -86,8 +86,8 @@ const Board: React.FC<BoardProps> = ({
       const length = SHIP_LENGTHS[variant];
 
       for (let i = 0; i < length; i++) {
-        const x = orientation === "horizontal" ? position.x + i : position.x;
-        const y = orientation === "vertical" ? position.y + i : position.y;
+        const x = orientation === "horizontal" ? position?.x + i : position?.x;
+        const y = orientation === "vertical" ? position?.y + i : position?.y;
         const key = `${x}-${y}`;
 
         // Mark as occupied

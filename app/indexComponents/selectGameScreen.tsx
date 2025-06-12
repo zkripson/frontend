@@ -12,9 +12,11 @@ import { setInvitation } from "@/store/invite";
 const SelectGameScreen = ({
   nextScreen,
   phase,
+  onBack,
 }: {
   nextScreen: () => void;
   phase: "select" | "stake" | "create";
+  onBack: () => void;
 }) => {
   const {
     inviteState: { loadingInviteAcceptance, invitation, invitationLoading },
@@ -78,23 +80,14 @@ const SelectGameScreen = ({
       </h1>
 
       {gameTypes.map((game) => (
-        <div
+        <KPGameTypeCard
           key={game.id}
-          onClick={() => {
-            audio.play("place");
-            if (game.action) {
-              game.action();
-            }
-          }}
-        >
-          <KPGameTypeCard
-            {...game}
-            className={classNames({
-              "border border-primary-200 transition-all duration-500 rounded-[4px]":
-                phase === "create" && game.id === "create",
-            })}
-          />
-        </div>
+          {...game}
+          className={classNames({
+            "border border-primary-200 transition-all duration-500 rounded-[4px]":
+              phase === "create" && game.id === "create",
+          })}
+        />
       ))}
     </div>,
 
@@ -110,18 +103,17 @@ const SelectGameScreen = ({
     <KPDialougue
       title="welcome"
       showCloseButton
-      primaryCta={
-        !isJoining
-          ? undefined
-          : {
-              title: "Next",
-              onClick: onSubmit,
-              icon: "arrow",
-              iconPosition: "right",
-              loading: loadingInviteAcceptance || invitationLoading || loading,
-              disabled: !canAccept || loadingInviteAcceptance || loading,
-            }
-      }
+      showBackButton
+      onBack={onBack}
+      primaryCta={{
+        title: "Next",
+        onClick: onSubmit,
+        icon: "arrow",
+        iconPosition: "right",
+        loading: loadingInviteAcceptance || invitationLoading || loading,
+        disabled: !canAccept || loadingInviteAcceptance || loading,
+        hide: !isJoining,
+      }}
       showPoints={!isJoining}
       className="pt-[88px]"
     >

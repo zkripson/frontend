@@ -6,12 +6,14 @@ import { useParams } from "next/navigation";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
 import StakeOverview from "./stake-overview";
 import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
+import { AI_OPPONENTS } from "@/constants/aiOpponents";
 
 const KPFullscreenLoader = ({
   title,
   loadingMessages,
   showStakeOverview,
   loaderDuration = 10,
+  isComputerGame,
 }: IKPFullscreenLoader) => {
   const {
     inviteState: { invitation, bettingCreation },
@@ -21,6 +23,7 @@ const KPFullscreenLoader = ({
 
   const params = useParams();
   const sessionId = params?.sessionId as string | undefined;
+  const difficulty = params?.difficulty as string | undefined;
 
   let sessionStakeAmount: number | string | undefined = undefined;
   if (sessionId && ongoingSessions && ongoingSessions.length > 0) {
@@ -45,6 +48,10 @@ const KPFullscreenLoader = ({
     linkedTwitter?.profilePictureUrl ||
     undefined;
 
+  // Get AI opponent profile if this is a computer game
+  const aiOpponent =
+    isComputerGame && difficulty ? AI_OPPONENTS[difficulty] : null;
+
   return (
     <div
       id="fullscreen-loader"
@@ -65,8 +72,17 @@ const KPFullscreenLoader = ({
             amount={amount}
             leftAvatarUrl={pfp!}
             leftName={username}
-            rightAvatarUrl={opponentProfile?.avatar}
-            rightName={opponentProfile?.username}
+            rightAvatarUrl={
+              isComputerGame && aiOpponent
+                ? aiOpponent.avatarUrl
+                : opponentProfile?.avatar
+            }
+            rightName={
+              isComputerGame && aiOpponent
+                ? aiOpponent.name
+                : opponentProfile?.username
+            }
+            isComputerGame={isComputerGame}
           />
         )}
         <div className="relative w-full max-w-[357px] max-sm:max-w-[277px] h-[60px] max-sm:max-h-[37px] bg-primary-450 border border-primary-300 px-3.5 py-2.5 max-sm:px-2 max-sm:py-1.5">

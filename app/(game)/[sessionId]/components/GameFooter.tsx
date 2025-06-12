@@ -6,6 +6,8 @@ import usePrivyLinkedAccounts from "@/hooks/usePrivyLinkedAccounts";
 import General, { GeneralMessageKey } from "./general";
 import Info from "./info";
 import useSystemFunctions from "@/hooks/useSystemFunctions";
+import { useParams } from "next/navigation";
+import { AI_OPPONENTS } from "@/constants/aiOpponents";
 
 interface GameFooterProps {
   overlaps: { x: number; y: number }[];
@@ -17,6 +19,7 @@ interface GameFooterProps {
   playerStatus: string;
   opponentStatus: string;
   mode: "setup" | "game";
+  isComputerGame?: boolean;
 }
 
 export function GameFooter({
@@ -29,11 +32,17 @@ export function GameFooter({
   playerStatus,
   opponentStatus,
   mode,
+  isComputerGame,
 }: GameFooterProps) {
   const {
     playerState: { opponentProfile },
     appState,
   } = useSystemFunctions();
+  const params = useParams();
+  const difficulty = params?.difficulty as string | undefined;
+
+  const aiOpponent =
+    isComputerGame && difficulty ? AI_OPPONENTS[difficulty] : null;
 
   const showWarning = overlaps.length > 0;
 
@@ -52,6 +61,13 @@ export function GameFooter({
     5,
     5
   );
+
+  const opponentNameOrAI = isComputerGame
+    ? aiOpponent?.name
+    : opponentProfile?.username || opponentName || "–";
+  const opponentPfp = isComputerGame
+    ? aiOpponent?.avatarUrl
+    : opponentProfile?.avatar || undefined;
 
   return (
     <div className="fixed bottom-[2%] right-0 w-full px-5 lg:px-12">
@@ -83,8 +99,8 @@ export function GameFooter({
 
         <KPGameBadge
           status={opponentStatus}
-          username={opponentProfile?.username || opponentName || "–"}
-          avatarUrl={opponentProfile?.avatar || undefined}
+          username={opponentNameOrAI}
+          avatarUrl={opponentPfp}
           isPlayer={false}
         />
       </div>
@@ -111,8 +127,8 @@ export function GameFooter({
           />
           <KPGameBadge
             status={opponentStatus}
-            username={opponentProfile?.username || opponentName || "–"}
-            avatarUrl={opponentProfile?.avatar || undefined}
+            username={opponentNameOrAI}
+            avatarUrl={opponentPfp}
             isPlayer={false}
           />
         </div>

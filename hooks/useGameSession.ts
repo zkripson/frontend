@@ -24,7 +24,7 @@ import { useAudio } from "@/providers/AudioProvider";
 import { useToggleInfo } from "@/hooks/useToggleInfo";
 import { usePlayerActions } from "@/store/player/actions";
 
-const loadingMessages: string[] = [
+export const loadingMessages: string[] = [
   "Creating opponent fleet...",
   "Completing fleet coordinates...",
   "Loading battleships and environments...",

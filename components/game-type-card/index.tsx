@@ -1,5 +1,7 @@
 import classNames from "classnames";
 
+import { useAudio } from "@/providers/AudioProvider";
+
 const KPGameTypeCard = ({
   name,
   description,
@@ -7,13 +9,20 @@ const KPGameTypeCard = ({
   className,
   status,
 }: IKPGameTypeCard) => {
+  const { play } = useAudio();
+
+  const onClick = () => {
+    play("place");
+    action?.();
+  };
+
   const cardShadow = `inset 0px 4px 0px 0px #5D656E`;
 
   return (
     <div
-      onClick={action}
+      onClick={onClick}
       role={action && "button"}
-      className={`relative w-full h-[95px] max-sm:h-16 ${className}} hover:rounded-xl`}
+      className={`relative w-full h-[95px] max-sm:h-16 ${className} hover:rounded-xl`}
     >
       <div
         className={classNames(
