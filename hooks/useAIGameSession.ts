@@ -477,19 +477,19 @@ const useAIGameSession = (difficulty: string) => {
   }, []);
 
   // --- AI fires at player (difficulty-based logic) ---
-
   function aiMove() {
-    // Side-effect flags
+    // ── Prevent overlapping AI calls ───────────────────────────
+    clearAIMoveTimeout();
+
+    // ── Side-effect flags ──────────────────────────────────────
     let hitThisTurn = false;
     let sunkShipId: string | null = null;
     let sunkShipName: string | null = null;
-    let shotX = 0;
-    let shotY = 0;
+    let shotX = 0,
+      shotY = 0;
+    let aiJustWon = false;
 
-    // Flag to detect if AI just cleared every player ship
-    let loseThisTurn = false;
-
-    // ① Atomically update the game state off the freshest prev
+    // ── 1️⃣ Atomically update state ─────────────────────────────
     setGameStateLocal((prev) => {
       if (prev.gameStatus !== "ACTIVE" || prev.currentTurn !== "AI") {
         return prev;
@@ -500,12 +500,16 @@ const useAIGameSession = (difficulty: string) => {
         y = 0,
         found = false;
       let huntTargets = aiHuntTargets.length ? [...aiHuntTargets] : [];
+      huntTargets = huntTargets.filter(
+        ({ x, y }) => board[y][x] === 0 || board[y][x] > 0
+      );
+
       let lastHits = aiLastHits.length ? [...aiLastHits] : [];
       const aiShipsLeft = prev.ships.filter(
         (ship) => !ship.cells.every((c) => board[c.y][c.x] === -2)
       );
 
-      // Build a list of all still-unshot cells
+      // Build list of all unshot coords
       const allCoords: { x: number; y: number }[] = [];
       for (let row = 0; row < 10; row++) {
         for (let col = 0; col < 10; col++) {
@@ -515,14 +519,16 @@ const useAIGameSession = (difficulty: string) => {
         }
       }
 
-      // --- AI Difficulty Logic ---
+      // ── Difficulty Logic ─────────────────────────────────────
       if (difficulty === "easy") {
+        // pure random
         if (allCoords.length) {
-          const idx = Math.floor(Math.random() * allCoords.length);
-          ({ x, y } = allCoords[idx]);
+          const i = Math.floor(Math.random() * allCoords.length);
+          ({ x, y } = allCoords[i]);
           found = true;
         }
       } else if (difficulty === "medium") {
+        // hunt queue first
         if (huntTargets.length) {
           ({ x, y } = huntTargets.splice(
             Math.floor(Math.random() * huntTargets.length),
@@ -530,19 +536,20 @@ const useAIGameSession = (difficulty: string) => {
           )[0]);
           found = true;
         } else {
+          // checkerboard parity
           const parity = allCoords.filter((c) => (c.x + c.y) % 2 === 0);
           const pool = parity.length ? parity : allCoords;
-          const idx = Math.floor(Math.random() * pool.length);
-          ({ x, y } = pool[idx]);
+          const i = Math.floor(Math.random() * pool.length);
+          ({ x, y } = pool[i]);
           found = true;
         }
-      } else if (difficulty === "hard") {
-        // ——— your existing “hard” line-extend & adjacents logic ———
+      } /* hard */ else {
+        // 1️⃣ line-extend
         if (lastHits.length > 1) {
           const [a, b] = lastHits.slice(-2);
           const dx = b.x - a.x,
             dy = b.y - a.y;
-          const lineTargets: { x: number; y: number }[] = [];
+          const line: { x: number; y: number }[] = [];
           for (const dir of [-1, 1]) {
             let nx = b.x + dx * dir,
               ny = b.y + dy * dir;
@@ -553,17 +560,18 @@ const useAIGameSession = (difficulty: string) => {
               ny < 10 &&
               (board[ny][nx] === 0 || board[ny][nx] > 0)
             ) {
-              lineTargets.push({ x: nx, y: ny });
+              line.push({ x: nx, y: ny });
               nx += dx * dir;
               ny += dy * dir;
             }
           }
-          if (lineTargets.length) {
-            const idx = Math.floor(Math.random() * lineTargets.length);
-            ({ x, y } = lineTargets[idx]);
+          if (line.length) {
+            const i = Math.floor(Math.random() * line.length);
+            ({ x, y } = line[i]);
             found = true;
           }
         }
+        // 2️⃣ adjacents fallback
         if (!found && lastHits.length) {
           const adj: { x: number; y: number }[] = [];
           lastHits.forEach((hit) => {
@@ -571,76 +579,72 @@ const useAIGameSession = (difficulty: string) => {
               if (
                 (board[c.y][c.x] === 0 || board[c.y][c.x] > 0) &&
                 !lastHits.some((h) => h.x === c.x && h.y === c.y)
-              ) {
+              )
                 adj.push(c);
-              }
             });
           });
           if (adj.length) {
-            const idx = Math.floor(Math.random() * adj.length);
-            ({ x, y } = adj[idx]);
+            const i = Math.floor(Math.random() * adj.length);
+            ({ x, y } = adj[i]);
             found = true;
           }
         }
+        // 3️⃣ heatmap as last resort
         if (!found) {
-          const heat = Array.from({ length: 10 }, () =>
-            Array.from({ length: 10 }, () => 0)
-          );
+          const heat = Array.from({ length: 10 }, () => Array(10).fill(0));
           aiShipsLeft.forEach((ship) => {
-            const len = ship.cells.length;
-            for (let row = 0; row < 10; row++) {
-              for (let col = 0; col < 10; col++) {
-                // Horizontal
-                if (col + len <= 10) {
+            const L = ship.cells.length;
+            for (let r = 0; r < 10; r++) {
+              for (let c = 0; c < 10; c++) {
+                // horizontal
+                if (c + L <= 10) {
                   let ok = true;
-                  for (let i = 0; i < len; i++) {
-                    if (
-                      !(board[row][col + i] === 0 || board[row][col + i] > 0)
-                    ) {
+                  for (let i = 0; i < L; i++) {
+                    if (!(board[r][c + i] === 0 || board[r][c + i] > 0)) {
                       ok = false;
                       break;
                     }
                   }
-                  if (ok) for (let i = 0; i < len; i++) heat[row][col + i]++;
+                  if (ok) for (let i = 0; i < L; i++) heat[r][c + i]++;
                 }
-                // Vertical
-                if (row + len <= 10) {
+                // vertical
+                if (r + L <= 10) {
                   let ok = true;
-                  for (let i = 0; i < len; i++) {
-                    if (
-                      !(board[row + i][col] === 0 || board[row + i][col] > 0)
-                    ) {
+                  for (let i = 0; i < L; i++) {
+                    if (!(board[r + i][c] === 0 || board[r + i][c] > 0)) {
                       ok = false;
                       break;
                     }
                   }
-                  if (ok) for (let i = 0; i < len; i++) heat[row + i][col]++;
+                  if (ok) for (let i = 0; i < L; i++) heat[r + i][c]++;
                 }
               }
             }
           });
-          let maxHeat = -1;
-          allCoords.forEach((c) => {
-            maxHeat = Math.max(maxHeat, heat[c.y][c.x]);
-          });
-          const best = allCoords.filter((c) => heat[c.y][c.x] === maxHeat);
+          // pick max-heat among allCoords
+          let maxH = -1;
+          allCoords.forEach((c) => (maxH = Math.max(maxH, heat[c.y][c.x])));
+          const best = allCoords.filter((c) => heat[c.y][c.x] === maxH);
           if (best.length) {
-            const idx = Math.floor(Math.random() * best.length);
-            ({ x, y } = best[idx]);
+            const i = Math.floor(Math.random() * best.length);
+            ({ x, y } = best[i]);
             found = true;
           }
         }
       }
 
-      if (!found) {
-        return prev;
+      // ── Forced fallback if still not found ───────────────
+      if (!found && allCoords.length) {
+        const i = Math.floor(Math.random() * allCoords.length);
+        ({ x, y } = allCoords[i]);
+        found = true;
       }
 
-      // Capture the shot for side-effects
+      // Capture shot coords
       shotX = x;
       shotY = y;
 
-      // Clone & apply the shot
+      // ── Apply shot to board & stats ─────────────────────
       const newBoard = board.map((r) => [...r]);
       const newStats = { ...prev.aiStats! };
 
@@ -648,8 +652,8 @@ const useAIGameSession = (difficulty: string) => {
         if (ship.cells.some((c) => c.x === x && c.y === y)) {
           hitThisTurn = true;
           newBoard[y][x] = -2;
-          const allHit = ship.cells.every((c) => newBoard[c.y][c.x] === -2);
-          if (allHit) {
+          const sunk = ship.cells.every((c) => newBoard[c.y][c.x] === -2);
+          if (sunk) {
             sunkShipId = ship.id;
             sunkShipName = ship.name;
           }
@@ -657,15 +661,13 @@ const useAIGameSession = (difficulty: string) => {
           break;
         }
       }
-      if (!hitThisTurn) {
-        newBoard[y][x] = -1;
-      }
+      if (!hitThisTurn) newBoard[y][x] = -1;
       newStats.shotsCount++;
       newStats.accuracy = Math.round(
         (newStats.hitsCount / newStats.shotsCount) * 100
       );
 
-      // Maintain hunt state for medium & hard
+      // ── Maintain hunt state ─────────────────────────────
       if ((difficulty === "medium" || difficulty === "hard") && hitThisTurn) {
         lastHits.push({ x, y });
         if (sunkShipId) {
@@ -676,27 +678,24 @@ const useAIGameSession = (difficulty: string) => {
             if (
               !huntTargets.some((h) => h.x === c.x && h.y === c.y) &&
               (newBoard[c.y][c.x] === 0 || newBoard[c.y][c.x] > 0)
-            ) {
+            )
               huntTargets.push(c);
-            }
           });
         }
       }
 
-      // Persist hunt arrays
       setAiHuntTargets(huntTargets);
       setAiLastHits(lastHits);
 
-      // Check if AI just sank all player ships
-      const allSunk = prev.ships.every((ship) =>
-        ship.cells.every((c) => newBoard[c.y][c.x] === -2)
+      // ── AI win detection ────────────────────────────────
+      const anyLeft = prev.ships.some((ship) =>
+        ship.cells.some((c) => newBoard[c.y][c.x] !== -2)
       );
-      if (allSunk) {
-        loseThisTurn = true;
-      }
+      if (!anyLeft) aiJustWon = true;
 
-      // Pass turn back (AI repeats on hit)
-      const nextTurn = hitThisTurn ? "AI" : activeWallet || null;
+      // Next turn: AI again if hit, else player
+      const nextTurn = hitThisTurn ? "AI" : activeWallet ?? null;
+
       return {
         ...prev,
         playerBoard: newBoard,
@@ -705,13 +704,13 @@ const useAIGameSession = (difficulty: string) => {
       };
     });
 
-    // ① .5 If AI just cleared the board, end the match immediately
-    if (loseThisTurn) {
+    // ── 2️⃣ Immediate end if AI just won ───────────────────
+    if (aiJustWon) {
       endGame("AI");
       return;
     }
 
-    // ② Fire audio + UI in lock-step
+    // ── 3️⃣ Audio + message ───────────────────────────────
     playSound(hitThisTurn ? "hit" : "miss");
     if (hitThisTurn) {
       if (sunkShipId && sunkShipName) {
@@ -727,9 +726,8 @@ const useAIGameSession = (difficulty: string) => {
       setGeneralMessage({ key: "missed", id: Date.now() });
     }
 
-    // ③ If hit, queue the next AI strike
+    // ── 4️⃣ Schedule next AI move if hit ─────────────────
     if (hitThisTurn) {
-      clearAIMoveTimeout();
       aiMoveTimeout.current = setTimeout(
         aiMove,
         Math.floor(Math.random() * 2000) + 1000
