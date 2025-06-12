@@ -48,12 +48,12 @@ export default function KPShip({
 
   const [isDragging, setIsDragging] = useState(false);
 
-  const x = useMotionValue(position.x * cellSize);
-  const y = useMotionValue(position.y * cellSize);
+  const x = useMotionValue(position?.x * cellSize);
+  const y = useMotionValue(position?.y * cellSize);
   useEffect(() => {
-    x.set(position.x * cellSize);
-    y.set(position.y * cellSize);
-  }, [position.x, position.y, x, y, cellSize]);
+    x.set(position?.x * cellSize);
+    y.set(position?.y * cellSize);
+  }, [position?.x, position?.y, x, y, cellSize]);
 
   // drag end snapping
   const handleDragEnd = (

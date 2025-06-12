@@ -4,11 +4,13 @@ import { KPFullscreenLoader } from "@/components";
 interface LoadingOverlayProps {
   loading: boolean;
   loadingMessages: string[];
+  isComputerGame?: boolean;
 }
 
 export function LoadingOverlay({
   loading,
   loadingMessages,
+  isComputerGame,
 }: LoadingOverlayProps) {
   return (
     <AnimatePresence>
@@ -25,6 +27,7 @@ export function LoadingOverlay({
             title="loading new game..."
             loadingMessages={loadingMessages}
             showStakeOverview
+            isComputerGame={isComputerGame}
           />
         </motion.div>
       )}

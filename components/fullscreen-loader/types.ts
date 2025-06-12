@@ -3,4 +3,5 @@ interface IKPFullscreenLoader {
   loadingMessages?: string[];
   showStakeOverview?: boolean;
   loaderDuration?: number;
+  isComputerGame?: boolean;
 }

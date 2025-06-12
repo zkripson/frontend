@@ -13,6 +13,7 @@ interface GameHeaderProps {
   turnStartedAt?: number;
   onTurnExpiry?: () => void;
   gameTimeRemaining?: number;
+  isComputerGame?: boolean;
 }
 
 export function GameHeader({
@@ -20,6 +21,7 @@ export function GameHeader({
   turnStartedAt,
   onTurnExpiry,
   gameTimeRemaining,
+  isComputerGame,
 }: GameHeaderProps) {
   const { linkedFarcaster, linkedTwitter } = usePrivyLinkedAccounts();
   const { showToast } = useAppActions();
@@ -101,17 +103,22 @@ export function GameHeader({
       </div>
 
       <div className="flex flex-col-reverse items-end lg:flex-row lg:items-center gap-2 lg:gap-6 h-full pointer-events-auto">
-        <div className="flex flex-col-reverse md:flex-row items-end md:items-center gap-2 lg:gap-3 pointer-events-auto">
-          <div className="flex items-center gap-2 lg:gap-3 pointer-events-auto">
-            {mode === "game" && gameTimeRemaining !== 0 && (
-              <KPTimer turnStartedAt={turnStartedAt} onExpire={onTurnExpiry} />
-            )}
-            {mode === "game" && (
-              <div className="h-8 lg:h-10 w-0.5 bg-primary-50" />
-            )}
-            {mode === "game" && <KPTimer isGame />}
+        {!isComputerGame && (
+          <div className="flex flex-col-reverse md:flex-row items-end md:items-center gap-2 lg:gap-3 pointer-events-auto">
+            <div className="flex items-center gap-2 lg:gap-3 pointer-events-auto">
+              {mode === "game" && gameTimeRemaining !== 0 && (
+                <KPTimer
+                  turnStartedAt={turnStartedAt}
+                  onExpire={onTurnExpiry}
+                />
+              )}
+              {mode === "game" && (
+                <div className="h-8 lg:h-10 w-0.5 bg-primary-50" />
+              )}
+              {mode === "game" && <KPTimer isGame />}
+            </div>
           </div>
-        </div>
+        )}
         {gameCode && <KPIconButton icon="share" onClick={handleShareInvite} />}
         <KPIconButton icon={muted ? "unmute" : "mute"} onClick={onMute} />
       </div>

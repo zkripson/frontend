@@ -24,6 +24,7 @@ import KPTokenProgressCard from "./token-progress-card";
 import KPProgressClaimButton from "./progress-claim-button";
 import KPGameRuleModal from "./game-rule-modal";
 import KPOngoingSessionsNotifier from "./session-notifier";
+import KPBotCard from "./bot-card";
 
 export {
   KPDialougue,
@@ -52,4 +53,5 @@ export {
   KPProgressClaimButton,
   KPGameRuleModal,
   KPOngoingSessionsNotifier,
+  KPBotCard,
 };
